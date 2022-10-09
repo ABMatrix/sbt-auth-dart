@@ -8,10 +8,13 @@ environment:
   flutter: 3.3.2
 
 dependencies:
+  eth_sig_util: ^0.0.9
   flutter:
     sdk: flutter
   hive: ^2.2.3
+  http: ^0.13.5
   mpc_dart: ^0.0.1
+  web3dart: ^2.4.1
 
 dev_dependencies:
   flutter_test:

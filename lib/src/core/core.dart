@@ -1,5 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:mpc_dart/mpc_dart.dart';
 import 'package:sbt_auth_dart/src/types/account.dart';
+import 'package:sbt_auth_dart/src/types/exception.dart';
+
+import 'package:sbt_auth_dart/src/utils.dart';
 
 /// Hive box key
 const CACHE_KEY = 'local_cache_key';
@@ -21,14 +26,35 @@ class AuthCore {
     if (address != null) {
       _local = _getSavedShare(address) ?? local;
       if (_local != null) {
-        _saveShare(local, address);
+        _saveShare(_local!, address);
       }
     }
     _remote = remote;
-    if (_local == null && remote != null && backup != null) {
-      recover(remote, backup);
+    if (_local == null && _remote != null && backup != null) {
+      _recover(_remote!, backup);
     }
     return _local != null;
+  }
+
+  /// Local share
+  Share? get localShare => _local;
+
+  /// Get wallet address
+  String getAddress() {
+    if (_local == null) throw SbtAuthException('Please init auth core');
+    return Ecdsa.address(shareToKey(_local!));
+  }
+
+  /// Sign method
+  String signDigest(Uint8List message) {
+    final result = Ecdsa.sign(
+      SignParams(
+        [message],
+        1,
+        [shareToKey(_local!), shareToKey(_remote!, 2)],
+      ),
+    );
+    return result;
   }
 
   Share? _getSavedShare(String address) {
@@ -40,7 +66,23 @@ class AuthCore {
     return _box.put(address, share);
   }
 
-  _recover() {
-    
+  void _recover(Share remote, String backup) {
+    if (!validPrivateKey(backup)) {
+      throw SbtAuthException('Wrong backup private key');
+    }
+    final backupShare = Share(
+      privateKey: backup,
+      extraData: remote.extraData,
+    );
+    final backupKey = shareToKey(backupShare, 3);
+    final remoteKey = shareToKey(remote, 2);
+    final backupAddress = Ecdsa.address(backupKey);
+    final address = Ecdsa.address(remoteKey);
+    if (backupAddress != address) {
+      throw SbtAuthException('Wrong backup private key');
+    }
+    final localKey = Ecdsa.recover([backupKey, remoteKey]);
+    _local = keyToShare(localKey);
+    _saveShare(keyToShare(localKey), address);
   }
 }
