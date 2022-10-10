@@ -8,4 +8,6 @@
 /// SBTAuth flutter sdk
 library sbt_auth_dart;
 
-export 'src/sbt_auth_dart.dart';
+export 'src/core/core.dart';
+export 'src/provider/provider.dart';
+export 'src/types/account.dart';

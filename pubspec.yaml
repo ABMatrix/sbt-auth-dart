@@ -1,7 +1,6 @@
 name: sbt_auth_dart
 description: SBTAuth flutter sdk
 version: 0.1.0+1
-publish_to: none
 
 environment:
   sdk: ">=2.18.0 <3.0.0"
@@ -12,8 +11,10 @@ dependencies:
   flutter:
     sdk: flutter
   hive: ^2.2.3
+  hive_flutter: ^1.1.0
   http: ^0.13.5
-  mpc_dart: ^0.0.1
+  mpc_dart: ^0.1.1
+  path_provider: ^2.0.11
   web3dart: ^2.4.1
 
 dev_dependencies:

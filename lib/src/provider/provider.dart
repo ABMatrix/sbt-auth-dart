@@ -2,6 +2,7 @@ import 'package:http/http.dart';
 import 'package:sbt_auth_dart/src/core/core.dart';
 import 'package:sbt_auth_dart/src/types/error.dart';
 import 'package:sbt_auth_dart/src/types/provider.dart';
+import 'package:sbt_auth_dart/src/types/signer.dart';
 import 'package:web3dart/json_rpc.dart';
 
 const _ethSignerMethods = [
@@ -34,6 +35,7 @@ class EthereumProvider {
     required this.core,
     required this.clientId,
   }) {
+    accounts = [core.getAddress()];
     _setupJsonRpcClient();
   }
 
@@ -53,11 +55,12 @@ class EthereumProvider {
   final methods = _ethSignerMethods;
 
   /// Provider accounts
-  final accounts = [];
+  List<String> accounts = [];
 
   /// JsonRpc client.
   JsonRPC? jsonRpcClient;
 
+  /// Json rpc request
   Future<dynamic> request(RequestArgument arguments) async {
     switch (arguments.method) {
       case 'eth_requestAccounts':
@@ -66,14 +69,23 @@ class EthereumProvider {
         return accounts;
       case 'eth_chainId':
         return chainId;
+      case 'eth_signTransaction':
+        return _signTransaction(arguments);
       case 'eth_sendTransaction':
         return _sendTransaction(arguments);
+      case 'personal_sing':
+      case 'eth_sign':
+        final message = arguments.params[0] as String;
+        return core.signer.personalSign(message);
       default:
         break;
     }
-    if (methods.contains(arguments.method)) {}
+    if (methods.contains(arguments.method)) {
+      final typedData = arguments.params[0] as Map<String, dynamic>;
+      return core.signer.signTypedData(typedData);
+    }
     try {
-      return await jsonRpcClient.call(arguments.method, arguments.params);
+      return await jsonRpcClient!.call(arguments.method, arguments.params);
     } catch (error) {
       if (error is RPCError) {
         rethrow;
@@ -81,7 +93,16 @@ class EthereumProvider {
     }
   }
 
-  _sendTransaction(RequestArgument argument) {}
+  Future<void> _sendTransaction(RequestArgument argument) async {
+    final transaction = _signTransaction(argument);
+    await jsonRpcClient!.call('eth_sendTransaction', [transaction]);
+  }
+
+  String? _signTransaction(RequestArgument argument) {
+    final transaction = argument.params[0] as Map<String, dynamic>;
+    return core.signer
+        .signTransaction(UnsignedTransaction.fromMap(transaction));
+  }
 
   void _setupJsonRpcClient() {
     final rpcUrl = _ethRpc[chainId];

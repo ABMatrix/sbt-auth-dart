@@ -1,12 +1,12 @@
+// ignore_for_file: implementation_imports
 import 'dart:convert';
 
 import 'package:eth_sig_util/eth_sig_util.dart';
 import 'package:sbt_auth_dart/src/core/core.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
 import 'package:sbt_auth_dart/src/utils.dart';
-import "package:web3dart/web3dart.dart";
+import 'package:web3dart/crypto.dart';
 import 'package:web3dart/src/utils/length_tracking_byte_sink.dart';
-// ignore: implementation_imports
 import 'package:web3dart/src/utils/rlp.dart' as rlp;
 
 /// Signer
@@ -48,8 +48,24 @@ class Signer {
         ..add(rlp.encode(encodeEIP1559ToRlp(transaction)))
         ..close();
       final signature = _core.signDigest(encodedTx.asBytes());
-      return uint8ListFromList(rlp.encode(
-          encodeEIP1559ToRlp(transaction, signature, BigInt.from(chainId))));
+      final result = uint8ListFromList(
+        rlp.encode(
+          encodeEIP1559ToRlp(transaction, hexToBytes(signature)),
+        ),
+      );
+      return bytesToHex(result);
+    } else {
+      final encodedTx = LengthTrackingByteSink()
+        ..addByte(0x02)
+        ..add(rlp.encode(encodeToRlp(transaction)))
+        ..close();
+      final signature = _core.signDigest(encodedTx.asBytes());
+      final result = uint8ListFromList(
+        rlp.encode(
+          encodeToRlp(transaction, hexToBytes(signature)),
+        ),
+      );
+      return bytesToHex(result);
     }
   }
 }

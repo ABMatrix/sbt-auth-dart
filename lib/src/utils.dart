@@ -59,7 +59,10 @@ Uint8List hashMessage(Uint8List message) {
 }
 
 /// Rpc encoder for EIP1559 transaction.
-List<dynamic> encodeEIP1559ToRlp(UnsignedTransaction transaction) {
+List<dynamic> encodeEIP1559ToRlp(
+  UnsignedTransaction transaction, [
+  Uint8List? signature,
+]) {
   final list = [
     transaction.chainId,
     transaction.nonce,
@@ -78,11 +81,22 @@ List<dynamic> encodeEIP1559ToRlp(UnsignedTransaction transaction) {
     ..add(transaction.value)
     ..add(transaction.data)
     ..add([]); // access list
+
+  if (signature != null) {
+    final msgSignature = Signature.from(signature);
+    list
+      ..add(msgSignature.v)
+      ..add(msgSignature.r)
+      ..add(msgSignature.s);
+  }
   return list;
 }
 
 /// Rlp encoder for legacy transaction.
-List<dynamic> encodeToRlp(UnsignedTransaction transaction) {
+List<dynamic> encodeToRlp(
+  UnsignedTransaction transaction, [
+  Uint8List? signature,
+]) {
   if (transaction.gasPrice == null ||
       transaction.maxFeePerGas == null ||
       transaction.to == null) {
@@ -103,5 +117,13 @@ List<dynamic> encodeToRlp(UnsignedTransaction transaction) {
   list
     ..add(transaction.value)
     ..add(transaction.data);
+
+  if (signature != null) {
+    final msgSignature = Signature.from(signature);
+    list
+      ..add(msgSignature.v)
+      ..add(msgSignature.r)
+      ..add(msgSignature.s);
+  }
   return list;
 }
