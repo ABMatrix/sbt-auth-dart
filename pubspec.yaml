@@ -1,6 +1,7 @@
 name: sbt_auth_dart
 description: SBTAuth flutter sdk
 version: 0.1.0+1
+repository: https://github.com/ABMatrix/sbt-auth-dart
 
 environment:
   sdk: ">=2.18.0 <3.0.0"
