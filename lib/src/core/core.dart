@@ -107,8 +107,11 @@ class AuthCore {
   }
 
   Future<void> _initHive() async {
+    if (_box != null) {
+      return;
+    }
     await Hive.initFlutter();
-    Hive.registerAdapter(ShareAdapter());
+    Hive.registerAdapter(ShareAdapter(), override: true);
     await Hive.openBox<Share?>(CACHE_KEY);
     _box = Hive.box<Share?>(CACHE_KEY);
   }
