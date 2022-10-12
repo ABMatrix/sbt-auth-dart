@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mpc_dart/mpc_dart.dart';
@@ -5,8 +7,10 @@ import 'package:sbt_auth_dart/src/core/signer.dart';
 import 'package:sbt_auth_dart/src/types/account.dart';
 import 'package:sbt_auth_dart/src/types/adapter.dart';
 import 'package:sbt_auth_dart/src/types/exception.dart';
+import 'package:sbt_auth_dart/src/types/signer.dart';
 
 import 'package:sbt_auth_dart/src/utils.dart';
+import 'package:web3dart/crypto.dart';
 
 /// Hive box key
 const CACHE_KEY = 'local_cache_key';
@@ -66,7 +70,7 @@ class AuthCore {
   }
 
   /// Sign method
-  String signDigest(Uint8List message) {
+  String signDigest(Uint8List message, {int? chainId, bool isEIP1559 = false}) {
     final result = Ecdsa.sign(
       SignParams(
         [message],
@@ -74,12 +78,47 @@ class AuthCore {
         [shareToKey(_local!), shareToKey(_remote!, 2)],
       ),
     );
-    return result;
+    final signature = Signature.from(hexToBytes(result));
+    var chainIdV = signature.v;
+    if (chainId != null) {
+      if (isEIP1559) {
+        chainIdV = signature.v - 27;
+      } else {
+        chainIdV = signature.v - 27 + (chainId * 2 + 35);
+      }
+      return bytesToHex(signature.copyWith(v: chainIdV).join(),
+          include0x: true);
+    } else {
+      return bytesToHex(signature.join(), include0x: true);
+    }
+  }
+
+  /// Sign method
+  Signature signTransaction(
+    Uint8List message, {
+    required int chainId,
+    bool isEIP1559 = false,
+  }) {
+    final result = Ecdsa.sign(
+      SignParams(
+        [message],
+        1,
+        [shareToKey(_local!), shareToKey(_remote!, 2)],
+      ),
+    );
+    final signature = Signature.from(hexToBytes(result));
+    var chainIdV = signature.v;
+    if (isEIP1559) {
+      chainIdV = signature.v - 27;
+    } else {
+      chainIdV = signature.v - 27 + (chainId * 2 + 35);
+    }
+    return signature.copyWith(v: chainIdV);
   }
 
   Share? _getSavedShare(String address) {
     final share = _box!.get(address);
-    return share;
+    return (share == null || share.privateKey == '') ? null : share;
   }
 
   Future<void> _saveShare(Share share, String address) {
@@ -111,7 +150,9 @@ class AuthCore {
       return;
     }
     await Hive.initFlutter();
-    Hive.registerAdapter(ShareAdapter(), override: true);
+    if (!Hive.isAdapterRegistered(1)) {
+      Hive.registerAdapter(ShareAdapter());
+    }
     await Hive.openBox<Share?>(CACHE_KEY);
     _box = Hive.box<Share?>(CACHE_KEY);
   }

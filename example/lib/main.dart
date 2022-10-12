@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:example/sign.dart';
 import 'package:http/http.dart' as http;
@@ -40,6 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _controller.text = '30min12@gmail.com';
   }
 
   @override
@@ -89,7 +89,6 @@ class _MyHomePageState extends State<MyHomePage> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(data));
-    log(result.body);
     final token = jsonDecode(result.body)['data'];
 
     final headers = {
@@ -114,8 +113,8 @@ class _MyHomePageState extends State<MyHomePage> {
       final remoteRes = await http.get(
           Uri.parse('$baseUrl/user/private-key-fragment-info'),
           headers: headers);
-      final address = jsonDecode(
-          remoteRes.body)['privateKeyFragmentInfoPrivateKey2Fragment'];
+      final address =
+          jsonDecode(remoteRes.body)['privateKeyFragmentInfoPublicKeyAddress'];
       final remote =
           jsonDecode(remoteRes.body)['privateKeyFragmentInfoPublicKeyAddress'];
       core.init(remote: Share.fromMap(remote), address: address);

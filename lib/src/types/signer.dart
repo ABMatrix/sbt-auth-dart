@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:flutter/foundation.dart';
+import 'package:sbt_auth_dart/src/utils.dart';
 import 'package:web3dart/crypto.dart';
 
 class UnsignedTransaction {
@@ -22,7 +23,7 @@ class UnsignedTransaction {
   factory UnsignedTransaction.fromMap(Map<String, dynamic> map) {
     return UnsignedTransaction(
       map['to'] as String?,
-      map['nonce'] as int?,
+      map['nonce'] as String?,
       map['gasLimit'] as String?,
       map['gasPrice'] as String?,
       map['data'] as String?,
@@ -32,12 +33,12 @@ class UnsignedTransaction {
       map['accessList'] as List<String>?,
       map['maxPriorityFeePerGas'] as String?,
       map['maxFeePerGas'] as String?,
-      map['maxGas'] as String?,
+      map['maxGas'] as int?,
     );
   }
 
-  late String? to;
-  late int? nonce;
+  String? to;
+  String? nonce;
   String? gasLimit;
   String? gasPrice;
   String? data;
@@ -52,7 +53,7 @@ class UnsignedTransaction {
   // EIP-1559; Type 2
   String? maxPriorityFeePerGas;
   String? maxFeePerGas;
-  String? maxGas;
+  int? maxGas;
 }
 
 /// Signatures used to sign Ethereum transactions and messages.
@@ -66,13 +67,45 @@ class Signature {
     r = signature.sublist(0, 32);
     s = signature.sublist(32, 64);
     v = signature[64];
+    if (v < 27) {
+      if (v == 0 || v == 1) {
+        v += 27;
+      } else {
+        throw Error();
+      }
+    }
     return Signature(
-      BigInt.parse(bytesToHex(r)),
-      BigInt.parse(bytesToHex(s)),
+      r,
+      s,
       v,
     );
   }
-  final BigInt r;
-  final BigInt s;
+  int get recoveryParam => 1 - v % 2;
+
+  final Uint8List r;
+  final Uint8List s;
   final int v;
+
+  BigInt get rValue => BigInt.parse(bytesToHex(r, include0x: true));
+  BigInt get sValue => BigInt.parse(bytesToHex(s, include0x: true));
+
+  Uint8List join() {
+    return Uint8List.fromList(
+      padUint8ListTo32(r) +
+          padUint8ListTo32(s) +
+          [if (recoveryParam == 1) 0x1c else 0x1b],
+    );
+  }
+
+  Signature copyWith({
+    Uint8List? r,
+    Uint8List? s,
+    int? v,
+  }) {
+    return Signature(
+      r ?? this.r,
+      s ?? this.s,
+      v ?? this.v,
+    );
+  }
 }

@@ -11,15 +11,55 @@ class SignPage extends StatefulWidget {
 }
 
 class _SignPageState extends State<SignPage> {
-  
+  String _signature = '';
+  String _result = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Sign')),
       body: Center(
           child: Column(
-        children: [Text(widget.username)],
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(widget.username),
+          TextButton(
+            onPressed: _signMessage,
+            child: const Text('Sign message'),
+          ),
+          const SizedBox(height: 10),
+          Text(_signature),
+          const SizedBox(height: 10),
+          TextButton(
+            onPressed: _sendTransaction,
+            child: const Text('Send transaction'),
+          ),
+          Text(_result),
+        ],
       )),
     );
+  }
+
+  _signMessage() async {
+    final provider =
+        SbtAuthProvider(signer: widget.core.signer, clientId: 'Test');
+    final signature = await provider
+        .request(RequestArgument(method: 'personal_sign', params: ['test']));
+    setState(() {
+      _signature = signature;
+    });
+  }
+
+  _sendTransaction() async {
+    final provider =
+        SbtAuthProvider(signer: widget.core.signer, clientId: 'Test');
+    final result = await provider.sendTransaction(
+        to: "0x8316e9b2789a7cc3e61c80b6bab9a6e1735701b2",
+        value: '0x0',
+        data: '0x',
+        gasPrice: '0x0737be7600');
+    setState(() {
+      _result = result;
+    });
   }
 }

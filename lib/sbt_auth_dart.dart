@@ -11,3 +11,4 @@ library sbt_auth_dart;
 export 'src/core/core.dart';
 export 'src/provider/provider.dart';
 export 'src/types/account.dart';
+export 'src/types/provider.dart';

@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 /// Sbt auth exceoption
-class SbtAuthError extends Error{
+class SbtAuthError extends Error {
   /// Sbt auth error
   SbtAuthError([this.message]);
 

@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:eth_sig_util/eth_sig_util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sbt_auth_dart/src/core/core.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
 import 'package:sbt_auth_dart/src/utils.dart';
@@ -40,8 +41,7 @@ class Signer {
   }
 
   /// Sign transaction
-  String signTransaction(UnsignedTransaction transaction) {
-    final chainId = transaction.chainId;
+  String signTransaction(UnsignedTransaction transaction, int chainId) {
     if (transaction.type == 2 && chainId != null) {
       final encodedTx = LengthTrackingByteSink()
         ..addByte(0x02)
@@ -55,17 +55,24 @@ class Signer {
       );
       return bytesToHex(result);
     } else {
-      final encodedTx = LengthTrackingByteSink()
-        ..addByte(0x02)
-        ..add(rlp.encode(encodeToRlp(transaction)))
-        ..close();
-      final signature = _core.signDigest(encodedTx.asBytes());
-      final result = uint8ListFromList(
+      final innerSignature =
+          Signature(Uint8List.fromList([0]), Uint8List.fromList([0]), chainId);
+      final encodedTx = uint8ListFromList(
         rlp.encode(
-          encodeToRlp(transaction, hexToBytes(signature)),
+          encodeToRlp(
+            transaction,
+            innerSignature,
+          ),
         ),
       );
-      return bytesToHex(result);
+      final signature =
+          _core.signTransaction(keccak256(encodedTx), chainId: chainId);
+      final result = uint8ListFromList(
+        rlp.encode(
+          encodeToRlp(transaction, signature),
+        ),
+      );
+      return bytesToHex(result, include0x: true);
     }
   }
 }

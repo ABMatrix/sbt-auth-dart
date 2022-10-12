@@ -15,6 +15,7 @@ bool validPrivateKey(String privateKey) {
   return regexp.hasMatch(privateKey);
 }
 
+/// Uint8ListFromList
 Uint8List uint8ListFromList(List<int> data) {
   if (data is Uint8List) return data;
   return Uint8List.fromList(data);
@@ -24,7 +25,7 @@ Uint8List uint8ListFromList(List<int> data) {
 Share keyToShare(KeyPair key) {
   return Share(
     privateKey: key.x_i,
-    extraData: jsonEncode(key.y),
+    extraData: key.y.toJson(),
   );
 }
 
@@ -32,7 +33,7 @@ Share keyToShare(KeyPair key) {
 KeyPair shareToKey(Share share, [int index = 1]) {
   return KeyPair(
     share.privateKey,
-    jsonDecode(share.extraData) as Coordinate,
+    Coordinate.fromMap(jsonDecode(share.extraData) as Map<String, dynamic>),
     index,
     1,
     3,
@@ -95,17 +96,15 @@ List<dynamic> encodeEIP1559ToRlp(
 /// Rlp encoder for legacy transaction.
 List<dynamic> encodeToRlp(
   UnsignedTransaction transaction, [
-  Uint8List? signature,
+  Signature? signature,
 ]) {
-  if (transaction.gasPrice == null ||
-      transaction.maxFeePerGas == null ||
-      transaction.to == null) {
+  if (transaction.gasPrice == null || transaction.to == null) {
     throw SbtAuthError('Transcation format error');
   }
   final list = [
-    transaction.nonce,
+    int.parse(transaction.nonce!),
     BigInt.parse(transaction.gasPrice!),
-    int.parse(transaction.maxFeePerGas!),
+    int.parse(transaction.gasLimit!),
   ];
 
   if (transaction.to != null) {
@@ -115,15 +114,23 @@ List<dynamic> encodeToRlp(
   }
 
   list
-    ..add(transaction.value)
-    ..add(transaction.data);
+    ..add(BigInt.parse(transaction.value!))
+    ..add(transaction.data == null ? [0] : hexToBytes(transaction.data!));
 
   if (signature != null) {
-    final msgSignature = Signature.from(signature);
     list
-      ..add(msgSignature.v)
-      ..add(msgSignature.r)
-      ..add(msgSignature.s);
+      ..add(signature.v)
+      ..add(signature.rValue)
+      ..add(signature.sValue);
   }
   return list;
+}
+
+/// Pad Uint8 To 32
+Uint8List padUint8ListTo32(Uint8List data) {
+  assert(data.length <= 32, 'Wrong data length');
+  if (data.length == 32) return data;
+
+  // todo there must be a faster way to do this?
+  return Uint8List(32)..setRange(32 - data.length, 32, data);
 }
