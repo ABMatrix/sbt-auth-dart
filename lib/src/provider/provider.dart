@@ -101,13 +101,17 @@ class SbtAuthProvider {
     String? data,
     String? gasPrice,
     String? gasLimit,
+    String? maxFeePerGas,
+    String? maxPriorityFeePerGas,
   }) async {
     final transaction = {
       'gasPrice': gasPrice,
       'gasLimit': gasLimit,
       'value': value,
       'to': to,
-      'data': data
+      'data': data,
+      'maxFeePerGas': maxFeePerGas,
+      'maxPriorityFeePerGas': maxPriorityFeePerGas
     };
     final result = await request(
       RequestArgument(method: 'eth_sendTransaction', params: [transaction]),
@@ -151,6 +155,17 @@ class SbtAuthProvider {
   }
 
   Future<void> _checkTransaction(Map<String, dynamic> transaction) async {
+    if (transaction['to'] == null || transaction['value'] == null) {
+      throw SbtAuthException('Invalid transaction');
+    }
+    final to = transaction['to'] as String;
+    if (!to.startsWith('0x')) {
+      transaction['to'] = '0x$to';
+    }
+    final value = transaction['value'] as String;
+    if (!value.startsWith('0x')) {
+      transaction['value'] = '0x$BigInt.parse(value).toRadixString(16)';
+    }
     if (transaction['nonce'] == null) {
       final response = await jsonRpcClient!
           .call('eth_getTransactionCount', [accounts[0], 'latest']);

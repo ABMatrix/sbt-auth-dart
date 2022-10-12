@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:hive/hive.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
@@ -11,9 +8,8 @@ class ShareAdapter extends TypeAdapter<Share> {
 
   @override
   Share read(BinaryReader reader) {
-    final data = reader.readString();
-    if (data != '') return Share(privateKey: '', extraData: '');
-    return Share.fromMap(jsonDecode(data) as Map<String, dynamic>);
+    final data = reader.readMap();
+    return Share.fromMap(data);
   }
 
   @override

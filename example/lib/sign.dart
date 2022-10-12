@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
+import 'package:sbt_auth_dart/utils.dart';
 
 class SignPage extends StatefulWidget {
   final String username;
@@ -57,7 +58,8 @@ class _SignPageState extends State<SignPage> {
         to: "0x8316e9b2789a7cc3e61c80b6bab9a6e1735701b2",
         value: '0x0',
         data: '0x',
-        gasPrice: '0x0737be7600');
+        maxPriorityFeePerGas: bigIntToHex(parseUnit('1', decimals: 9)),
+        maxFeePerGas: '0x0737be7600');
     setState(() {
       _result = result;
     });

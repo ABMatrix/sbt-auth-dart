@@ -26,7 +26,7 @@ class Signer {
   /// Sign message
   String personalSign(String message) {
     final data =
-        message.startsWith('0x') ? arrayify(message) : ascii.encode(message);
+        message.startsWith('0x') ? hexToBytes(message) : ascii.encode(message);
     return _core.signDigest(hashMessage(data));
   }
 
@@ -42,18 +42,24 @@ class Signer {
 
   /// Sign transaction
   String signTransaction(UnsignedTransaction transaction, int chainId) {
-    if (transaction.type == 2 && chainId != null) {
+    if (transaction.maxFeePerGas != null ||
+        transaction.maxPriorityFeePerGas != null) {
       final encodedTx = LengthTrackingByteSink()
         ..addByte(0x02)
-        ..add(rlp.encode(encodeEIP1559ToRlp(transaction)))
+        ..add(rlp.encode(encodeEIP1559ToRlp(transaction, chainId)))
         ..close();
-      final signature = _core.signDigest(encodedTx.asBytes());
-      final result = uint8ListFromList(
-        rlp.encode(
-          encodeEIP1559ToRlp(transaction, hexToBytes(signature)),
-        ),
+      final signature = _core.signTransaction(
+        keccak256(encodedTx.asBytes()),
+        chainId: chainId,
+        isEIP1559: true,
       );
-      return bytesToHex(result);
+      final result = [0x02] +
+          uint8ListFromList(
+            rlp.encode(
+              encodeEIP1559ToRlp(transaction, chainId, signature),
+            ),
+          );
+      return bytesToHex(result, include0x: true);
     } else {
       final innerSignature =
           Signature(Uint8List.fromList([0]), Uint8List.fromList([0]), chainId);

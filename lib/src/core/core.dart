@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -30,13 +31,17 @@ class AuthCore {
   /// Init core
   /// The most common case is use remote share to init auth core,
   /// the local share is loaded automaicly.
-  Future<bool> init(
-      {Share? remote, String? address, String? backup, Share? local}) async {
+  Future<bool> init({
+    Share? remote,
+    String? address,
+    String? backup,
+    Share? local,
+  }) async {
     await _initHive();
     if (address != null) {
       _local = _getSavedShare(address) ?? local;
       if (_local != null) {
-        _saveShare(_local!, address);
+        unawaited(_saveShare(_local!, address));
       }
     }
     _remote = remote;
@@ -53,7 +58,7 @@ class AuthCore {
     final address = Ecdsa.address(keys[0]);
     _local = keyToShare(keys[0]);
     _remote = keyToShare(keys[1]);
-    _saveShare(_local!, address);
+    unawaited(_saveShare(_local!, address));
     return MpcAccount(
       address: address,
       shares: [for (final k in keys) keyToShare(k)],
@@ -79,18 +84,7 @@ class AuthCore {
       ),
     );
     final signature = Signature.from(hexToBytes(result));
-    var chainIdV = signature.v;
-    if (chainId != null) {
-      if (isEIP1559) {
-        chainIdV = signature.v - 27;
-      } else {
-        chainIdV = signature.v - 27 + (chainId * 2 + 35);
-      }
-      return bytesToHex(signature.copyWith(v: chainIdV).join(),
-          include0x: true);
-    } else {
-      return bytesToHex(signature.join(), include0x: true);
-    }
+    return bytesToHex(signature.join(), include0x: true);
   }
 
   /// Sign method

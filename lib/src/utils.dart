@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:decimal/decimal.dart';
 import 'package:mpc_dart/mpc_dart.dart';
 import 'package:sbt_auth_dart/src/types/account.dart';
 import 'package:sbt_auth_dart/src/types/error.dart';
@@ -40,18 +42,6 @@ KeyPair shareToKey(Share share, [int index = 1]) {
   );
 }
 
-/// Convert hex string to uint8list
-Uint8List arrayify(String value) {
-  var input = value;
-  if (value.substring(0, 2) != '0x') {
-    input = '0x$value';
-  }
-  return List<int>.generate(
-    input.length ~/ 2,
-    (i) => int.parse(input.substring(i * 2, i * 2 + 2), radix: 16),
-  ) as Uint8List;
-}
-
 /// Keccak hash
 Uint8List hashMessage(Uint8List message) {
   final prefix = _messagePrefix + message.length.toString();
@@ -61,34 +51,34 @@ Uint8List hashMessage(Uint8List message) {
 
 /// Rpc encoder for EIP1559 transaction.
 List<dynamic> encodeEIP1559ToRlp(
-  UnsignedTransaction transaction, [
-  Uint8List? signature,
+  UnsignedTransaction transaction,
+  int chainId, [
+  Signature? signature,
 ]) {
   final list = [
-    transaction.chainId,
-    transaction.nonce,
+    BigInt.from(chainId),
+    int.parse(transaction.nonce!),
     BigInt.parse(transaction.maxPriorityFeePerGas!),
-    transaction.maxFeePerGas,
-    transaction.maxGas,
+    BigInt.parse(transaction.maxFeePerGas!),
+    int.parse(transaction.gasLimit!),
   ];
 
   if (transaction.to != null) {
-    list.add(transaction.to);
+    list.add(hexToBytes(transaction.to!));
   } else {
     list.add('');
   }
 
   list
-    ..add(transaction.value)
-    ..add(transaction.data)
+    ..add(BigInt.parse(transaction.value!))
+    ..add(transaction.data == null ? [0] : hexToBytes(transaction.data!))
     ..add([]); // access list
 
   if (signature != null) {
-    final msgSignature = Signature.from(signature);
     list
-      ..add(msgSignature.v)
-      ..add(msgSignature.r)
-      ..add(msgSignature.s);
+      ..add(signature.v)
+      ..add(signature.rValue)
+      ..add(signature.sValue);
   }
   return list;
 }
@@ -133,4 +123,16 @@ Uint8List padUint8ListTo32(Uint8List data) {
 
   // todo there must be a faster way to do this?
   return Uint8List(32)..setRange(32 - data.length, 32, data);
+}
+
+/// Parse unit
+BigInt parseUnit(String amount, {int decimals = 18}) {
+  return (Decimal.parse(amount) *
+          Decimal.parse(math.pow(10, decimals).toString()))
+      .toBigInt();
+}
+
+/// Bigint to hex string
+String bigIntToHex(BigInt input) {
+  return '0x${input.toRadixString(16)}';
 }

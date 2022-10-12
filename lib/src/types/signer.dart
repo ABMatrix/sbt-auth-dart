@@ -17,7 +17,6 @@ class UnsignedTransaction {
     this.accessList,
     this.maxPriorityFeePerGas,
     this.maxFeePerGas,
-    this.maxGas,
   );
 
   factory UnsignedTransaction.fromMap(Map<String, dynamic> map) {
@@ -33,7 +32,6 @@ class UnsignedTransaction {
       map['accessList'] as List<String>?,
       map['maxPriorityFeePerGas'] as String?,
       map['maxFeePerGas'] as String?,
-      map['maxGas'] as int?,
     );
   }
 

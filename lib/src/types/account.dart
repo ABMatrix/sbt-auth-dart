@@ -7,7 +7,7 @@ class Share {
   });
 
   /// Share from map.
-  factory Share.fromMap(Map<String, dynamic> map) {
+  factory Share.fromMap(Map<dynamic, dynamic> map) {
     return Share(
       privateKey: map['privateKey'] as String,
       extraData: map['extraData'] as String,
