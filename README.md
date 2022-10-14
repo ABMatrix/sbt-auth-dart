@@ -9,6 +9,9 @@ SBTAuth SDK for flutter.
 
 ## Setup
 
+
+### iOS
+
 ### Android
 
 Add intent-filter inside  activity

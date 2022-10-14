@@ -23,22 +23,28 @@ enum LoginType {
 
 /// SbtAuth class
 class SbtAuth {
-  /// SBTAuth, please use
-  SbtAuth({required this.developMode, required String clientId}) {
+  /// SBTAuth, you need to set your own custom scheme.
+  SbtAuth({
+    required this.developMode,
+    required String clientId,
+    required String scheme,
+  }) {
     _clientId = clientId;
+    _scheme = scheme;
   }
 
   /// If you set developMode true, the use registered is on test site, can only
   /// access to testnet.
   late bool developMode;
   late String _clientId;
+  late String _scheme;
 
   String get _baseUrl => developMode
       ? 'https://test-api.sbtauth.io/sbt-auth'
       : 'https://api.sbtauth.io/sbt-auth';
 
   /// Login with sbtauth
-  Future<AuthCore> login(
+  Future<AuthCore?> login(
     LoginType loginType, {
     String? email,
     String? code,
@@ -48,7 +54,7 @@ class SbtAuth {
           (loginType == LoginType.email && email != null && code != null),
       'Email and code required',
     );
-    String token;
+    String? token;
     if (loginType == LoginType.email) {
       token = await SbtAuthApi.userLogin(
         email: email!,
@@ -60,13 +66,13 @@ class SbtAuth {
       final appUrl = developMode
           ? 'https://test-connect.sbtauth.io/login'
           : 'https://connect.sbtauth.io/login';
-      final loginUrl = '$appUrl?loginType=${loginType.name}&scheme=sbtauth';
+      final loginUrl = '$appUrl?loginType=${loginType.name}&scheme=$_scheme';
       unawaited(
         launchUrl(
           Uri.parse(loginUrl),
         ),
       );
-      final completer = Completer<String>();
+      final completer = Completer<String?>();
       final appLinks = AppLinks();
       final linkSubscription = appLinks.uriLinkStream.listen((uri) {
         if (uri.toString().startsWith('sbtauth')) {
@@ -74,9 +80,11 @@ class SbtAuth {
         }
       });
       token = await completer.future;
+      await closeInAppWebView();
       await linkSubscription.cancel();
     }
     // return token;
+    if (token == null) return null;
     final api = SbtAuthApi(token: token, baseUrl: _baseUrl);
     final userInfo = await api.getUserInfo();
     final core = AuthCore();

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:example/sign.dart';
 import 'package:flutter/material.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
@@ -92,21 +94,28 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _loginWithSocial(LoginType loginType) async {
-    final sbtAuth = SbtAuth(developMode: true, clientId: 'Demo');
-    AuthCore core;
+    final sbtAuth =
+        SbtAuth(developMode: true, clientId: 'Demo', scheme: 'sbtauth');
+    AuthCore? core;
     if (loginType == LoginType.email) {
       final email = _controller.text;
       const code = '121212';
       core = await sbtAuth.login(loginType, email: email, code: code);
     } else {
-      core = await sbtAuth.login(loginType);
+      try {
+        core = await sbtAuth.login(loginType);
+      } catch (e) {
+        if (e is SbtAuthException) {
+          log('message');
+        }
+      }
     }
-    if (mounted) {
+    if (mounted && core != null) {
       Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  SignPage(username: core.getAddress(), core: core)));
+                  SignPage(username: core!.getAddress(), core: core)));
     }
   }
 }
