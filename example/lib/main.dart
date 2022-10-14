@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:example/sign.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
@@ -39,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _controller = TextEditingController();
-    _controller.text = '30min12@gmail.com';
+    _controller.text = '30min18@gmail.com';
   }
 
   @override
@@ -67,7 +64,26 @@ class _MyHomePageState extends State<MyHomePage> {
                   labelText: 'Email',
                 ),
               ),
-              ElevatedButton(onPressed: login, child: const Text('Login'))
+              ElevatedButton(
+                  onPressed: () {
+                    _loginWithSocial(LoginType.email);
+                  },
+                  child: const Text('Login with email')),
+              ElevatedButton(
+                  onPressed: () {
+                    _loginWithSocial(LoginType.google);
+                  },
+                  child: const Text('Login with Google')),
+              ElevatedButton(
+                  onPressed: () {
+                    _loginWithSocial(LoginType.facebook);
+                  },
+                  child: const Text('Login With Facebook')),
+              ElevatedButton(
+                  onPressed: () {
+                    _loginWithSocial(LoginType.twitter);
+                  },
+                  child: const Text('Login With Twitter')),
             ],
           ),
         ),
@@ -75,52 +91,22 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  login() async {
-    final email = _controller.text;
-    final data = {
-      'emailAddress': email,
-      'authCode': '121212',
-      'deviceName': 'Device',
-      'clientID': 'Safematrix'
-    };
-    const baseUrl = 'https://test-api.sbtauth.io/sbt-auth';
-    final result = await http.post(Uri.parse('$baseUrl/user:login'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(data));
-    final token = jsonDecode(result.body)['data'];
-
-    final headers = {
-      'Content-Type': 'application/json; charset=UTF-8',
-      'authorization': 'Bearer $token'
-    };
-    final userRes =
-        await http.get(Uri.parse('$baseUrl/user/user'), headers: headers);
-    final user = jsonDecode(userRes.body);
-    final core = AuthCore();
-    if (user['publicKeyAddress'] == null) {
-      final account = await core.generatePubKey();
-
-      /// Go to backup page
-      if (!mounted) return;
+  _loginWithSocial(LoginType loginType) async {
+    final sbtAuth = SbtAuth(developMode: true, clientId: 'Demo');
+    AuthCore core;
+    if (loginType == LoginType.email) {
+      final email = _controller.text;
+      const code = '121212';
+      core = await sbtAuth.login(loginType, email: email, code: code);
+    } else {
+      core = await sbtAuth.login(loginType);
+    }
+    if (mounted) {
       Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  SignPage(username: account.address, core: core)));
-    } else {
-      final remoteRes = await http.get(
-          Uri.parse('$baseUrl/user/private-key-fragment-info'),
-          headers: headers);
-      final address =
-          jsonDecode(remoteRes.body)['privateKeyFragmentInfoPublicKeyAddress'];
-      final remote =
-          jsonDecode(remoteRes.body)['privateKeyFragmentInfoPublicKeyAddress'];
-      core.init(remote: Share.fromMap(remote), address: address);
-      if (!mounted) return;
-      Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => SignPage(username: address, core: core)));
+                  SignPage(username: core.getAddress(), core: core)));
     }
   }
 }

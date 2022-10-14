@@ -7,28 +7,23 @@
 
 SBTAuth SDK for flutter.
 
-## Installation 💻
+## Setup
 
-**❗ In order to start using Sbt Auth Dart you must have the [Flutter SDK][flutter_install_link] installed on your machine.**
+### Android
 
-Add `sbt_auth_dart` to your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  sbt_auth_dart: ^0.1.0
+Add intent-filter inside  activity
 ```
-
-Install it:
-
-```sh
-flutter pub add sbt_auth_dart
+<activity ...>
+  <intent-filter android:autoVerify="true">
+      <action android:name="android.intent.action.VIEW" />
+          <category android:name="android.intent.category.DEFAULT" />
+          <category android:name="android.intent.category.BROWSABLE" />
+          <data android:scheme="sbtauth" />
+  </intent-filter>
+</activity>
 ```
-
----
 
 ## Get started
-
-
 
 ## Running Tests 🧪
 

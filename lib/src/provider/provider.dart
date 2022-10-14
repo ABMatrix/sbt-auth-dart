@@ -166,6 +166,12 @@ class SbtAuthProvider {
     if (!value.startsWith('0x')) {
       transaction['value'] = '0x$BigInt.parse(value).toRadixString(16)';
     }
+    if (transaction['gasPrice'] == null &&
+        transaction['maxFeePerGas'] == null &&
+        transaction['maxPriorityFeePerGas'] == null) {
+      final response = await jsonRpcClient!.call('eth_gasPrice', []);
+      transaction['gasPrice'] = response.result;
+    }
     if (transaction['nonce'] == null) {
       final response = await jsonRpcClient!
           .call('eth_getTransactionCount', [accounts[0], 'latest']);

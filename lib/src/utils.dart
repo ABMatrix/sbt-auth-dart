@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:decimal/decimal.dart';
 import 'package:mpc_dart/mpc_dart.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sbt_auth_dart/src/types/account.dart';
 import 'package:sbt_auth_dart/src/types/error.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
@@ -135,4 +137,12 @@ BigInt parseUnit(String amount, {int decimals = 18}) {
 /// Bigint to hex string
 String bigIntToHex(BigInt input) {
   return '0x${input.toRadixString(16)}';
+}
+
+/// Get device name
+Future<String> getDeviceName() async {
+  final packageInfo = await PackageInfo.fromPlatform();
+  final appName = packageInfo.appName;
+  final packageName = packageInfo.packageName;
+  return '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName''';
 }

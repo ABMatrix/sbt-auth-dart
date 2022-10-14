@@ -18,7 +18,9 @@ class _SignPageState extends State<SignPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign')),
+      appBar: AppBar(
+        title: const Text('Sign'),
+      ),
       body: Center(
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
