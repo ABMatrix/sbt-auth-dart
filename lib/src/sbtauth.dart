@@ -138,18 +138,18 @@ class SbtAuth {
               : LaunchMode.platformDefault,
         ),
       );
-      final completer = Completer<String?>();
-      final appLinks = AppLinks();
-      final linkSubscription = appLinks.uriLinkStream.listen((uri) {
-        if (uri.toString().startsWith(_scheme)) {
-          completer.complete(uri.queryParameters['token']);
-        }
-      });
-      token = await completer.future;
       if (Platform.isIOS) {
+        final completer = Completer<String?>();
+        final appLinks = AppLinks();
+        final linkSubscription = appLinks.uriLinkStream.listen((uri) {
+          if (uri.toString().startsWith(_scheme)) {
+            completer.complete(uri.queryParameters['token']);
+          }
+        });
+        token = await completer.future;
         await closeInAppWebView();
+        await linkSubscription.cancel();
       }
-      await linkSubscription.cancel();
     }
     if (token == null) return;
     await _saveToken(token);
