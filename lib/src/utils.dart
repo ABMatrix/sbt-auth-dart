@@ -13,7 +13,7 @@ import 'package:web3dart/crypto.dart';
 
 const _messagePrefix = '\u0019Ethereum Signed Message:\n';
 
-/// Check privcate key format
+/// Check private key format
 bool validPrivateKey(String privateKey) {
   final regexp = RegExp(r'/^[\dA-Fa-f]{64}$/');
   return regexp.hasMatch(privateKey);
@@ -118,8 +118,8 @@ List<dynamic> encodeToRlp(
   return list;
 }
 
-/// Pad Uint8 To 32
-Uint8List padUint8ListTo32(Uint8List data) {
+/// Pad Unit8 To 32
+Uint8List padUnit8ListTo32(Uint8List data) {
   assert(data.length <= 32, 'Wrong data length');
   if (data.length == 32) return data;
 

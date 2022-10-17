@@ -3,20 +3,24 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
+import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/api.dart';
-import 'package:sbt_auth_dart/src/types/exception.dart';
 import 'package:sbt_auth_dart/utils.dart';
 import 'package:web3dart/crypto.dart';
 
 /// SBTAuth apis
 class SbtAuthApi {
   /// SBTAuth apis used inside project.
-  SbtAuthApi({required String token, required String baseUrl}) {
-    _token = token;
+  SbtAuthApi({required String baseUrl}) {
     _baseUrl = baseUrl;
   }
+  static late DBUtil _dbUtil;
 
-  late String _token;
+  static Future<void> init() async {
+    _dbUtil = await DBUtil.getInstance();
+  }
+
+  String get _token => _dbUtil.tokenBox.values.first;
   late String _baseUrl;
 
   Map<String, String> get _headers => {
@@ -45,8 +49,7 @@ class SbtAuthApi {
       },
       body: jsonEncode(data),
     );
-    final token =
-        _checkResponse(response) as String;
+    final token = _checkResponse(response) as String;
     return token;
   }
 

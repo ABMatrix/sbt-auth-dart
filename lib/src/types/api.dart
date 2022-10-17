@@ -34,7 +34,7 @@ class UserInfo {
       avatar: map['avatar'] as String?,
       userLoginParams: map['userLoginParams'] as String,
       userLoginType: map['userLoginType'] as String,
-      publicKeyAddress:map['publicKeyAddress'] as String?,
+      publicKeyAddress: map['publicKeyAddress'] as String?,
     );
   }
 

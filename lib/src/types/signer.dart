@@ -89,8 +89,8 @@ class Signature {
 
   Uint8List join() {
     return Uint8List.fromList(
-      padUint8ListTo32(r) +
-          padUint8ListTo32(s) +
+      padUnit8ListTo32(r) +
+          padUnit8ListTo32(s) +
           [if (recoveryParam == 1) 0x1c else 0x1b],
     );
   }

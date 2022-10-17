@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mpc_dart/mpc_dart.dart';
 import 'package:sbt_auth_dart/src/core/signer.dart';
+import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/account.dart';
-import 'package:sbt_auth_dart/src/types/adapter.dart';
 import 'package:sbt_auth_dart/src/types/exception.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
 
@@ -14,7 +12,6 @@ import 'package:sbt_auth_dart/src/utils.dart';
 import 'package:web3dart/crypto.dart';
 
 /// Hive box key
-const CACHE_KEY = 'local_cache_key';
 
 /// SBTAuth core, manage shares
 class AuthCore {
@@ -23,7 +20,6 @@ class AuthCore {
 
   /// Remote share, saved on server side
   late Share? _remote;
-  Box<Share?>? _box;
 
   /// Signer
   Signer get signer => Signer(this);
@@ -37,9 +33,8 @@ class AuthCore {
     String? backup,
     Share? local,
   }) async {
-    await _initHive();
     if (address != null) {
-      _local = _getSavedShare(address) ?? local;
+      _local = await _getSavedShare(address) ?? local;
       if (_local != null) {
         unawaited(_saveShare(_local!, address));
       }
@@ -53,7 +48,6 @@ class AuthCore {
 
   /// Generate shares
   Future<MpcAccount> generatePubKey() async {
-    await _initHive();
     final keys = Ecdsa.generate(1, 3);
     final address = Ecdsa.address(keys[0]);
     _local = keyToShare(keys[0]);
@@ -110,13 +104,17 @@ class AuthCore {
     return signature.copyWith(v: chainIdV);
   }
 
-  Share? _getSavedShare(String address) {
-    final share = _box!.get(address);
+  Future<Share?> _getSavedShare(String address) async {
+    final dbUtil = await DBUtil.getInstance();
+    final box = dbUtil.shareBox;
+    final share = box!.get(address);
     return (share == null || share.privateKey == '') ? null : share;
   }
 
-  Future<void> _saveShare(Share share, String address) {
-    return _box!.put(address, share);
+  Future<void> _saveShare(Share share, String address) async {
+    final dbUtil = await DBUtil.getInstance();
+    final box = dbUtil.shareBox;
+    return box!.put(address, share);
   }
 
   void _recover(Share remote, String backup) {
@@ -137,17 +135,5 @@ class AuthCore {
     final localKey = Ecdsa.recover([backupKey, remoteKey]);
     _local = keyToShare(localKey);
     _saveShare(keyToShare(localKey), address);
-  }
-
-  Future<void> _initHive() async {
-    if (_box != null) {
-      return;
-    }
-    await Hive.initFlutter();
-    if (!Hive.isAdapterRegistered(1)) {
-      Hive.registerAdapter(ShareAdapter());
-    }
-    await Hive.openBox<Share?>(CACHE_KEY);
-    _box = Hive.box<Share?>(CACHE_KEY);
   }
 }

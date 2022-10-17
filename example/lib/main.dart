@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
+
   final String title;
 
   @override
@@ -33,12 +34,15 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late TextEditingController _controller;
+  final sbtAuth =
+      SbtAuth(developMode: true, clientId: 'Demo', scheme: 'sbtauth');
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
     _controller.text = '30min18@gmail.com';
+    sbtAuth.init();
   }
 
   @override
@@ -68,22 +72,22 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               ElevatedButton(
                   onPressed: () {
-                    _loginWithSocial(LoginType.email);
+                    _login(LoginType.email, email: _controller.text.trim());
                   },
                   child: const Text('Login with email')),
               ElevatedButton(
                   onPressed: () {
-                    _loginWithSocial(LoginType.google);
+                    _login(LoginType.google);
                   },
                   child: const Text('Login with Google')),
               ElevatedButton(
                   onPressed: () {
-                    _loginWithSocial(LoginType.facebook);
+                    _login(LoginType.facebook);
                   },
                   child: const Text('Login With Facebook')),
               ElevatedButton(
                   onPressed: () {
-                    _loginWithSocial(LoginType.twitter);
+                    _login(LoginType.twitter);
                   },
                   child: const Text('Login With Twitter')),
             ],
@@ -93,29 +97,22 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  _loginWithSocial(LoginType loginType) async {
-    final sbtAuth =
-        SbtAuth(developMode: true, clientId: 'Demo', scheme: 'sbtauth');
-    AuthCore? core;
-    if (loginType == LoginType.email) {
-      final email = _controller.text;
-      const code = '121212';
-      core = await sbtAuth.login(loginType, email: email, code: code);
-    } else {
-      try {
-        core = await sbtAuth.login(loginType);
-      } catch (e) {
-        if (e is SbtAuthException) {
-          log('message');
-        }
+  _login(LoginType loginType, {String? email, String? verityCode}) async {
+    late bool loginSuccess;
+    try {
+      loginSuccess = await sbtAuth.loginWithSocial(loginType,
+          email: email, verityCode: verityCode);
+    } catch (e) {
+      if (e is SbtAuthException) {
+        log('message');
       }
     }
-    if (mounted && core != null) {
+    if (mounted && loginSuccess) {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) =>
-                  SignPage(username: core!.getAddress(), core: core)));
+              builder: (context) => SignPage(
+                  username: sbtAuth.core.getAddress(), core: sbtAuth.core)));
     }
   }
 }
