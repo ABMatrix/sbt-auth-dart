@@ -55,9 +55,14 @@ class SbtAuth {
   /// core
   AuthCore core = AuthCore();
 
-  String get _baseUrl => developMode
-      ? 'https://test-api.sbtauth.io/sbt-auth'
-      : 'https://api.sbtauth.io/sbt-auth';
+  String get _baseUrl =>
+      developMode
+          ? 'https://test-api.sbtauth.io/sbt-auth'
+          : 'https://api.sbtauth.io/sbt-auth';
+
+  /// provider
+  SbtAuthProvider get provider =>
+      SbtAuthProvider(signer: core.signer, clientId: _clientId);
 
   /// Init sbtauth
   Future<void> init() async {
@@ -99,15 +104,14 @@ class SbtAuth {
     return token != null;
   }
 
-  Future<void> _login(
-    LoginType loginType, {
+  Future<void> _login(LoginType loginType, {
     String? email,
     String? code,
   }) async {
     assert(
-      loginType != LoginType.email ||
-          (loginType == LoginType.email && email != null && code != null),
-      'Email and code required',
+    loginType != LoginType.email ||
+        (loginType == LoginType.email && email != null && code != null),
+    'Email and code required',
     );
     String? token;
     if (loginType == LoginType.email) {
@@ -175,8 +179,4 @@ class SbtAuth {
     await SbtAuthApi.init();
   }
 
-  /// Get provider
-  SbtAuthProvider getProvider() {
-    return SbtAuthProvider(signer: core.signer, clientId: _clientId);
-  }
 }
