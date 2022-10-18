@@ -20,7 +20,7 @@ class SbtAuthApi {
     _dbUtil = await DBUtil.getInstance();
   }
 
-  String get _token => _dbUtil.tokenBox.values.first;
+  String? get _token => _dbUtil.tokenBox.get(TOKEN_KEY);
   late String _baseUrl;
 
   Map<String, String> get _headers => {

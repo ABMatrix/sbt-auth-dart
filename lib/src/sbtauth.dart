@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:sbt_auth_dart/src/api.dart';
 import 'package:sbt_auth_dart/src/core/core.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
@@ -45,7 +43,6 @@ class SbtAuth {
 
   late String _clientId;
   late String _scheme;
-  late AppLinks _appLinks;
 
   /// Login user
   late UserInfo user;
@@ -62,7 +59,6 @@ class SbtAuth {
 
   /// Init sbtauth
   Future<void> init() async {
-    await _initDeepLinks();
     await DBUtil.install();
     await DBUtil.getInstance();
     await SbtAuthApi.init();
@@ -74,7 +70,7 @@ class SbtAuth {
     if (user.publicKeyAddress == null) {
       final account = await core.generatePubKey();
       await api.uploadShares(account.shares, account.address);
-      privateKeyFragment3 = account.shares[2].privateKey;
+      privateKeyFragment3 = '0x${account.shares[2].privateKey}';
     } else {
       core = await initCore();
     }
@@ -94,15 +90,9 @@ class SbtAuth {
       final dbUtil = await DBUtil.getInstance();
       token = dbUtil.tokenBox.get(TOKEN_KEY);
     } else {
-      try {
-        await _login(loginType);
-        final dbUtil = await DBUtil.getInstance();
-        token = dbUtil.tokenBox.get(TOKEN_KEY);
-      } catch (e) {
-        if (e is SbtAuthException) {
-          log('message');
-        }
-      }
+      await _login(loginType);
+      final dbUtil = await DBUtil.getInstance();
+      token = dbUtil.tokenBox.get(TOKEN_KEY);
     }
     return token != null;
   }
@@ -138,19 +128,21 @@ class SbtAuth {
               : LaunchMode.platformDefault,
         ),
       );
+      final completer = Completer<String?>();
+      final appLinks = AppLinks();
+      final linkSubscription = appLinks.uriLinkStream.listen((uri) {
+        print(uri);
+        if (uri.toString().startsWith(_scheme)) {
+          completer.complete(uri.queryParameters['token']);
+        }
+      });
+      token = await completer.future;
       if (Platform.isIOS) {
-        final completer = Completer<String?>();
-        final appLinks = AppLinks();
-        final linkSubscription = appLinks.uriLinkStream.listen((uri) {
-          if (uri.toString().startsWith(_scheme)) {
-            completer.complete(uri.queryParameters['token']);
-          }
-        });
-        token = await completer.future;
         await closeInAppWebView();
-        await linkSubscription.cancel();
       }
+      await linkSubscription.cancel();
     }
+
     if (token == null) return;
     await _saveToken(token);
     await SbtAuthApi.init();
@@ -158,43 +150,9 @@ class SbtAuth {
   }
 
   /// Send privateKey fragment
-  Future<bool> sendBackupPrivateKey(String privateKey, String email) async {
+  Future<void> sendBackupPrivateKey(String privateKey, String email) async {
     final api = SbtAuthApi(baseUrl: _baseUrl);
-    try {
-      await api.backupShare(privateKey, email);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /// Init deep links
-  Future<void> _initDeepLinks() async {
-    _appLinks = AppLinks();
-    var token = '';
-
-    // Check initial link if app was in cold state (terminated)
-    final appLink = await _appLinks.getInitialAppLink();
-    if (appLink != null) {
-      debugPrint('getInitialAppLink: $appLink');
-      token = appLink.queryParameters['token'] ?? '';
-      if (token != '') {
-        await _saveToken(token);
-        await SbtAuthApi.init();
-        await _initUser();
-      }
-    }
-
-    // Handle link when app is in warm state (front or background)
-    _appLinks.uriLinkStream.listen((uri) {
-      debugPrint('onAppLink: $uri');
-      token = uri.queryParameters['token'] ?? '';
-      if (token != '') {
-        _saveToken(token);
-        SbtAuthApi.init();
-        _initUser();
-      }
-    });
+    await api.backupShare(privateKey, email);
   }
 
   /// Init core
