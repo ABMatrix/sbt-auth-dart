@@ -166,4 +166,10 @@ class SbtAuth {
     if (!init) throw SbtAuthException('New device detected');
     return core;
   }
+
+  /// Logout
+  Future<void> logout() async {
+    await _saveToken('');
+    await SbtAuthApi.init();
+  }
 }
