@@ -10,6 +10,8 @@ import 'package:sbt_auth_dart/src/types/exception.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import '../sbt_auth_dart.dart';
+
 /// Login types
 enum LoginType {
   /// Login with google account
@@ -171,5 +173,10 @@ class SbtAuth {
   Future<void> logout() async {
     await _saveToken('');
     await SbtAuthApi.init();
+  }
+
+  /// Get provider
+  SbtAuthProvider getProvider() {
+    return SbtAuthProvider(signer: core.signer, clientId: _clientId);
   }
 }
