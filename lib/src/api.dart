@@ -105,9 +105,9 @@ class SbtAuthApi {
   Future<void> backupShare(String privateKey, String email) async {
     final params = {'emailAddress': email, 'privateKey3Fragment': privateKey};
     final response = await http.post(
-      Uri.parse('$_baseUrl/user:backup'),
+      Uri.parse('$_baseUrl/user:back-up'),
       headers: _headers,
-      body: params,
+      body: jsonEncode(params),
     );
     _checkResponse(response);
   }
