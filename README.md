@@ -11,7 +11,20 @@ SBTAuth SDK for flutter.
 
 
 ### iOS
-
+Add custom url scheme to Info.plist.
+```
+<key>CFBundleURLTypes</key>
+<array>
+  <dict>
+    <key>CFBundleTypeRole</key>
+    <string>Viewer</string>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>{your custom scheme}</string>
+    </array>
+  </dict>
+</array>
+```
 ### Android
 
 Add intent-filter inside  activity
@@ -21,7 +34,7 @@ Add intent-filter inside  activity
       <action android:name="android.intent.action.VIEW" />
           <category android:name="android.intent.category.DEFAULT" />
           <category android:name="android.intent.category.BROWSABLE" />
-          <data android:scheme="sbtauth" />
+          <data android:scheme="{your custom scheme}" />
   </intent-filter>
 </activity>
 ```
