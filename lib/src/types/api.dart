@@ -59,3 +59,36 @@ class UserInfo {
   /// User wallet address
   String? publicKeyAddress;
 }
+
+/// Device
+class Device {
+  /// Device
+  Device({
+    required this.deviceJoinTime,
+    required this.userId,
+    required this.deviceID,
+    required this.deviceName,
+  });
+
+  /// Device from map
+  factory Device.fromMap(Map<String, dynamic> map) {
+    return Device(
+      deviceJoinTime: (map['deviceJoinTime'] ?? '') as String,
+      userId: (map['userId'] ?? '') as String,
+      deviceID: (map['deviceID'] ?? '') as String,
+      deviceName: (map['deviceName'] ?? '') as String,
+    );
+  }
+
+  /// Join time
+  String? deviceJoinTime;
+
+  /// User id
+  String? userId;
+
+  /// Device id
+  String? deviceID;
+
+  /// Device name
+  String? deviceName;
+}

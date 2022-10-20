@@ -40,6 +40,7 @@ dependencies:
   http: ^0.13.5
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  pin_code_fields: ^7.4.0
 
 dev_dependencies:
   flutter_test:

@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:developer';
 
+import 'package:example/confirm_auth.dart';
+import 'package:example/grant_authorization.dart';
 import 'package:example/sign.dart';
 import 'package:flutter/material.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
-void main() {
+void main() async {
   runApp(const MyApp());
 }
 
@@ -35,7 +38,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late TextEditingController _controller;
   final sbtAuth =
-      SbtAuth(developMode: true, clientId: 'Demo', scheme: 'sbtauth');
+      SbtAuth(developMode: true, clientId: 'SBT', scheme: 'sbtauth');
 
   @override
   void initState() {
@@ -43,6 +46,15 @@ class _MyHomePageState extends State<MyHomePage> {
     _controller = TextEditingController();
     _controller.text = '30min18@gmail.com';
     sbtAuth.init();
+    sbtAuth.streamController.stream.listen((event) {
+      if (event.contains('deviceName')) {
+        final deviceName = jsonDecode(event)['deviceName'];
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ConfirmAuthPage(deviceName: deviceName)));
+      }
+    });
   }
 
   @override
@@ -97,14 +109,20 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  _login(LoginType loginType, {String? email, String? verityCode}) async {
+  _login(LoginType loginType, {String? email}) async {
     late bool loginSuccess;
     try {
       loginSuccess = await sbtAuth.loginWithSocial(loginType,
-          email: email, verityCode: verityCode);
+          email: email, verityCode: 'verityCode');
     } catch (e) {
       if (e is SbtAuthException) {
-        log('message');
+        log(e.toString());
+        if (e.toString() == 'New device detected') {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const GrantAuthorizationPage()));
+        }
       }
     }
     if (mounted && loginSuccess) {

@@ -14,8 +14,10 @@ class SbtAuthApi {
   SbtAuthApi({required String baseUrl}) {
     _baseUrl = baseUrl;
   }
+
   static late DBUtil _dbUtil;
 
+  /// Init
   static Future<void> init() async {
     _dbUtil = await DBUtil.getInstance();
   }
@@ -55,20 +57,18 @@ class SbtAuthApi {
 
   /// Get user info.
   Future<UserInfo> getUserInfo() async {
-    final headers = {
-      'Content-Type': 'application/json; charset=UTF-8',
-      'authorization': 'Bearer $_token'
-    };
     final response =
-        await http.get(Uri.parse('$_baseUrl/user/user'), headers: headers);
+        await http.get(Uri.parse('$_baseUrl/user/user'), headers: _headers);
 
     final user = _checkResponse(response) as Map<String, dynamic>;
     return UserInfo.fromMap(user);
   }
 
   /// Upload shares.
-  Future<void> uploadShares(List<Share> shares, String address) async {
+  Future<void> uploadShares(
+      String clientId, List<Share> shares, String address) async {
     final params = {
+      'clientID': clientId,
       'privateKey2Fragment': jsonEncode(shares[1].toJson()),
       'privateKey1FragmentHash': bytesToHex(
         hashMessage(ascii.encode(jsonEncode(shares[0].toJson()))),
@@ -89,9 +89,9 @@ class SbtAuthApi {
   }
 
   /// Fetch remote share
-  Future<RemoteShareInfo> fetchRemoteShare() async {
+  Future<RemoteShareInfo> fetchRemoteShare(String clientId) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/user/private-key-fragment-info'),
+      Uri.parse('$_baseUrl/user/private-key-fragment-info?clientID=$clientId'),
       headers: _headers,
     );
     final result = _checkResponse(response) as Map<String, dynamic>;
@@ -112,10 +112,64 @@ class SbtAuthApi {
     _checkResponse(response);
   }
 
+  /// Get userDevice list
+  Future<List<Device>> getUserDeviceList() async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/user/devices?pageNo=1&pageSize=9999'),
+      headers: _headers,
+    );
+    final data = _checkResponse(response) as Map<String, dynamic>;
+    final items = data['items'] as List?;
+    return [
+      for (var d in items ?? []) Device.fromMap(d as Map<String, dynamic>)
+    ];
+  }
+
+  /// Send auth request
+  Future<void> sendAuthRequest(String deviceName) async {
+    final params = {'oldDeviceName': deviceName};
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/apply:auth'),
+      headers: _headers,
+      body: jsonEncode(params),
+    );
+    _checkResponse(response);
+  }
+
+  /// Approve auth request
+  Future<void> approveAuthRequest(String deviceName, String encrypted) async {
+    final params = {
+      'newDeviceName': deviceName,
+      'encryptedFragment': encrypted,
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/confirm:auth'),
+      headers: _headers,
+      body: jsonEncode(params),
+    );
+    _checkResponse(response);
+  }
+
+  /// Confirm event received
+  Future<void> confirmEventReceived(String eventID, String eventType) async {
+    final deviceName = await getDeviceName();
+    final params = {
+      'deviceName': deviceName,
+      'eventType': eventType,
+      'eventID': eventID,
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/receive:auth'),
+      headers: _headers,
+      body: jsonEncode(params),
+    );
+    _checkResponse(response);
+  }
+
   static dynamic _checkResponse(Response response) {
     final body = jsonDecode(response.body) as Map<String, dynamic>;
     if (body['code'] != '000') {
-      throw SbtAuthException(body['error'] as String);
+      throw SbtAuthException((body['error'] ?? '') as String);
     }
     return body['data'];
   }
