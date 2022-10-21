@@ -12,7 +12,7 @@ class ConfirmAuthPage extends StatefulWidget {
 
 class ConfirmAuthPageState extends State<ConfirmAuthPage> {
   final sbtAuth =
-      SbtAuth(developMode: true, clientId: 'SBT', scheme: 'sbtauth');
+      SbtAuth(developMode: true, clientId: 'Demo', scheme: 'sbtauth');
 
   String code = '';
 

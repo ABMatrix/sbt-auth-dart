@@ -159,7 +159,6 @@ class SbtAuth {
       }
       await linkSubscription.cancel();
     }
-
     if (token == null) return;
     await _saveToken(token);
     await SbtAuthApi.init();
@@ -220,11 +219,11 @@ class SbtAuth {
       try {
         if (!streamController.isClosed && event.id != null) {
           streamController.add(event.data!);
-          api.confirmEventReceived(event.id!, 'AUTH_APPLY');
         }
       } catch (e) {
         rethrow;
       }
+      api.confirmEventReceived(event.id!, 'AUTH_APPLY');
     });
   }
 
@@ -291,8 +290,8 @@ class SbtAuth {
   }
 
   /// Recover with privateKey
-  Future<void> recoverWidthBackup(String backupPrivateKey,
-      String password) async {
+  Future<void> recoverWidthBackup(
+      String backupPrivateKey, String password) async {
     final api = SbtAuthApi(baseUrl: _baseUrl);
     final remoteShareInfo = await api.fetchRemoteShare(_clientId);
     var backup = await decryptMsg(backupPrivateKey, password);

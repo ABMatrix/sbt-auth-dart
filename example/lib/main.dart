@@ -38,7 +38,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late TextEditingController _controller;
   final sbtAuth =
-      SbtAuth(developMode: true, clientId: 'SBT', scheme: 'sbtauth');
+      SbtAuth(developMode: true, clientId: 'Demo', scheme: 'sbtauth');
 
   @override
   void initState() {
