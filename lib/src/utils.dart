@@ -15,7 +15,7 @@ const _messagePrefix = '\u0019Ethereum Signed Message:\n';
 
 /// Check private key format
 bool validPrivateKey(String privateKey) {
-  final regexp = RegExp(r'/^[\dA-Fa-f]{64}$/');
+  final regexp = RegExp(r'^[A-Fa-f0-9]{32,64}$');
   return regexp.hasMatch(privateKey);
 }
 

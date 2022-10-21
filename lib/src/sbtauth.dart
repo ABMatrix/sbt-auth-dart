@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:aes_dart/aes_dart.dart';
 import 'package:app_links/app_links.dart';
 import 'package:eventsource/eventsource.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/api.dart';
+import 'package:sbt_encrypt/sbt_encrypt.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -236,11 +236,7 @@ class SbtAuth {
 
     final eventSource =
         await EventSource.connect('$_baseUrl/sse:connect?access_token=$token');
-    // listen for events
     eventSource.listen((Event event) {
-      print('New event:');
-      print('  event: ${event.event}');
-      print('  data: ${event.data}');
       if (event.id != null) {
         api.confirmEventReceived(event.id!, 'AUTH_CONFIRM');
         _grantData = event.data;
@@ -269,7 +265,7 @@ class SbtAuth {
 
   /// Encrypt
   Future<String> encryptMsg(String msg, String password) async {
-    final encprypted = await aesEncrypt(msg, password);
+    final encprypted = await encrypt(msg, password);
     return encprypted;
   }
 
@@ -277,7 +273,7 @@ class SbtAuth {
   Future<String> decryptMsg(String? encrypted, String password) async {
     if (encrypted == null) throw SbtAuthException('Verification Code error');
     try {
-      final decrypted = await aesDecrypt(encrypted, password);
+      final decrypted = await decrypt(encrypted, password);
       return decrypted;
     } catch (e) {
       if (e.toString().contains('Invalid or corrupted pad block')) {
@@ -295,16 +291,18 @@ class SbtAuth {
   }
 
   /// Recover with privateKey
-  Future<void> recoverWidthBackup(
-      String backupPrivateKey, String password) async {
+  Future<void> recoverWidthBackup(String backupPrivateKey,
+      String password) async {
     final api = SbtAuthApi(baseUrl: _baseUrl);
     final remoteShareInfo = await api.fetchRemoteShare(_clientId);
-    final shareString = await decryptMsg(backupPrivateKey, password);
-    final localShare = Share.fromMap(jsonDecode(shareString) as Map);
+    var backup = await decryptMsg(backupPrivateKey, password);
+    if (backup.startsWith('0x')) {
+      backup = backup.substring(2, backup.length);
+    }
     final init = await core.init(
       address: remoteShareInfo.address,
       remote: remoteShareInfo.remote,
-      local: localShare,
+      backup: backup,
     );
     if (!init) throw SbtAuthException('Init error');
   }
