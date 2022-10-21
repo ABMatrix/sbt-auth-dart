@@ -50,8 +50,7 @@ class SbtAuth {
   /// Login user
   late UserInfo user;
 
-  /// Backup privateKey fragment3
-  late String privateKeyFragment3;
+  late String _privateKeyFragment3;
 
   /// core
   AuthCore core = AuthCore();
@@ -78,10 +77,6 @@ class SbtAuth {
     await DBUtil.getInstance();
     await SbtAuthApi.init();
     await _authRequestListener();
-    // streamController.stream.listen((event) {
-    //   print(event);
-    //   print('****************************************');
-    // });
   }
 
   Future<void> _initUser() async {
@@ -90,7 +85,7 @@ class SbtAuth {
     if (user.publicKeyAddress == null) {
       final account = await core.generatePubKey();
       await api.uploadShares(_clientId, account.shares, account.address);
-      privateKeyFragment3 = '0x${account.shares[2].privateKey}';
+      _privateKeyFragment3 = '0x${account.shares[2].privateKey}';
     } else {
       core = await initCore();
     }
@@ -318,5 +313,11 @@ class SbtAuth {
   Future<void> getDeviceList() async {
     final api = SbtAuthApi(baseUrl: _baseUrl);
     deviceList = await api.getUserDeviceList();
+  }
+
+  /// Get privateKeyFragment3
+  Future<String> getPrivateKeyFragment3(String password) {
+    final privateKey = encryptMsg(_privateKeyFragment3, password);
+    return privateKey;
   }
 }
