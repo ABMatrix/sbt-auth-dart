@@ -30,6 +30,22 @@ class SbtAuthApi {
         'authorization': 'Bearer $_token'
       };
 
+  /// Send email verification code
+  static Future<void> sendEmailCode({
+    required String email,
+    required String baseUrl,
+  }) async {
+    final data = {'emailAddress': email};
+    final response = await http.post(
+      Uri.parse('$baseUrl/user:auth-code'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(data),
+    );
+    _checkResponse(response) as String;
+  }
+
   /// Login with email
   static Future<String> userLogin({
     required String email,
@@ -62,6 +78,14 @@ class SbtAuthApi {
 
     final user = _checkResponse(response) as Map<String, dynamic>;
     return UserInfo.fromMap(user);
+  }
+
+  /// Set user password.
+  Future<void> setPassword(String password) async {
+    final data = {'emailAddress': password};
+    final response = await http.put(Uri.parse('$_baseUrl/user/user'),
+        headers: _headers, body: jsonEncode(data));
+    _checkResponse(response);
   }
 
   /// Upload shares.

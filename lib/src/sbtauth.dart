@@ -317,4 +317,10 @@ class SbtAuth {
     final privateKey = encryptMsg(_privateKeyFragment3, password);
     return privateKey;
   }
+
+  /// Set password
+  Future<void> setLoginPassword(String password) async {
+    final api = SbtAuthApi(baseUrl: _baseUrl);
+    await api.setPassword(password);
+  }
 }
