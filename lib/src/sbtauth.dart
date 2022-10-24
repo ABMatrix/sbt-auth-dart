@@ -25,7 +25,10 @@ enum LoginType {
   email,
 
   /// Login with twitter
-  twitter
+  twitter,
+
+  /// Login with password
+  password
 }
 
 /// SbtAuth class
@@ -101,10 +104,15 @@ class SbtAuth {
     LoginType loginType, {
     String? email,
     String? verityCode,
+    String? password,
   }) async {
     String? token;
     if (loginType == LoginType.email) {
       await _login(loginType, email: email, code: verityCode ?? '');
+      final dbUtil = await DBUtil.getInstance();
+      token = dbUtil.tokenBox.get(TOKEN_KEY);
+    } else if (loginType == LoginType.password) {
+      await _login(loginType, password: password);
       final dbUtil = await DBUtil.getInstance();
       token = dbUtil.tokenBox.get(TOKEN_KEY);
     } else {
@@ -119,17 +127,32 @@ class SbtAuth {
     LoginType loginType, {
     String? email,
     String? code,
+    String? password,
   }) async {
     assert(
       loginType != LoginType.email ||
           (loginType == LoginType.email && email != null && code != null),
       'Email and code required',
     );
+    assert(
+      loginType != LoginType.password ||
+          (loginType == LoginType.password &&
+              email != null &&
+              password != null),
+      'Email and password required',
+    );
     String? token;
     if (loginType == LoginType.email) {
       token = await SbtAuthApi.userLogin(
         email: email!,
         code: code!,
+        clientId: _clientId,
+        baseUrl: _baseUrl,
+      );
+    } else if (loginType == LoginType.password) {
+      token = await SbtAuthApi.userLogin(
+        email: email!,
+        password: password!,
         clientId: _clientId,
         baseUrl: _baseUrl,
       );
@@ -291,7 +314,9 @@ class SbtAuth {
 
   /// Recover with privateKey
   Future<void> recoverWidthBackup(
-      String backupPrivateKey, String password) async {
+    String backupPrivateKey,
+    String password,
+  ) async {
     final api = SbtAuthApi(baseUrl: _baseUrl);
     final remoteShareInfo = await api.fetchRemoteShare(_clientId);
     var backup = await decryptMsg(backupPrivateKey, password);

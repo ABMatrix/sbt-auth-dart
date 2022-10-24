@@ -49,16 +49,18 @@ class SbtAuthApi {
   /// Login with email
   static Future<String> userLogin({
     required String email,
-    required String code,
+    String? code,
     required String clientId,
     required String baseUrl,
+    String? password,
   }) async {
     final deviceName = await getDeviceName();
     final data = {
       'emailAddress': email,
       'authCode': code,
       'deviceName': deviceName,
-      'clientID': clientId
+      'clientID': clientId,
+      'password': password
     };
     final response = await http.post(
       Uri.parse('$baseUrl/user:login'),
@@ -84,6 +86,19 @@ class SbtAuthApi {
   Future<void> setPassword(String password) async {
     final data = {'emailAddress': password};
     final response = await http.put(Uri.parse('$_baseUrl/user/user'),
+        headers: _headers, body: jsonEncode(data));
+    _checkResponse(response);
+  }
+
+  /// Reset password
+  Future<void> resetPassword(
+      String emailAddress, String authCode, String password) async {
+    final data = {
+      'emailAddress': emailAddress,
+      'authCode': authCode,
+      'password': password
+    };
+    final response = await http.post(Uri.parse('$_baseUrl/user/reset:password'),
         headers: _headers, body: jsonEncode(data));
     _checkResponse(response);
   }
