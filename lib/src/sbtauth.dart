@@ -112,7 +112,7 @@ class SbtAuth {
       final dbUtil = await DBUtil.getInstance();
       token = dbUtil.tokenBox.get(TOKEN_KEY);
     } else if (loginType == LoginType.password) {
-      await _login(loginType, password: password);
+      await _login(loginType, email: email, password: password);
       final dbUtil = await DBUtil.getInstance();
       token = dbUtil.tokenBox.get(TOKEN_KEY);
     } else {
@@ -145,14 +145,14 @@ class SbtAuth {
     if (loginType == LoginType.email) {
       token = await SbtAuthApi.userLogin(
         email: email!,
-        code: code!,
+        code: code,
         clientId: _clientId,
         baseUrl: _baseUrl,
       );
     } else if (loginType == LoginType.password) {
       token = await SbtAuthApi.userLogin(
         email: email!,
-        password: password!,
+        password: password,
         clientId: _clientId,
         baseUrl: _baseUrl,
       );

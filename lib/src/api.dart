@@ -84,7 +84,7 @@ class SbtAuthApi {
 
   /// Set user password.
   Future<void> setPassword(String password) async {
-    final data = {'emailAddress': password};
+    final data = {'password': password};
     final response = await http.put(Uri.parse('$_baseUrl/user/user'),
         headers: _headers, body: jsonEncode(data));
     _checkResponse(response);

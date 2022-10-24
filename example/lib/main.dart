@@ -109,11 +109,11 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  _login(LoginType loginType, {String? email}) async {
+  _login(LoginType loginType, {String? email,String?password}) async {
     late bool loginSuccess;
     try {
       loginSuccess = await sbtAuth.loginWithSocial(loginType,
-          email: email, verityCode: 'verityCode');
+          email: email, verityCode: 'verityCode',password: password);
     } catch (e) {
       if (e is SbtAuthException) {
         log(e.toString());
