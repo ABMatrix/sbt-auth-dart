@@ -9,6 +9,7 @@ import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/api.dart';
+import 'package:sbt_auth_dart/utils.dart';
 import 'package:sbt_encrypt/sbt_encrypt.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -157,10 +158,12 @@ class SbtAuth {
         baseUrl: _baseUrl,
       );
     } else {
+      final deviceName = await getDeviceName();
       final appUrl = developMode
           ? 'https://test-connect.sbtauth.io/login'
           : 'https://connect.sbtauth.io/login';
-      final loginUrl = '$appUrl?loginType=${loginType.name}&scheme=$_scheme';
+      final loginUrl =
+          '$appUrl?loginType=${loginType.name}&scheme=$_scheme&deviceName=$deviceName';
       unawaited(
         launchUrlString(
           loginUrl,
@@ -347,6 +350,16 @@ class SbtAuth {
   Future<void> setLoginPassword(String password) async {
     final api = SbtAuthApi(baseUrl: _baseUrl);
     await api.setPassword(password);
+  }
+
+  /// Set password
+  Future<void> reSetLoginPassword(
+    String emailAddress,
+    String authCode,
+    String password,
+  ) async {
+    final api = SbtAuthApi(baseUrl: _baseUrl);
+    await api.resetPassword(emailAddress, authCode, password);
   }
 
   /// Get privateKey

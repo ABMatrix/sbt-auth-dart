@@ -92,7 +92,10 @@ class SbtAuthApi {
 
   /// Reset password
   Future<void> resetPassword(
-      String emailAddress, String authCode, String password) async {
+    String emailAddress,
+    String authCode,
+    String password,
+  ) async {
     final data = {
       'emailAddress': emailAddress,
       'authCode': authCode,
