@@ -348,4 +348,9 @@ class SbtAuth {
     final api = SbtAuthApi(baseUrl: _baseUrl);
     await api.setPassword(password);
   }
+
+  /// Get privateKey
+  String getPrivateKey() {
+    return core.getPrivateKey();
+  }
 }

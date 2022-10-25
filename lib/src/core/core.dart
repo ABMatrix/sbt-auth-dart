@@ -136,4 +136,16 @@ class AuthCore {
     _local = keyToShare(localKey);
     _saveShare(keyToShare(localKey), address);
   }
+
+  /// Get privateKey
+  String getPrivateKey() {
+    if (_local == null || _remote == null) {
+      throw SbtAuthException('Please init auth core');
+    }
+    final privateKey = Ecdsa.privateKey([
+      shareToKey(_local!),
+      shareToKey(_remote!, 2),
+    ]);
+    return privateKey;
+  }
 }

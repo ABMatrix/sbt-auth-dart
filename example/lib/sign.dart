@@ -5,6 +5,7 @@ import 'package:sbt_auth_dart/utils.dart';
 class SignPage extends StatefulWidget {
   final String username;
   final AuthCore core;
+
   const SignPage({required this.username, required this.core, super.key});
 
   @override
@@ -14,6 +15,7 @@ class SignPage extends StatefulWidget {
 class _SignPageState extends State<SignPage> {
   String _signature = '';
   String _result = '';
+  String _privateKey = '';
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +40,12 @@ class _SignPageState extends State<SignPage> {
             child: const Text('Send transaction'),
           ),
           Text(_result),
+          const SizedBox(height: 10),
+          TextButton(
+            onPressed: _getPrivateKey,
+            child: const Text('Get privateKey'),
+          ),
+          Text(_privateKey),
         ],
       )),
     );
@@ -64,6 +72,12 @@ class _SignPageState extends State<SignPage> {
         maxFeePerGas: '0x0737be7600');
     setState(() {
       _result = result;
+    });
+  }
+
+  _getPrivateKey() {
+    setState(() {
+      _privateKey = widget.core.getPrivateKey();
     });
   }
 }
