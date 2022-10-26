@@ -109,11 +109,11 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  _login(LoginType loginType, {String? email,String?password}) async {
+  _login(LoginType loginType, {String? email, String? password}) async {
     late bool loginSuccess;
     try {
       loginSuccess = await sbtAuth.loginWithSocial(loginType,
-          email: email, verityCode: 'verityCode',password: password);
+          email: email, verityCode: 'verityCode', password: password);
     } catch (e) {
       if (e is SbtAuthException) {
         log(e.toString());
@@ -130,7 +130,9 @@ class _MyHomePageState extends State<MyHomePage> {
           context,
           MaterialPageRoute(
               builder: (context) => SignPage(
-                  username: sbtAuth.core.getAddress(), core: sbtAuth.core)));
+                    username: sbtAuth.core.getAddress(),
+                    sbtauth: sbtAuth,
+                  )));
     }
   }
 }

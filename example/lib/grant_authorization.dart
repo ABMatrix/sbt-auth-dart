@@ -144,7 +144,7 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
               MaterialPageRoute(
                   builder: (context) => SignPage(
                         username: auth.user.username,
-                        core: auth.core,
+                        sbtauth: auth,
                       )));
         },
         child: const Text('finish'),

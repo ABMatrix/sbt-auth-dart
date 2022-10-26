@@ -73,6 +73,33 @@ class SbtAuthApi {
     return token;
   }
 
+  /// Confirm to login witrh qrcode on new device
+  Future<void> confirmLoginWithQrCode(
+    String qrCodeId,
+    String encryptedFragment,
+  ) async {
+    final data = {'qrCodeID': qrCodeId, 'encryptedFragment': encryptedFragment};
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/confirm:qrcode'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+
+    _checkResponse(response) as Map<String, dynamic>;
+  }
+
+  /// Get qrcode status
+  Future<QrCodeStatus> getQrCodeStatus(String qrCodeId) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/user/qrcode?qrCodeID=$qrCodeId'),
+      headers: _headers,
+    );
+
+    final result = _checkResponse(response) as Map<String, dynamic>;
+    return QrCodeStatus.fromMap(result);
+  }
+
   /// Get user info.
   Future<UserInfo> getUserInfo() async {
     final response =

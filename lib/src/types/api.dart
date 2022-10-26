@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:sbt_auth_dart/src/types/account.dart';
 
 /// Remote share info
@@ -58,6 +60,44 @@ class UserInfo {
 
   /// User wallet address
   String? publicKeyAddress;
+}
+
+/// Login QrCode status
+class QrCodeStatus {
+  /// QrCode status
+  QrCodeStatus({
+    required this.qrcodeName,
+    required this.qrcodeClientID,
+    required this.qrcodeExpireAt,
+    required this.fail,
+    this.qrcodeAuthToken,
+  });
+
+  /// QrCode status from map
+  factory QrCodeStatus.fromMap(Map<String, dynamic> map) {
+    return QrCodeStatus(
+      qrcodeName: (map['qrcodeName'] ?? '') as String,
+      qrcodeClientID: (map['qrcodeClientID'] ?? '') as String,
+      qrcodeExpireAt: (map['qrcodeExpireAt'] ?? '') as String,
+      qrcodeAuthToken: (map['qrcodeAuthToken'] ?? '') as String,
+      fail: (map['fail'] ?? false) as bool,
+    );
+  }
+
+  /// QrCode name
+  String qrcodeName;
+
+  /// Clientid
+  String qrcodeClientID;
+
+  /// QrCode expire data
+  String qrcodeExpireAt;
+
+  ///  QrCode data
+  String? qrcodeAuthToken;
+
+  /// QrCode
+  bool fail;
 }
 
 /// Device

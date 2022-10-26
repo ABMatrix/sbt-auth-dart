@@ -238,6 +238,28 @@ class SbtAuth {
     return password.toString();
   }
 
+  /// Confirm login with qrcode on new device
+  Future<void> approveLoginWithQrCode(String qrcode) async {
+    final qrcodeData = jsonDecode(qrcode);
+    final password = qrcodeData['password'] as String?;
+    final qrCodeId = qrcodeData['qrCodeId'] as String?;
+    if (password == null || qrCodeId == null) {
+      throw SbtAuthException('Invalid QrCode');
+    }
+    final api = SbtAuthApi(baseUrl: _baseUrl);
+    final status = await api.getQrCodeStatus(qrCodeId);
+    // if (int.parse(status.qrcodeExpireAt) >=
+    //     DateTime.now().millisecondsSinceEpoch) {
+    //   throw SbtAuthException('QrCode expired');
+    // }
+    if (status.qrcodeAuthToken != null && status.qrcodeAuthToken != '') {
+      throw SbtAuthException('QrCode used already');
+    }
+    final local = core.localShare;
+    final encrypted = await encryptMsg(jsonEncode(local?.toJson()), password);
+    await api.confirmLoginWithQrCode(qrCodeId, encrypted);
+  }
+
   /// Auth request listener
   Future<void> _authRequestListener() async {
     final dbUtil = await DBUtil.getInstance();
