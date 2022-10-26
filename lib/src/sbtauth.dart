@@ -193,9 +193,13 @@ class SbtAuth {
   }
 
   /// Send privateKey fragment
-  Future<void> sendBackupPrivateKey(String privateKey, String email) async {
+  Future<void> sendBackupPrivateKey(
+    String privateKey,
+    String email,
+    String code,
+  ) async {
     final api = SbtAuthApi(baseUrl: _baseUrl);
-    await api.backupShare(privateKey, email);
+    await api.backupShare(privateKey, email, code);
   }
 
   /// Init core

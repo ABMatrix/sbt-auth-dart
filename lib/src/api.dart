@@ -85,8 +85,11 @@ class SbtAuthApi {
   /// Set user password.
   Future<void> setPassword(String password) async {
     final data = {'password': password};
-    final response = await http.put(Uri.parse('$_baseUrl/user/user'),
-        headers: _headers, body: jsonEncode(data));
+    final response = await http.put(
+      Uri.parse('$_baseUrl/user/user'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
     _checkResponse(response);
   }
 
@@ -101,14 +104,20 @@ class SbtAuthApi {
       'authCode': authCode,
       'password': password
     };
-    final response = await http.post(Uri.parse('$_baseUrl/user/reset:password'),
-        headers: _headers, body: jsonEncode(data));
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/reset:password'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
     _checkResponse(response);
   }
 
   /// Upload shares.
   Future<void> uploadShares(
-      String clientId, List<Share> shares, String address) async {
+    String clientId,
+    List<Share> shares,
+    String address,
+  ) async {
     final params = {
       'clientID': clientId,
       'privateKey2Fragment': jsonEncode(shares[1].toJson()),
@@ -144,8 +153,12 @@ class SbtAuthApi {
   }
 
   /// Backup share via email
-  Future<void> backupShare(String privateKey, String email) async {
-    final params = {'emailAddress': email, 'privateKey3Fragment': privateKey};
+  Future<void> backupShare(String privateKey, String email, String code) async {
+    final params = {
+      'emailAddress': email,
+      'privateKey3Fragment': privateKey,
+      'authCode': code
+    };
     final response = await http.post(
       Uri.parse('$_baseUrl/user:back-up'),
       headers: _headers,
