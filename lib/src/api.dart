@@ -74,7 +74,7 @@ class SbtAuthApi {
     return token;
   }
 
-  /// Confirm to login witrh qrcode on new device
+  /// Confirm to login with qrcode on new device
   Future<void> confirmLoginWithQrCode(
     String qrCodeId,
     String encryptedFragment,

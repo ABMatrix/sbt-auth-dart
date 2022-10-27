@@ -199,7 +199,7 @@ class SbtAuth {
     return password.toString();
   }
 
-  /// Confirm login with qrcode on new device
+  /// Get login with qrcode encrypted message
   Future<void> approveLoginWithQrCode(String qrcode) async {
     final qrcodeData = jsonDecode(qrcode) as Map;
     final password = qrcodeData['password'] as String?;
@@ -219,7 +219,6 @@ class SbtAuth {
     if (local == null) throw SbtAuthException('SBTAuth not inited');
     final encrypted = await encryptMsg(jsonEncode(local.toJson()), password);
     await api.confirmLoginWithQrCode(qrCodeId, encrypted);
-    await _authRequestListener();
   }
 
   /// Send verify Code
