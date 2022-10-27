@@ -252,12 +252,14 @@ class SbtAuthApi {
   /// Verify identity
   Future<void> verifyIdentity(Share share) async {
     final data = {
-      'privateKeyFragmentHash':
-          bytesToHex(hashMessage(ascii.encode(jsonEncode(share.toJson())))),
+      'privateKeyFragmentHash': bytesToHex(
+        hashMessage(ascii.encode(jsonEncode(share.toJson()))),
+        include0x: true,
+      ),
       'type': 'PRIVATE_KEY1'
     };
     final response = await http.post(
-      Uri.parse('$_baseUrl/user/receive:auth'),
+      Uri.parse('$_baseUrl/user/verify:identity'),
       headers: _headers,
       body: jsonEncode(data),
     );
