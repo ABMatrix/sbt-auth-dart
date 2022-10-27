@@ -249,6 +249,21 @@ class SbtAuthApi {
     _checkResponse(response);
   }
 
+  /// Verify identity
+  Future<void> verifyIdentity(Share share) async {
+    final data = {
+      'privateKeyFragmentHash':
+          bytesToHex(hashMessage(ascii.encode(jsonEncode(share.toJson())))),
+      'type': 'PRIVATE_KEY1'
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/receive:auth'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
   static dynamic _checkResponse(Response response) {
     final body = jsonDecode(response.body) as Map<String, dynamic>;
     if (body['code'] != '000') {
