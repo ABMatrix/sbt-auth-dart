@@ -346,6 +346,7 @@ class SbtAuth {
     final api = SbtAuthApi(baseUrl: _baseUrl);
     await api.sendAuthRequest(deviceName);
     await _authReplyListener();
+    await api.verifyIdentity(core.localShare!);
   }
 
   /// Recover with privateKey
@@ -365,6 +366,7 @@ class SbtAuth {
       backup: backup,
     );
     if (!init) throw SbtAuthException('Init error');
+    await api.verifyIdentity(core.localShare!);
   }
 
   /// Get Device list
