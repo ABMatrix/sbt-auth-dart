@@ -319,6 +319,7 @@ class SbtAuth {
     );
     if (!init) throw SbtAuthException('Init error');
     await _initUser();
+    await api.verifyIdentity(core.localShare!);
   }
 
   /// Encrypt
@@ -346,7 +347,6 @@ class SbtAuth {
     final api = SbtAuthApi(baseUrl: _baseUrl);
     await api.sendAuthRequest(deviceName);
     await _authReplyListener();
-    await api.verifyIdentity(core.localShare!);
   }
 
   /// Recover with privateKey
