@@ -240,7 +240,7 @@ class SbtAuth {
 
   /// Confirm login with qrcode on new device
   Future<void> approveLoginWithQrCode(String qrcode) async {
-    final qrcodeData = jsonDecode(qrcode);
+    final qrcodeData = jsonDecode(qrcode) as Map;
     final password = qrcodeData['password'] as String?;
     final qrCodeId = qrcodeData['qrCodeId'] as String?;
     if (password == null || qrCodeId == null) {
@@ -390,6 +390,11 @@ class SbtAuth {
 
   /// Get privateKey
   String getPrivateKey() {
+    return core.getPrivateKey();
+  }
+
+  /// Get backup privateKey
+  String getBackupPrivateKey() {
     return core.getPrivateKey();
   }
 }

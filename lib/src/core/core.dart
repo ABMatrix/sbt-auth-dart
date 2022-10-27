@@ -148,4 +148,15 @@ class AuthCore {
     ]);
     return privateKey;
   }
+
+  /// Get backup privateKey
+  String getBackupPrivateKey() {
+    if (_local == null || _remote == null) {
+      throw SbtAuthException('Please init auth core');
+    }
+    final localKey = shareToKey(_local!);
+    final remoteKey = shareToKey(_remote!, 2);
+    final backup = Ecdsa.recover([localKey, remoteKey]);
+    return '0x${backup.x_i}';
+  }
 }
