@@ -54,7 +54,7 @@ class SbtAuth {
   /// Login user
   late UserInfo user;
 
-  late String _privateKeyFragment3;
+  String? _privateKeyFragment3;
 
   /// core
   AuthCore core = AuthCore();
@@ -238,8 +238,8 @@ class SbtAuth {
     return password.toString();
   }
 
-  /// Confirm login with qrcode on new device
-  Future<void> approveLoginWithQrCode(String qrcode) async {
+  /// Get login with qrcode encrypted message
+  Future<Map<String, String>> getLoginMessage(String qrcode) async {
     final qrcodeData = jsonDecode(qrcode) as Map;
     final password = qrcodeData['password'] as String?;
     final qrCodeId = qrcodeData['qrCodeId'] as String?;
@@ -257,7 +257,14 @@ class SbtAuth {
     }
     final local = core.localShare;
     final encrypted = await encryptMsg(jsonEncode(local?.toJson()), password);
-    await api.confirmLoginWithQrCode(qrCodeId, encrypted);
+    return {'qrCodeId': qrCodeId, 'encryptedMessage': encrypted};
+  }
+
+  /// Confirm login with qrcode on new device
+  Future<void> approveLoginWithQrCode(Map<String, String> map) async {
+    final api = SbtAuthApi(baseUrl: _baseUrl);
+    await api.confirmLoginWithQrCode(
+        map['qrCodeId']!, map['encryptedMessage']!);
   }
 
   /// Auth request listener
@@ -367,8 +374,14 @@ class SbtAuth {
   }
 
   /// Get privateKeyFragment3
-  Future<String> getPrivateKeyFragment3(String password) {
-    final privateKey = encryptMsg(_privateKeyFragment3, password);
+  Future<String> getPrivateKeyFragment3(String password) async {
+    var privateKey = '';
+    if (_privateKeyFragment3 == null) {
+      privateKey = await encryptMsg(_getBackupPrivateKey(), password);
+    } else {
+      privateKey = await encryptMsg(_privateKeyFragment3!, password);
+    }
+
     return privateKey;
   }
 
@@ -379,7 +392,7 @@ class SbtAuth {
   }
 
   /// Set password
-  Future<void> reSetLoginPassword(
+  Future<void> resetLoginPassword(
     String emailAddress,
     String authCode,
     String password,
@@ -393,8 +406,7 @@ class SbtAuth {
     return core.getPrivateKey();
   }
 
-  /// Get backup privateKey
-  String getBackupPrivateKey() {
-    return core.getPrivateKey();
+  String _getBackupPrivateKey() {
+    return core.getBackupPrivateKey();
   }
 }

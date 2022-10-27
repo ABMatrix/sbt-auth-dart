@@ -7,6 +7,7 @@ import 'package:sbt_auth_dart/utils.dart';
 class SignPage extends StatefulWidget {
   final String username;
   final SbtAuth sbtauth;
+
   const SignPage({required this.username, required this.sbtauth, super.key});
 
   @override
@@ -52,7 +53,8 @@ class _SignPageState extends State<SignPage> {
               final data = await Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => const SimpleBarcodeScannerPage(),
               ));
-              widget.sbtauth.approveLoginWithQrCode(data as String);
+              final map = await widget.sbtauth.getLoginMessage(data as String);
+              widget.sbtauth.approveLoginWithQrCode(map);
             },
             child: const Text('Scan'),
           ),
