@@ -106,7 +106,7 @@ await sendBackupPrivateKey(privateKey,email,code);
 
 如果是老用户，并且在新设备登录，则需要恢复私钥碎片，可以通过老设备授权的方式恢复，也可以通过原来用安全码加密后的私钥碎片进行恢复
 
-```sh
+```dart
 
 ```
 

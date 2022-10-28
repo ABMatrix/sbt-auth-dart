@@ -50,7 +50,7 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
                                 itemBuilder: (context, i) {
                                   return GestureDetector(
                                     onTap: () async {
-                                      await auth.recoverWithDevice(
+                                      await auth.api.sendAuthRequest(
                                           snapshot.data[i].deviceName!);
                                     },
                                     child: Container(

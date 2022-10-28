@@ -15,3 +15,4 @@ export 'src/types/account.dart';
 export 'src/types/error.dart';
 export 'src/types/exception.dart';
 export 'src/types/provider.dart';
+export 'src/utils.dart';
