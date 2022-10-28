@@ -306,18 +306,4 @@ class SbtAuth {
     DBUtil.tokenBox.put(TOKEN_KEY, token);
   }
 
-  /// Set password
-  Future<void> setLoginPassword(String password) async {
-    await api.setPassword(password);
-  }
-
-  /// Set password
-  Future<void> resetLoginPassword(
-    String emailAddress,
-    String authCode,
-    String password,
-  ) async {
-    await api.resetPassword(emailAddress, authCode, password);
-  }
-
 }
