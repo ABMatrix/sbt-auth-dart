@@ -12,7 +12,6 @@ import 'package:sbt_auth_dart/src/types/api.dart';
 import 'package:sbt_auth_dart/utils.dart';
 import 'package:sbt_encrypt/sbt_encrypt.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 /// Login types
 enum LoginType {
@@ -165,8 +164,8 @@ class SbtAuth {
       final loginUrl =
           '$appUrl?loginType=${loginType.name}&scheme=$_scheme&deviceName=$deviceName';
       unawaited(
-        launchUrlString(
-          loginUrl,
+        launchUrl(
+          Uri.parse(loginUrl),
           mode: Platform.isAndroid
               ? LaunchMode.externalApplication
               : LaunchMode.platformDefault,
@@ -265,7 +264,9 @@ class SbtAuth {
   Future<void> approveLoginWithQrCode(Map<String, String> map) async {
     final api = SbtAuthApi(baseUrl: _baseUrl);
     await api.confirmLoginWithQrCode(
-        map['qrCodeId']!, map['encryptedMessage']!);
+      map['qrCodeId']!,
+      map['encryptedMessage']!,
+    );
   }
 
   /// Auth request listener
