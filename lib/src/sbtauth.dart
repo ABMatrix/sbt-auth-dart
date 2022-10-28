@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -10,9 +12,13 @@ import 'package:sbt_auth_dart/src/api.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/api.dart';
 import 'package:sbt_auth_dart/utils.dart';
-import 'package:sbt_encrypt/sbt_encrypt.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+
+/// Develop app url
+const DEVELOP_APP_URL = 'https://test-connect.sbtauth.io/login';
+
+/// Production app url
+const PRODUCTION_APP_URL = 'https://connect.sbtauth.io/login';
 
 /// Login types
 enum LoginType {
@@ -27,9 +33,6 @@ enum LoginType {
 
   /// Login with twitter
   twitter,
-
-  /// Login with password
-  password
 }
 
 /// SbtAuth class
@@ -52,79 +55,66 @@ class SbtAuth {
   late String _scheme;
 
   /// Login user
-  late UserInfo user;
+  UserInfo? get user => _user;
 
-  late String _privateKeyFragment3;
+  UserInfo? _user;
 
   /// core
-  AuthCore core = AuthCore();
+  AuthCore? get core => _core;
+
+  AuthCore? _core;
+
+  EventSource? _eventSource;
 
   /// Grant authorization listen controller
-  StreamController<String> streamController = StreamController.broadcast();
+  StreamController<String> authRequestStreamController =
+      StreamController.broadcast();
 
-  String? _grantData;
+  String get _baseUrl => developMode ? DEVELOP_BASE_URL : PRODUCTION_BASE_URL;
 
-  /// Device list
-  late List<Device> deviceList;
-
-  String get _baseUrl => developMode
-      ? 'https://test-api.sbtauth.io/sbt-auth'
-      : 'https://api.sbtauth.io/sbt-auth';
+  /// SBTAuth api
+  SbtAuthApi get api {
+    final token = DBUtil.tokenBox.get(TOKEN_KEY);
+    if (token == null) throw SbtAuthException('User not logined');
+    return SbtAuthApi(baseUrl: _baseUrl, token: token);
+  }
 
   /// provider
-  SbtAuthProvider get provider =>
-      SbtAuthProvider(signer: core.signer, clientId: _clientId);
+  SbtAuthProvider? get provider => core == null
+      ? null
+      : SbtAuthProvider(signer: core!.signer, clientId: _clientId);
+
+  /// Init sbtauth hive
+  static Future<void> initHive() async {
+    await DBUtil.init();
+  }
 
   /// Init sbtauth
   Future<void> init() async {
-    await DBUtil.install();
-    await DBUtil.getInstance();
-    await SbtAuthApi.init();
+    _user = await api.getUserInfo();
+    if (_user == null) throw SbtAuthException('User not logined');
+    final core = AuthCore();
+    if (_user!.publicKeyAddress == null) {
+      final account = await core.generatePubKey();
+      await api.uploadShares(_clientId, account.shares, account.address);
+      _core = core;
+      user!.backupPrivateKey = '0x${account.shares[2].privateKey}';
+    } else {
+      final remoteShareInfo = await api.fetchRemoteShare();
+      final core = AuthCore();
+      final inited = await core.init(
+        address: remoteShareInfo.address,
+        remote: remoteShareInfo.remote,
+      );
+      if (inited) {
+        _core = core;
+      }
+    }
     await _authRequestListener();
   }
 
-  Future<void> _initUser() async {
-    final api = SbtAuthApi(baseUrl: _baseUrl);
-    user = await api.getUserInfo();
-    if (user.publicKeyAddress == null) {
-      final account = await core.generatePubKey();
-      await api.uploadShares(_clientId, account.shares, account.address);
-      _privateKeyFragment3 = '0x${account.shares[2].privateKey}';
-    } else {
-      core = await initCore();
-    }
-  }
-
-  Future<void> _saveToken(String token) async {
-    final dbUtil = await DBUtil.getInstance();
-    await dbUtil.tokenBox.put(TOKEN_KEY, token);
-  }
-
-  /// Login with sbtAuth
-  Future<bool> loginWithSocial(
-    LoginType loginType, {
-    String? email,
-    String? verityCode,
-    String? password,
-  }) async {
-    String? token;
-    if (loginType == LoginType.email) {
-      await _login(loginType, email: email, code: verityCode ?? '');
-      final dbUtil = await DBUtil.getInstance();
-      token = dbUtil.tokenBox.get(TOKEN_KEY);
-    } else if (loginType == LoginType.password) {
-      await _login(loginType, email: email, password: password);
-      final dbUtil = await DBUtil.getInstance();
-      token = dbUtil.tokenBox.get(TOKEN_KEY);
-    } else {
-      await _login(loginType);
-      final dbUtil = await DBUtil.getInstance();
-      token = dbUtil.tokenBox.get(TOKEN_KEY);
-    }
-    return token != null;
-  }
-
-  Future<void> _login(
+  ///
+  Future<void> login(
     LoginType loginType, {
     String? email,
     String? code,
@@ -132,41 +122,28 @@ class SbtAuth {
   }) async {
     assert(
       loginType != LoginType.email ||
-          (loginType == LoginType.email && email != null && code != null),
-      'Email and code required',
-    );
-    assert(
-      loginType != LoginType.password ||
-          (loginType == LoginType.password &&
+          (loginType == LoginType.email &&
               email != null &&
-              password != null),
-      'Email and password required',
+              !(code == null && password == null)),
+      'Password or code required if login with email',
     );
     String? token;
     if (loginType == LoginType.email) {
       token = await SbtAuthApi.userLogin(
         email: email!,
         code: code,
-        clientId: _clientId,
-        baseUrl: _baseUrl,
-      );
-    } else if (loginType == LoginType.password) {
-      token = await SbtAuthApi.userLogin(
-        email: email!,
         password: password,
         clientId: _clientId,
         baseUrl: _baseUrl,
       );
     } else {
       final deviceName = await getDeviceName();
-      final appUrl = developMode
-          ? 'https://test-connect.sbtauth.io/login'
-          : 'https://connect.sbtauth.io/login';
+      final appUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
       final loginUrl =
           '$appUrl?loginType=${loginType.name}&scheme=$_scheme&deviceName=$deviceName';
       unawaited(
-        launchUrlString(
-          loginUrl,
+        launchUrl(
+          Uri.parse(loginUrl),
           mode: Platform.isAndroid
               ? LaunchMode.externalApplication
               : LaunchMode.platformDefault,
@@ -186,10 +163,8 @@ class SbtAuth {
       await linkSubscription.cancel();
     }
     if (token == null) return;
-    await _saveToken(token);
-    await SbtAuthApi.init();
-    await _initUser();
-    await _authRequestListener();
+    _saveToken(token);
+    await init();
   }
 
   /// Send privateKey fragment
@@ -198,36 +173,22 @@ class SbtAuth {
     String email,
     String code,
   ) async {
-    final api = SbtAuthApi(baseUrl: _baseUrl);
     await api.backupShare(privateKey, email, code);
   }
 
-  /// Init core
-  Future<AuthCore> initCore() async {
-    final api = SbtAuthApi(baseUrl: _baseUrl);
-    final remoteShareInfo = await api.fetchRemoteShare(_clientId);
-    final init = await core.init(
-      address: remoteShareInfo.address,
-      remote: remoteShareInfo.remote,
-    );
-    if (!init) {
-      throw SbtAuthException('New device detected');
-    }
-    return core;
-  }
-
   /// Logout
-  Future<void> logout() async {
-    await _saveToken('');
-    await SbtAuthApi.init();
+  void logout() {
+    _saveToken('');
+    _user = null;
+    _core = null;
+    _eventSource?.client.close();
   }
 
   /// Approve auth request
   Future<String> approveAuthRequest(String deviceName) async {
-    core = await initCore();
-    final local = core.localShare;
+    if (core == null) throw SbtAuthException('Auth not inited');
+    final local = core!.localShare;
     if (local == null) throw SbtAuthException('User not login');
-    final api = SbtAuthApi(baseUrl: _baseUrl);
     final password = StringBuffer();
     for (var i = 0; i < 6; i++) {
       password.write(Random().nextInt(9).toString());
@@ -246,7 +207,6 @@ class SbtAuth {
     if (password == null || qrCodeId == null) {
       throw SbtAuthException('Invalid QrCode');
     }
-    final api = SbtAuthApi(baseUrl: _baseUrl);
     final status = await api.getQrCodeStatus(qrCodeId);
     // if (int.parse(status.qrcodeExpireAt) >=
     //     DateTime.now().millisecondsSinceEpoch) {
@@ -255,90 +215,47 @@ class SbtAuth {
     if (status.qrcodeAuthToken != null && status.qrcodeAuthToken != '') {
       throw SbtAuthException('QrCode used already');
     }
-    final local = core.localShare;
-    final encrypted = await encryptMsg(jsonEncode(local?.toJson()), password);
+    final local = core?.localShare;
+    if (local == null) throw SbtAuthException('SBTAuth not inited');
+    final encrypted = await encryptMsg(jsonEncode(local.toJson()), password);
     await api.confirmLoginWithQrCode(qrCodeId, encrypted);
+    await _authRequestListener();
   }
 
-  /// Auth request listener
-  Future<void> _authRequestListener() async {
-    final dbUtil = await DBUtil.getInstance();
-    final token = dbUtil.tokenBox.get(TOKEN_KEY);
-    final api = SbtAuthApi(baseUrl: _baseUrl);
-    final eventSource =
-        await EventSource.connect('$_baseUrl/sse:connect?access_token=$token');
-    eventSource.listen((Event event) {
-      try {
-        if (!streamController.isClosed && event.id != null) {
-          streamController.add(event.data!);
-        }
-      } catch (e) {
-        rethrow;
-      }
-      api.confirmEventReceived(event.id!, 'AUTH_APPLY');
-    });
-  }
-
-  /// Auth reply listener
-  Future<void> _authReplyListener() async {
-    final dbUtil = await DBUtil.getInstance();
-    final token = dbUtil.tokenBox.get(TOKEN_KEY);
-    final api = SbtAuthApi(baseUrl: _baseUrl);
-
-    final eventSource =
-        await EventSource.connect('$_baseUrl/sse:connect?access_token=$token');
-    eventSource.listen((Event event) {
-      if (event.id != null) {
-        api.confirmEventReceived(event.id!, 'AUTH_CONFIRM');
-        _grantData = event.data;
-      }
-    });
+  /// Send verify Code
+  Future<void> sendVerifyCode(String email) async {
+    await SbtAuthApi.sendEmailCode(email: email, baseUrl: _baseUrl);
   }
 
   /// Init local share
-  Future<void> initLocalShare(String code) async {
-    final api = SbtAuthApi(baseUrl: _baseUrl);
-    final remoteShareInfo = await api.fetchRemoteShare(_clientId);
-    if (_grantData == null) throw SbtAuthException('Verification Code error');
+  Future<void> recoverWithDevice(String code) async {
+    final token = DBUtil.tokenBox.get(TOKEN_KEY);
+    final eventSource =
+        await EventSource.connect('$_baseUrl/sse:connect?access_token=$token');
+    final completer = Completer<String>();
+    eventSource.listen((Event event) {
+      if (event.id != null) {
+        api.confirmEventReceived(event.id!, 'AUTH_CONFIRM');
+        completer.complete(event.data);
+        eventSource.client.close();
+      }
+    });
+    final data = await completer.future;
+    final remoteShareInfo = await api.fetchRemoteShare();
     final shareString = await decryptMsg(
-      (jsonDecode(_grantData!) as Map)['encryptedFragment'].toString(),
+      (jsonDecode(data) as Map)['encryptedFragment'].toString(),
       code,
     );
     final localShare = Share.fromMap(jsonDecode(shareString) as Map);
-    final init = await core.init(
+    final core = AuthCore();
+    final inited = await core.init(
       address: remoteShareInfo.address,
       remote: remoteShareInfo.remote,
       local: localShare,
     );
-    if (!init) throw SbtAuthException('Init error');
-    await _initUser();
-  }
-
-  /// Encrypt
-  Future<String> encryptMsg(String msg, String password) async {
-    final encprypted = await encrypt(msg, password);
-    return encprypted;
-  }
-
-  /// Decrypt
-  Future<String> decryptMsg(String? encrypted, String password) async {
-    if (encrypted == null) throw SbtAuthException('Verification Code error');
-    try {
-      final decrypted = await decrypt(encrypted, password);
-      return decrypted;
-    } catch (e) {
-      if (e.toString().contains('Invalid or corrupted pad block')) {
-        throw SbtAuthException('Verification Code error');
-      }
-      rethrow;
-    }
-  }
-
-  /// Recover with Device
-  Future<void> recoverWithDevice(String deviceName) async {
-    final api = SbtAuthApi(baseUrl: _baseUrl);
-    await api.sendAuthRequest(deviceName);
-    await _authReplyListener();
+    if (!inited) throw SbtAuthException('Init error');
+    _core = core;
+    await _authRequestListener();
   }
 
   /// Recover with privateKey
@@ -346,55 +263,47 @@ class SbtAuth {
     String backupPrivateKey,
     String password,
   ) async {
-    final api = SbtAuthApi(baseUrl: _baseUrl);
-    final remoteShareInfo = await api.fetchRemoteShare(_clientId);
+    final remoteShareInfo = await api.fetchRemoteShare();
     var backup = await decryptMsg(backupPrivateKey, password);
     if (backup.startsWith('0x')) {
       backup = backup.substring(2, backup.length);
     }
-    final init = await core.init(
+    final core = AuthCore();
+    final inited = await core.init(
       address: remoteShareInfo.address,
       remote: remoteShareInfo.remote,
       backup: backup,
     );
-    if (!init) throw SbtAuthException('Init error');
+    if (!inited) throw SbtAuthException('Init error');
+    _core = core;
   }
 
-  /// Get Device list
-  Future<void> getDeviceList() async {
-    final api = SbtAuthApi(baseUrl: _baseUrl);
-    deviceList = await api.getUserDeviceList();
+  /// Export privateKey
+  String exportPrivateKey() {
+    return core!.getPrivateKey();
   }
 
-  /// Get privateKeyFragment3
-  Future<String> getPrivateKeyFragment3(String password) {
-    final privateKey = encryptMsg(_privateKeyFragment3, password);
-    return privateKey;
+  /// Export backup privateKey
+  String exportBackupPrivateKey() {
+    return core!.getBackupPrivateKey();
   }
 
-  /// Set password
-  Future<void> setLoginPassword(String password) async {
-    final api = SbtAuthApi(baseUrl: _baseUrl);
-    await api.setPassword(password);
+  /// Auth request listener
+  Future<void> _authRequestListener() async {
+    final token = DBUtil.tokenBox.get(TOKEN_KEY);
+    _eventSource =
+        await EventSource.connect('$_baseUrl/sse:connect?access_token=$token');
+    _eventSource!.listen((Event event) {
+      if (event.event == 'AUTH_APPLY') {
+        if (!authRequestStreamController.isClosed && event.id != null) {
+          authRequestStreamController.add(event.data!);
+        }
+        api.confirmEventReceived(event.id!, 'AUTH_APPLY');
+      }
+    });
   }
 
-  /// Set password
-  Future<void> reSetLoginPassword(
-    String emailAddress,
-    String authCode,
-    String password,
-  ) async {
-    final api = SbtAuthApi(baseUrl: _baseUrl);
-    await api.resetPassword(emailAddress, authCode, password);
-  }
-
-  /// Get privateKey
-  String getPrivateKey() {
-    return core.getPrivateKey();
-  }
-
-  /// Get backup privateKey
-  String getBackupPrivateKey() {
-    return core.getPrivateKey();
+  void _saveToken(String token) {
+    DBUtil.tokenBox.put(TOKEN_KEY, token);
   }
 }

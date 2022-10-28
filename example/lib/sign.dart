@@ -62,8 +62,8 @@ class _SignPageState extends State<SignPage> {
   }
 
   _signMessage() async {
-    final provider =
-        SbtAuthProvider(signer: widget.sbtauth.core.signer, clientId: 'Test');
+    final provider = widget.sbtauth.provider;
+    if (provider == null) return;
     final signature = await provider
         .request(RequestArgument(method: 'personal_sign', params: ['test']));
     setState(() {
@@ -72,8 +72,8 @@ class _SignPageState extends State<SignPage> {
   }
 
   _sendTransaction() async {
-    final provider =
-        SbtAuthProvider(signer: widget.sbtauth.core.signer, clientId: 'Test');
+    final provider = widget.sbtauth.provider;
+    if (provider == null) return;
     final result = await provider.sendTransaction(
         to: "0x8316e9b2789a7cc3e61c80b6bab9a6e1735701b2",
         value: '0x0',
@@ -87,7 +87,7 @@ class _SignPageState extends State<SignPage> {
 
   _getPrivateKey() {
     setState(() {
-      _privateKey = widget.sbtauth.core.getPrivateKey();
+      _privateKey = widget.sbtauth.exportPrivateKey();
     });
   }
 }

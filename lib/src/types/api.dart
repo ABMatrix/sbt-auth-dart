@@ -60,6 +60,9 @@ class UserInfo {
 
   /// User wallet address
   String? publicKeyAddress;
+
+  /// Backup private key
+  String? backupPrivateKey;
 }
 
 /// Login QrCode status
