@@ -113,7 +113,7 @@ class SbtAuth {
     await _authRequestListener();
   }
 
-  ///
+  /// Login
   Future<void> login(
     LoginType loginType, {
     String? email,
@@ -305,4 +305,19 @@ class SbtAuth {
   void _saveToken(String token) {
     DBUtil.tokenBox.put(TOKEN_KEY, token);
   }
+
+  /// Set password
+  Future<void> setLoginPassword(String password) async {
+    await api.setPassword(password);
+  }
+
+  /// Set password
+  Future<void> resetLoginPassword(
+    String emailAddress,
+    String authCode,
+    String password,
+  ) async {
+    await api.resetPassword(emailAddress, authCode, password);
+  }
+
 }
