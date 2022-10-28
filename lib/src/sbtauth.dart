@@ -205,6 +205,7 @@ class SbtAuth {
   /// Init core
   Future<AuthCore> initCore() async {
     final api = SbtAuthApi(baseUrl: _baseUrl);
+    user = await api.getUserInfo();
     final remoteShareInfo = await api.fetchRemoteShare(_clientId);
     final init = await core.init(
       address: remoteShareInfo.address,
