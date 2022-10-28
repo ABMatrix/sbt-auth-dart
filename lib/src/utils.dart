@@ -6,9 +6,11 @@ import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
 import 'package:mpc_dart/mpc_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/types/account.dart';
 import 'package:sbt_auth_dart/src/types/error.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
+import 'package:sbt_encrypt/sbt_encrypt.dart';
 import 'package:web3dart/crypto.dart';
 
 const _messagePrefix = '\u0019Ethereum Signed Message:\n';
@@ -145,4 +147,23 @@ Future<String> getDeviceName() async {
   final appName = packageInfo.appName;
   final packageName = packageInfo.packageName;
   return '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName''';
+}
+
+/// Encrypt
+Future<String> encryptMsg(String msg, String password) async {
+  final encprypted = await encrypt(msg, password);
+  return encprypted;
+}
+
+/// Decrypt
+Future<String> decryptMsg(String encrypted, String password) async {
+  try {
+    final decrypted = await decrypt(encrypted, password);
+    return decrypted;
+  } catch (e) {
+    if (e.toString().contains('Invalid or corrupted pad block')) {
+      throw SbtAuthException('Verification Code error');
+    }
+    rethrow;
+  }
 }

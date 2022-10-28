@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SbtAuth.initHive();
   runApp(const MyApp());
 }
 
@@ -45,8 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _controller = TextEditingController();
     _controller.text = '30min18@gmail.com';
-    sbtAuth.init();
-    sbtAuth.streamController.stream.listen((event) {
+    sbtAuth.authRequestStreamController.stream.listen((event) {
       if (event.contains('deviceName')) {
         final deviceName = jsonDecode(event)['deviceName'];
         Navigator.push(
@@ -110,29 +111,32 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _login(LoginType loginType, {String? email, String? password}) async {
-    late bool loginSuccess;
     try {
-      loginSuccess = await sbtAuth.loginWithSocial(loginType,
-          email: email, verityCode: 'verityCode', password: password);
-    } catch (e) {
-      if (e is SbtAuthException) {
-        log(e.toString());
-        if (e.toString() == 'New device detected') {
+      await sbtAuth.login(loginType,
+          email: email, code: 'verityCode', password: password);
+      if (mounted) {
+        if (sbtAuth.provider == null) {
           Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => const GrantAuthorizationPage()));
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SignPage(
+                username: sbtAuth.user!.publicKeyAddress!,
+                sbtauth: sbtAuth,
+              ),
+            ),
+          );
         }
       }
-    }
-    if (mounted && loginSuccess) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => SignPage(
-                    username: sbtAuth.core.getAddress(),
-                    sbtauth: sbtAuth,
-                  )));
+    } catch (e) {
+      if (e is SbtAuthException) {
+        log(e.toString());
+        if (e.toString() == 'New device detected') {}
+      }
     }
   }
 }

@@ -105,16 +105,12 @@ class AuthCore {
   }
 
   Future<Share?> _getSavedShare(String address) async {
-    final dbUtil = await DBUtil.getInstance();
-    final box = dbUtil.shareBox;
-    final share = box!.get(address);
+    final share = DBUtil.shareBox!.get(address);
     return (share == null || share.privateKey == '') ? null : share;
   }
 
   Future<void> _saveShare(Share share, String address) async {
-    final dbUtil = await DBUtil.getInstance();
-    final box = dbUtil.shareBox;
-    return box!.put(address, share);
+    return DBUtil.shareBox!.put(address, share);
   }
 
   void _recover(Share remote, String backup) {

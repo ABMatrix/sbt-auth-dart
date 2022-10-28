@@ -1,3 +1,4 @@
+// ignore_for_file: constant_identifier_names
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -8,22 +9,22 @@ import 'package:sbt_auth_dart/src/types/api.dart';
 import 'package:sbt_auth_dart/utils.dart';
 import 'package:web3dart/crypto.dart';
 
+/// Develop mode base url
+const DEVELOP_BASE_URL = 'https://test-api.sbtauth.io/sbt-auth';
+
+/// Production mode base url
+const PRODUCTION_BASE_URL = 'https://api.sbtauth.io/sbt-auth';
+
 /// SBTAuth apis
 class SbtAuthApi {
   /// SBTAuth apis used inside project.
-  SbtAuthApi({required String baseUrl}) {
+  SbtAuthApi({required String baseUrl, required String token}) {
     _baseUrl = baseUrl;
+    _token = token;
   }
 
-  static late DBUtil _dbUtil;
-
-  /// Init
-  static Future<void> init() async {
-    _dbUtil = await DBUtil.getInstance();
-  }
-
-  String? get _token => _dbUtil.tokenBox.get(TOKEN_KEY);
   late String _baseUrl;
+  late String _token;
 
   Map<String, String> get _headers => {
         'Content-Type': 'application/json; charset=UTF-8',
@@ -167,9 +168,9 @@ class SbtAuthApi {
   }
 
   /// Fetch remote share
-  Future<RemoteShareInfo> fetchRemoteShare(String clientId) async {
+  Future<RemoteShareInfo> fetchRemoteShare() async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/user/private-key-fragment-info?clientID=$clientId'),
+      Uri.parse('$_baseUrl/user/private-key-fragment-info'),
       headers: _headers,
     );
     final result = _checkResponse(response) as Map<String, dynamic>;

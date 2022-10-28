@@ -33,7 +33,7 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
           ? Column(
               children: [
                 FutureBuilder(
-                    future: auth.getDeviceList(),
+                    future: auth.api.getUserDeviceList(),
                     builder: (BuildContext context, AsyncSnapshot snapshot) {
                       // finish
                       if (snapshot.connectionState == ConnectionState.done) {
@@ -46,12 +46,12 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
                             height: 300,
                             child: ListView.builder(
                                 shrinkWrap: true,
-                                itemCount: auth.deviceList.length,
+                                itemCount: snapshot.data.length,
                                 itemBuilder: (context, i) {
                                   return GestureDetector(
                                     onTap: () async {
                                       await auth.recoverWithDevice(
-                                          auth.deviceList[i].deviceName!);
+                                          snapshot.data[i].deviceName!);
                                     },
                                     child: Container(
                                       width: 800,
@@ -59,7 +59,7 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 20),
                                       child: Text(
-                                        auth.deviceList[i].deviceName!,
+                                        snapshot.data[i].deviceName!,
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
@@ -138,14 +138,16 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
             ),
       bottomNavigationBar: TextButton(
         onPressed: () async {
-          await auth.initLocalShare(currentText);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => SignPage(
-                        username: auth.user.username,
-                        sbtauth: auth,
-                      )));
+          await auth.recoverWithDevice(currentText);
+          if (mounted) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SignPage(
+                          username: auth.user!.username,
+                          sbtauth: auth,
+                        )));
+          }
         },
         child: const Text('finish'),
       ),
