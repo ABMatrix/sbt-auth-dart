@@ -305,5 +305,4 @@ class SbtAuth {
   void _saveToken(String token) {
     DBUtil.tokenBox.put(TOKEN_KEY, token);
   }
-
 }
