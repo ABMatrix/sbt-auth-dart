@@ -42,36 +42,10 @@ Add intent-filter inside activity
 </activity>
 ```
 
-## Get started
-
-## Running Tests 🧪
-
-For first time users, install the [very_good_cli][very_good_cli_link]:
-
-```sh
-dart pub global activate very_good_cli
-```
-
-To run all unit tests:
-
-```sh
-very_good test --coverage
-```
-
-To view the generated coverage report you can use [lcov](https://github.com/linux-test-project/lcov)
-.
-
-```sh
-# Generate Coverage Report
-genhtml coverage/lcov.info -o coverage/
-
-# Open Coverage Report
-open coverage/index.html
-```
 
 ## 初始化 SBTAuth
 
-注意：如果 developMode 为 true，则连接至测试服务，测试服务邮箱登录无需验证码，同时测试服务仅可连接至测试网。请在正式发布时确保 developMode 为 false。
+注意：如果 `developMode` 为 `true`，则连接至测试服务，测试服务邮箱登录无需验证码，同时测试服务仅可连接至测试网。请在正式发布时确保 `developMode` 为 `false`。
 SBTAuth Wallet 目前支持网络包括 Ethereum Polygon BNB Smart Chain。
 
 ```dart
@@ -89,7 +63,7 @@ SbtAuth auth = SbtAuth(developMode: true, clientId: 'Demo', scheme: 'custom sche
 
 ## 登录 SBTAuth 账户
 
-SBTAuth 目前支持邮箱登录、Google Account、Facebook、Twitter。 如果使用邮箱验证码登录，需要先获取验证码
+SBTAuth 目前支持邮箱登录、Google Account、Facebook、Twitter。 如果使用邮箱验证码登录，需要先获取验证码。
 
 ```dart
 
@@ -106,7 +80,7 @@ await auth.login(LoginType.email,{email:'example@gmail.com', code: '121212'});
 await auth.login(LoginType.google);
 ```
 
-登录成功后会获取用户信息，如果是新用户会直接创建账户进入 APP，可以设置登录密码,并且设置安全码，得到加密后的私钥碎片,支持发送加密碎片到邮箱
+登录成功后会获取用户信息，如果是新用户会直接创建账户进入 APP，可以设置登录密码,并且设置安全码，得到加密后的私钥碎片,支持发送加密碎片到邮箱。
 
 ```dart
 
@@ -120,7 +94,7 @@ if(auth.user?.backupPrivateKey != null){
 await auth.api.sendBackupPrivateKey(backupPrivateKey, email, code);
 ```
 
-如果是已注册用户，并且在新设备登录，则需要恢复私钥碎片，可以通过已登录设备授权的方式恢复，也可以通过原来备份的私钥碎片进行恢复
+如果是已注册用户，并且在新设备登录，则需要恢复私钥碎片，可以通过已登录设备授权的方式恢复，也可以通过原来备份的私钥碎片进行恢复。
 
 1. 已登录设备授权恢复
 
@@ -137,14 +111,14 @@ await auth.recoverWithDevice(code);
 
 ```
 
-2. 通过保存的私钥碎片恢复,获取碎片 `backupPrivateKey` 和密码 `password` 进行恢复
+2. 通过保存的私钥碎片恢复,获取碎片 `backupPrivateKey` 和密码 `password` 进行恢复。
 
 ```dart
 
 await auth.recoverWidthBackup(backupPrivateKey, password);
 ```
 
-已登录设备在账户登录之后，或者在 APP 初始化且账户登录未过期时添加监听
+已登录设备在账户登录之后，或者在 APP 初始化且账户登录未过期时添加监听。
 
 ```dart
 
