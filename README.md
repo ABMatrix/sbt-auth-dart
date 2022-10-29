@@ -83,7 +83,7 @@ await SbtAuth.initHive();
 SbtAuth auth = SbtAuth(developMode: true, clientId: 'Demo', scheme: 'custom scheme');
 ```
 
-## 登录创建sbt账户
+## 登录创建 sbt 账户
 
 SBTAuth 目前支持邮箱登录、Google Account、Facebook、Twitter。 如果使用邮箱验证码登录，需要先获取验证码
 
@@ -149,7 +149,7 @@ sbtAuth.authRequestStreamController.stream.listen((event) {
     }
 ```
 
-## sbt账户进行签名发送交易操作
+## sbt 账户进行签名发送交易操作
 
 调用 personal_sign 方法对消息进行签名
 
