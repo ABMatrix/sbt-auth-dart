@@ -75,8 +75,10 @@ open coverage/index.html
 SBTAuth Wallet 目前支持网络包括 Ethereum Polygon BNB Smart Chain。
 
 ```dart
-// 初始化 sbtAuth 前需要先调用 initHive 方法
+
+// 初始化 sbtAuth 前需要先调用 initHive 方法，一般放在 main.dart 中
 await SbtAuth.initHive();
+
 // init sbtAuth
 SbtAuth auth = SbtAuth(developMode: true, clientId: 'Demo', scheme: 'custom scheme');
 ```
@@ -86,11 +88,13 @@ SbtAuth auth = SbtAuth(developMode: true, clientId: 'Demo', scheme: 'custom sche
 SBTAuth 目前支持邮箱登录、Google Account、Facebook、Twitter。 如果使用邮箱验证码登录，需要先获取验证码
 
 ```dart
+
 //  传入邮箱 email 发送验证码
 await auth.api.sendVerifyCode(email);
 ```
 
 ```dart
+
 // 使用邮箱登录，传入邮箱 email，然后传入验证码 code 或者密码 password 进行登录
 await auth.login({email, code: '121212', password: '123456'});
 ```
@@ -98,12 +102,16 @@ await auth.login({email, code: '121212', password: '123456'});
 登录成功后会获取用户信息，如果是新用户会直接创建账户进入 APP，可以设置登录密码,并且设置安全码，得到加密后的私钥碎片,支持发送加密碎片到邮箱
 
 ```dart
+
 // 传入密码 password 来设置账户的登录密码
 await auth.setLoginPassword(password);
+
 // 获取私钥碎片 privateKey
 final privateKey = auth.exportBackupPrivateKey();
+
 // 传入安全码 password 来加密私钥碎片
 final encryptPrivateKey = await encryptMsg(privateKey,password);
+
 // 传入加密的私钥碎片 encryptPrivateKey，邮箱 email，和邮箱验证码 code来发送备份的私钥碎片
 await auth.api.sendBackupPrivateKey(encryptPrivateKey, email, code);
 ```
@@ -111,11 +119,15 @@ await auth.api.sendBackupPrivateKey(encryptPrivateKey, email, code);
 如果是老用户，并且在新设备登录，则需要恢复私钥碎片，可以通过老设备授权的方式恢复，也可以通过原来用安全码加密后的私钥碎片进行恢复
 
 ```dart
+
 // 1.老设备授权恢复
+
 // 需要先获取老设备列表
 fianl deviceList = await auth.api.getUserDeviceList();
+
 // 从列表中选择设备，传人设备名 deviceName，调用方法来请求老设备授权
 await auth.api.sendAuthRequest(deviceName);
+
 // 输入老设备生成的授权码 code 获取授权
 await auth.recoverWithDevice(code);
 
@@ -126,6 +138,7 @@ await auth.recoverWidthBackup(backupPrivateKey, password);
 老设备在账户登录之后，或者在 APP 初始化且账户登录未过期时添加监听
 
 ```dart
+
 sbtAuth.authRequestStreamController.stream.listen((event) {
   // 如果包含 deviceName 说明有新设备请求授权
       if (event.contains('deviceName')) {
@@ -141,7 +154,9 @@ sbtAuth.authRequestStreamController.stream.listen((event) {
 调用 personal_sign 方法对消息进行签名
 
 ```dart
+
 final provider = auth.provider;
+
 // 传人要签名的数据 message 来获取签名
 final signature = await provider?.request(RequestArgument(method: 'personal_sign', params: [message]));
 ```
@@ -149,10 +164,13 @@ final signature = await provider?.request(RequestArgument(method: 'personal_sign
 创建并发送交易
 
 ```dart
+
 final provider = auth.provider;
+
 // 发送交易之前首先要设置16进制的 chainId
 provider?.setChainId(chainId);
-// 传入 交易的信息之后调用 sendTransaction 方法即可获取交易 hash
+
+// 传入交易的信息之后调用 sendTransaction 方法即可获取交易 hash
 final txHash = await provider?.sendTransaction(
     to: to ,
     value: value,
