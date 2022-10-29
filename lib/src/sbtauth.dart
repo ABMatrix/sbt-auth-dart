@@ -140,7 +140,7 @@ class SbtAuth {
       final deviceName = await getDeviceName();
       final appUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
       final loginUrl =
-          '$appUrl?loginType=${loginType.name}&scheme=$_scheme&deviceName=$deviceName';
+          '$appUrl?loginType=${loginType.name}&scheme=$_scheme&deviceName=$deviceName&clientId=$_clientId';
       unawaited(
         launchUrl(
           Uri.parse(loginUrl),
@@ -263,9 +263,14 @@ class SbtAuth {
     String password,
   ) async {
     final remoteShareInfo = await api.fetchRemoteShare();
-    var backup = await decryptMsg(backupPrivateKey, password);
+    var backup = '';
+    if (backupPrivateKey.startsWith('0x')) {
+      backup = backupPrivateKey;
+    } else {
+      backup = await decryptMsg(backupPrivateKey, password);
+    }
     if (backup.startsWith('0x')) {
-      backup = backup.substring(2, backup.length);
+      backup = backup.substring(2);
     }
     final core = AuthCore();
     final inited = await core.init(
