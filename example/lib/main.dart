@@ -39,8 +39,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late TextEditingController _controller;
-  final sbtAuth =
-      SbtAuth(developMode: true, clientId: 'Demo', scheme: 'sbtauth');
+  final sbtAuth = SbtAuth(
+      developMode: true, clientId: 'Demo', scheme: 'sbtauth', local: 'zh-TW');
 
   @override
   void initState() {
@@ -125,7 +125,8 @@ class _MyHomePageState extends State<MyHomePage> {
             context,
             MaterialPageRoute(
               builder: (context) => SignPage(
-                username: sbtAuth.user!.publicKeyAddress!,
+                username: sbtAuth.user!.publicKeyAddress ??
+                    sbtAuth.core!.getAddress(),
                 sbtauth: sbtAuth,
               ),
             ),

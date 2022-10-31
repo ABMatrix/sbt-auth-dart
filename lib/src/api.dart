@@ -4,9 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
-import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/api.dart';
-import 'package:sbt_auth_dart/utils.dart';
 import 'package:web3dart/crypto.dart';
 
 /// Develop mode base url
@@ -18,29 +16,38 @@ const PRODUCTION_BASE_URL = 'https://api.sbtauth.io/sbt-auth';
 /// SBTAuth apis
 class SbtAuthApi {
   /// SBTAuth apis used inside project.
-  SbtAuthApi({required String baseUrl, required String token}) {
+  SbtAuthApi({
+    required String baseUrl,
+    required String token,
+    required String local,
+  }) {
     _baseUrl = baseUrl;
     _token = token;
+    _local = local;
   }
 
   late String _baseUrl;
   late String _token;
+  late String _local;
 
   Map<String, String> get _headers => {
         'Content-Type': 'application/json; charset=UTF-8',
-        'authorization': 'Bearer $_token'
+        'authorization': 'Bearer $_token',
+        'Accept-Language': _local
       };
 
   /// Send email verification code
   static Future<void> sendEmailCode({
     required String email,
     required String baseUrl,
+    String localLan = 'en-US',
   }) async {
     final data = {'emailAddress': email};
     final response = await http.post(
       Uri.parse('$baseUrl/user:auth-code'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Accept-Language': localLan,
       },
       body: jsonEncode(data),
     );
@@ -54,6 +61,7 @@ class SbtAuthApi {
     required String clientId,
     required String baseUrl,
     String? password,
+    String localLan = 'en-US',
   }) async {
     final deviceName = await getDeviceName();
     final data = {
@@ -67,6 +75,7 @@ class SbtAuthApi {
       Uri.parse('$baseUrl/user:login'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Accept-Language': localLan,
       },
       body: jsonEncode(data),
     );

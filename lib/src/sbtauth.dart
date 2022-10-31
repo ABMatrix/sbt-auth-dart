@@ -11,7 +11,6 @@ import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/api.dart';
-import 'package:sbt_auth_dart/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Develop app url
@@ -42,9 +41,11 @@ class SbtAuth {
     required this.developMode,
     required String clientId,
     required String scheme,
+    String local = 'en-US',
   }) {
     _clientId = clientId;
     _scheme = scheme;
+    _local = local;
   }
 
   /// If you set developMode true, the use registered is on test site, can only
@@ -53,6 +54,7 @@ class SbtAuth {
 
   late String _clientId;
   late String _scheme;
+  late String _local;
 
   /// Login user
   UserInfo? get user => _user;
@@ -76,7 +78,7 @@ class SbtAuth {
   SbtAuthApi get api {
     final token = DBUtil.tokenBox.get(TOKEN_KEY);
     if (token == null) throw SbtAuthException('User not logined');
-    return SbtAuthApi(baseUrl: _baseUrl, token: token);
+    return SbtAuthApi(baseUrl: _baseUrl, token: token, local: _local);
   }
 
   /// provider
@@ -135,6 +137,7 @@ class SbtAuth {
         password: password,
         clientId: _clientId,
         baseUrl: _baseUrl,
+        localLan: _local,
       );
     } else {
       final deviceName = await getDeviceName();
