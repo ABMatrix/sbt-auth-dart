@@ -276,7 +276,7 @@ class SbtAuthApi {
   }
 
   static dynamic _checkResponse(Response response) {
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    final body = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     if (body['code'] != '000') {
       throw SbtAuthException((body['msg'] ?? '') as String);
     }
