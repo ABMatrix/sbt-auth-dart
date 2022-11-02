@@ -1,3 +1,4 @@
+import 'package:example/white_list.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
@@ -24,6 +25,21 @@ class _SignPageState extends State<SignPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sign'),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => WhiteListPage(
+                              sbtAuth: widget.sbtauth,
+                            )));
+              },
+              child: const Text(
+                'White list',
+                style: TextStyle(color: Colors.black),
+              ))
+        ],
       ),
       body: Center(
           child: Column(

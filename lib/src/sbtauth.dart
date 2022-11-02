@@ -34,6 +34,18 @@ enum LoginType {
   twitter,
 }
 
+/// Local type
+enum LocalType {
+  /// en
+  en_US,
+
+  /// zh_cn
+  zh_CN,
+
+  /// zh_TW
+  zh_TW
+}
+
 /// SbtAuth class
 class SbtAuth {
   /// SBTAuth, you need to set your own custom scheme.
@@ -41,11 +53,9 @@ class SbtAuth {
     required this.developMode,
     required String clientId,
     required String scheme,
-    String local = 'en-US',
   }) {
     _clientId = clientId;
     _scheme = scheme;
-    _local = local;
   }
 
   /// If you set developMode true, the use registered is on test site, can only
@@ -54,7 +64,7 @@ class SbtAuth {
 
   late String _clientId;
   late String _scheme;
-  late String _local;
+  LocalType _local = LocalType.en_US;
 
   /// Login user
   UserInfo? get user => _user;
@@ -78,7 +88,11 @@ class SbtAuth {
   SbtAuthApi get api {
     final token = DBUtil.tokenBox.get(TOKEN_KEY);
     if (token == null) throw SbtAuthException('User not logined');
-    return SbtAuthApi(baseUrl: _baseUrl, token: token, local: _local);
+    return SbtAuthApi(
+      baseUrl: _baseUrl,
+      token: token,
+      local: _getLocal(_local),
+    );
   }
 
   /// provider
@@ -137,7 +151,7 @@ class SbtAuth {
         password: password,
         clientId: _clientId,
         baseUrl: _baseUrl,
-        localLan: _local,
+        localLan: _getLocal(_local),
       );
     } else {
       final deviceName = await getDeviceName();
@@ -308,6 +322,28 @@ class SbtAuth {
         api.confirmEventReceived(event.id!, 'AUTH_APPLY');
       }
     });
+  }
+
+  /// Switch white list
+  Future<void> switchWhiteList({required bool whitelistSwitch}) async {
+    await api.switchUserWhiteList(whitelistSwitch: whitelistSwitch);
+    _user = await api.getUserInfo();
+  }
+
+  String _getLocal(LocalType localType) {
+    switch (localType) {
+      case LocalType.en_US:
+        return 'en-US';
+      case LocalType.zh_CN:
+        return 'zh-CN';
+      case LocalType.zh_TW:
+        return 'zh-TW';
+    }
+  }
+
+  /// Set local
+  void setLocal(LocalType localType) {
+    _local = localType;
   }
 
   void _saveToken(String token) {

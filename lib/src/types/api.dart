@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:sbt_auth_dart/src/types/account.dart';
 
 /// Remote share info
@@ -25,6 +23,7 @@ class UserInfo {
     required this.userLoginParams,
     required this.userLoginType,
     required this.publicKeyAddress,
+    required this.userWhitelist,
   });
 
   /// User from map
@@ -37,6 +36,7 @@ class UserInfo {
       userLoginParams: map['userLoginParams'] as String,
       userLoginType: map['userLoginType'] as String,
       publicKeyAddress: map['publicKeyAddress'] as String?,
+      userWhitelist: (map['userWhitelist'] ?? false) as bool,
     );
   }
 
@@ -63,6 +63,9 @@ class UserInfo {
 
   /// Backup private key
   String? backupPrivateKey;
+
+  /// White list switch
+  bool userWhitelist;
 }
 
 /// Login QrCode status
@@ -134,4 +137,42 @@ class Device {
 
   /// Device name
   String? deviceName;
+}
+
+/// UserWhiteListItem
+class UserWhiteListItem {
+  /// UserWhiteListItem
+  UserWhiteListItem({
+    required this.userWhitelistName,
+    required this.userWhitelistNetwork,
+    required this.userWhitelistUserId,
+    required this.userWhitelistID,
+    required this.userWhitelistAddress,
+  });
+
+  /// UserWhiteListItem from map
+  factory UserWhiteListItem.fromMap(Map<String, dynamic> map) {
+    return UserWhiteListItem(
+      userWhitelistName: (map['userWhitelistName'] ?? '') as String,
+      userWhitelistNetwork: (map['userWhitelistNetwork'] ?? '') as String,
+      userWhitelistUserId: (map['userWhitelistUserId'] ?? '') as String,
+      userWhitelistID: (map['userWhitelistID'] ?? '') as String,
+      userWhitelistAddress: (map['userWhitelistAddress'] ?? '') as String,
+    );
+  }
+
+  /// Name
+  String userWhitelistName;
+
+  /// Network
+  String userWhitelistNetwork;
+
+  /// UserId
+  String userWhitelistUserId;
+
+  /// Id
+  String userWhitelistID;
+
+  /// Address
+  String userWhitelistAddress;
 }

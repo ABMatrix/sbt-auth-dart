@@ -275,8 +275,100 @@ class SbtAuthApi {
     _checkResponse(response);
   }
 
+  /// Create user whiteList
+  Future<void> createUserWhiteList(
+    String address,
+    String name,
+    String network,
+  ) async {
+    final data = {'address': address, 'name': name, 'network': network};
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user-whitelist/user-whitelist'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
+  /// Edit user whiteList
+  Future<void> editUserWhiteList(
+    String address,
+    String name,
+    String userWhitelistID,
+    String userId,
+    String network,
+  ) async {
+    final data = {
+      'address': address,
+      'name': name,
+      'userWhitelistID': userWhitelistID,
+      'userId': userId,
+      'network': network
+    };
+    final response = await http.put(
+      Uri.parse('$_baseUrl/user-whitelist/user-whitelist'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
+  /// Delete user whiteList
+  Future<void> deleteUserWhiteList(String userWhitelistID) async {
+    final data = {'userWhitelistID': userWhitelistID};
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/user-whitelist/user-whitelist'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
+  /// Get user whiteList
+  Future<List<UserWhiteListItem>> getUserWhiteList(
+    int pageNo,
+    int pageSize,
+  ) async {
+    final response = await http.get(
+      Uri.parse(
+        '$_baseUrl/user-whitelist/user-whitelists?pageNo=$pageNo&pageSize=$pageSize',
+      ),
+      headers: _headers,
+    );
+    final data = _checkResponse(response) ?? <String, dynamic>{};
+    final items = data['items'] as List?;
+    return [
+      for (var d in items ?? [])
+        UserWhiteListItem.fromMap(d as Map<String, dynamic>)
+    ];
+  }
+
+  /// Get user whiteList item
+  Future<UserWhiteListItem> getUserWhiteListItem(String userWhitelistID) async {
+    final response = await http.get(
+      Uri.parse(
+        '$_baseUrl/user-whitelist/user-whitelist?userWhitelistID=$userWhitelistID',
+      ),
+      headers: _headers,
+    );
+    final data = _checkResponse(response) as Map<String, dynamic>;
+    return UserWhiteListItem.fromMap(data);
+  }
+
+  /// User white list switch
+  Future<void> switchUserWhiteList({required bool whitelistSwitch}) async {
+    final data = {'whitelistSwitch': whitelistSwitch};
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/whitelist:switch'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
   static dynamic _checkResponse(Response response) {
-    final body = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    final body =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     if (body['code'] != '000') {
       throw SbtAuthException((body['msg'] ?? '') as String);
     }
