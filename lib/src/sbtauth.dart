@@ -144,9 +144,26 @@ class SbtAuth {
           address: remoteLocalShareInfo.address,
           remote: remoteLocalShareInfo.remote,
         );
-      }
-      if (inited) {
-        _core = core;
+        if (inited) {
+          _core = core;
+        }
+      } else {
+        final core = AuthCore(
+          mpcUrl: MpcUrl(
+            url: _baseUrl,
+            get: 'user/forward:query:data',
+            set: 'user/forward:data',
+          ),
+          signUrl: '$_baseUrl/user:sign',
+          token: token!,
+        );
+        inited = await core.init(
+          address: remoteLocalShareInfo.address,
+          remote: remoteLocalShareInfo.remote,
+        );
+        if (inited) {
+          _core = core;
+        }
       }
     }
     await _authRequestListener();
