@@ -20,7 +20,7 @@ dependencies:
   hive_flutter: ^1.1.0
   http: ^0.13.5
   mpc_dart: ^0.2.2
-  package_info_plus: ^2.0.0
+  package_info_plus: ^3.0.1
   path_provider: ^2.0.11
   sbt_encrypt: ^0.1.3
   url_launcher: ^6.1.6
