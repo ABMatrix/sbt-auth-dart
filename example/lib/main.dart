@@ -53,7 +53,10 @@ class _MyHomePageState extends State<MyHomePage> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => ConfirmAuthPage(deviceName: deviceName)));
+                builder: (context) => ConfirmAuthPage(
+                      deviceName: deviceName,
+                      auth: sbtAuth,
+                    )));
       }
     });
   }
@@ -119,13 +122,15 @@ class _MyHomePageState extends State<MyHomePage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const GrantAuthorizationPage()));
+                  builder: (context) => GrantAuthorizationPage(
+                        auth: sbtAuth,
+                      )));
         } else {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => SignPage(
-                username: sbtAuth.user!.publicKeyAddress ??
+                address: sbtAuth.user!.publicKeyAddress ??
                     sbtAuth.core!.getAddress(),
                 sbtauth: sbtAuth,
               ),

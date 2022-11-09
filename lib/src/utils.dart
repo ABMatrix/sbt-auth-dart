@@ -7,8 +7,6 @@ import 'package:decimal/decimal.dart';
 import 'package:mpc_dart/mpc_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
-import 'package:sbt_auth_dart/src/types/account.dart';
-import 'package:sbt_auth_dart/src/types/error.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
 import 'package:sbt_encrypt/sbt_encrypt.dart';
 import 'package:web3dart/crypto.dart';
@@ -28,15 +26,25 @@ Uint8List uint8ListFromList(List<int> data) {
 }
 
 /// Convert keypair to share
-Share keyToShare(KeyPair key) {
+Share keyToLocalShare(KeyPair key) {
   return Share(
     privateKey: key.x_i,
     extraData: key.y.toJson(),
   );
 }
 
-/// Convert share to keypair
-KeyPair shareToKey(Share share, [int index = 1]) {
+/// Convert keypair to share
+Share keyToShare(MultiKeypair key) {
+  return Share(
+    privateKey: key.sk,
+    publicKey: key.pk,
+    extraData: jsonEncode(key.aux),
+  );
+}
+
+
+/// Convert local share to keypair
+KeyPair localShareToKey(Share share, [int index = 1]) {
   return KeyPair(
     share.privateKey,
     Coordinate.fromMap(jsonDecode(share.extraData) as Map<String, dynamic>),
@@ -46,11 +54,29 @@ KeyPair shareToKey(Share share, [int index = 1]) {
   );
 }
 
+/// Convert share to keypair
+MultiKeypair shareToKey(Share share, {int index = 1}) {
+  return MultiKeypair(
+      sk: share.privateKey,
+      pk: share.publicKey,
+      partyInd: index,
+      threshold: 1,
+      sharCount: 3,
+      aux: jsonDecode(share.extraData) as Map<String,dynamic>);
+}
+
 /// Keccak hash
 Uint8List hashMessage(Uint8List message) {
   final prefix = _messagePrefix + message.length.toString();
   final prefixBytes = ascii.encode(prefix);
   return keccak256(Uint8List.fromList(prefixBytes + message));
+}
+
+/// Keccak hash
+Uint8List uit8Message(Uint8List message) {
+  final prefix = _messagePrefix + message.length.toString();
+  final prefixBytes = ascii.encode(prefix);
+  return Uint8List.fromList(prefixBytes + message);
 }
 
 /// Rpc encoder for EIP1559 transaction.
@@ -166,4 +192,17 @@ Future<String> decryptMsg(String encrypted, String password) async {
     }
     rethrow;
   }
+
+}
+
+/// List to hex
+String listToHex(List<int> bytes) {
+  final buffer = StringBuffer();
+  for (final part in bytes) {
+    if (part & 0xff != part) {
+      throw const FormatException('Non-byte integer detected');
+    }
+    buffer.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
+  }
+  return '0x$buffer';
 }

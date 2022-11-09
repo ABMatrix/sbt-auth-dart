@@ -2,18 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
 class ConfirmAuthPage extends StatefulWidget {
+  SbtAuth auth;
   final String deviceName;
 
-  ConfirmAuthPage({super.key, required this.deviceName});
+  ConfirmAuthPage({super.key, required this.deviceName, required this.auth});
 
   @override
   State<StatefulWidget> createState() => ConfirmAuthPageState();
 }
 
 class ConfirmAuthPageState extends State<ConfirmAuthPage> {
-  final sbtAuth =
-      SbtAuth(developMode: true, clientId: 'Demo', scheme: 'sbtauth');
-
   String code = '';
 
   @override
@@ -38,7 +36,7 @@ class ConfirmAuthPageState extends State<ConfirmAuthPage> {
               TextButton(
                   onPressed: () async {
                     final authCode =
-                        await sbtAuth.approveAuthRequest(widget.deviceName);
+                        await widget.auth.approveAuthRequest(widget.deviceName);
                     setState(() {
                       code = authCode;
                     });

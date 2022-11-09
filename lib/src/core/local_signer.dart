@@ -3,58 +3,53 @@ import 'dart:convert';
 
 import 'package:eth_sig_util/eth_sig_util.dart';
 import 'package:flutter/foundation.dart';
-import 'package:sbt_auth_dart/src/core/core.dart';
+import 'package:sbt_auth_dart/src/core/local_core.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
 import 'package:sbt_auth_dart/src/utils.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/src/utils/length_tracking_byte_sink.dart';
 import 'package:web3dart/src/utils/rlp.dart' as rlp;
 
-/// Signer
-class Signer {
+/// Local Signer
+class LocalSigner {
   /// Signer
-  Signer(this._core);
+  LocalSigner(this._localCore);
 
-  final AuthCore _core;
+  final LocalAuthCore _localCore;
 
   /// Get accounts, multi account is not supported, return account list with
   /// only one address
   List<String> getAccounts() {
-    return [_core.getAddress()];
+    return [_localCore.getAddress()];
   }
 
   /// Sign message
-  Future<String> personalSign(String message) async {
+  String personalSign(String message) {
     final data =
         message.startsWith('0x') ? hexToBytes(message) : ascii.encode(message);
-    final res = await _core.signDigest(uit8Message(data));
-    return res;
+    return _localCore.signDigest(hashMessage(data));
   }
 
   /// Sign typeddata
-  Future<String> signTypedData(Map<String, dynamic> data) async {
-    final res = await _core.signDigest(
+  String signTypedData(Map<String, dynamic> data) {
+    return _localCore.signDigest(
       TypedDataUtil.hashMessage(
         jsonData: jsonEncode(data),
         version: TypedDataVersion.V4,
       ),
     );
-    return res;
   }
 
   /// Sign transaction
-  Future<String> signTransaction(
-    UnsignedTransaction transaction,
-    int chainId,
-  ) async {
+  String signTransaction(UnsignedTransaction transaction, int chainId) {
     if (transaction.maxFeePerGas != null ||
         transaction.maxPriorityFeePerGas != null) {
       final encodedTx = LengthTrackingByteSink()
         ..addByte(0x02)
         ..add(rlp.encode(encodeEIP1559ToRlp(transaction, chainId)))
         ..close();
-      final signature = await _core.signTransaction(
-        encodedTx.asBytes(),
+      final signature = _localCore.signTransaction(
+        keccak256(encodedTx.asBytes()),
         chainId: chainId,
         isEIP1559: true,
       );
@@ -77,7 +72,7 @@ class Signer {
         ),
       );
       final signature =
-          await _core.signTransaction(encodedTx, chainId: chainId);
+      _localCore.signTransaction(keccak256(encodedTx), chainId: chainId);
       final result = uint8ListFromList(
         rlp.encode(
           encodeToRlp(transaction, signature),

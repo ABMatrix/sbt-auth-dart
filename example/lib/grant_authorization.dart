@@ -6,15 +6,15 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
 class GrantAuthorizationPage extends StatefulWidget {
-  const GrantAuthorizationPage({super.key});
+  SbtAuth auth;
+
+  GrantAuthorizationPage({super.key, required this.auth});
 
   @override
   State<StatefulWidget> createState() => GrantAuthorizationPageState();
 }
 
 class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
-  SbtAuth auth = SbtAuth(developMode: true, clientId: 'SBT', scheme: 'sbtauth');
-
   String currentText = '';
   StreamController<ErrorAnimationType> errorController = StreamController();
   TextEditingController textEditingController = TextEditingController();
@@ -33,7 +33,7 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
           ? Column(
               children: [
                 FutureBuilder(
-                    future: auth.api.getUserDeviceList(),
+                    future: widget.auth.api.getUserDeviceList(),
                     builder: (BuildContext context, AsyncSnapshot snapshot) {
                       // finish
                       if (snapshot.connectionState == ConnectionState.done) {
@@ -50,7 +50,7 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
                                 itemBuilder: (context, i) {
                                   return GestureDetector(
                                     onTap: () async {
-                                      await auth.api.sendAuthRequest(
+                                      await widget.auth.api.sendAuthRequest(
                                           snapshot.data[i].deviceName!);
                                     },
                                     child: Container(
@@ -138,14 +138,20 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
             ),
       bottomNavigationBar: TextButton(
         onPressed: () async {
-          await auth.recoverWithDevice(currentText);
+          if (emailConfirm) {
+            await widget.auth.recoverWithDevice(currentText);
+          } else {
+            await widget.auth
+                .recoverWidthBackup(privateKeyController.text.trim(), '123');
+          }
+
           if (mounted) {
             Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => SignPage(
-                          username: auth.user!.username,
-                          sbtauth: auth,
+                          address: widget.auth.user!.publicKeyAddress!,
+                          sbtauth: widget.auth,
                         )));
           }
         },

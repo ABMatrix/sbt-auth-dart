@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
-import 'package:sbt_auth_dart/utils.dart';
 
 class SignPage extends StatefulWidget {
-  final String username;
+  final String address;
   final SbtAuth sbtauth;
 
-  const SignPage({required this.username, required this.sbtauth, super.key});
+  const SignPage({required this.address, required this.sbtauth, super.key});
 
   @override
   State<SignPage> createState() => _SignPageState();
@@ -18,7 +17,14 @@ class SignPage extends StatefulWidget {
 class _SignPageState extends State<SignPage> {
   String _signature = '';
   String _result = '';
-  String _privateKey = '';
+
+  final TextEditingController _emailController = TextEditingController();
+
+  @override
+  void initState() {
+    print(widget.address);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +51,17 @@ class _SignPageState extends State<SignPage> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(widget.username),
+          TextField(
+            controller: _emailController,
+          ),
+          TextButton(
+              onPressed: () {
+                widget.sbtauth.sendBackupPrivateKey(
+                    '123', _emailController.text.trim(), 'code');
+              },
+              child: const Text('send')),
+          const SizedBox(height: 40),
+          Text(widget.address),
           TextButton(
             onPressed: _signMessage,
             child: const Text('Sign message'),
@@ -59,11 +75,11 @@ class _SignPageState extends State<SignPage> {
           ),
           Text(_result),
           const SizedBox(height: 10),
-          TextButton(
-            onPressed: _getPrivateKey,
-            child: const Text('Get privateKey'),
-          ),
-          Text(_privateKey),
+          // TextButton(
+          //   onPressed: _getPrivateKey,
+          //   child: const Text('Get privateKey'),
+          // ),
+          // Text(_privateKey),
           TextButton(
             onPressed: () async {
               final data = await Navigator.of(context).push(MaterialPageRoute(
@@ -102,9 +118,9 @@ class _SignPageState extends State<SignPage> {
     });
   }
 
-  _getPrivateKey() {
-    setState(() {
-      _privateKey = widget.sbtauth.exportPrivateKey();
-    });
-  }
+// _getPrivateKey() {
+//   setState(() {
+//     _privateKey = widget.sbtauth.exportPrivateKey();
+//   });
+// }
 }

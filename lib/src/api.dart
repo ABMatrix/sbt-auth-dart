@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+import 'package:mpc_dart/mpc_dart.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/types/api.dart';
 import 'package:web3dart/crypto.dart';
@@ -154,10 +155,13 @@ class SbtAuthApi {
     String clientId,
     List<Share> shares,
     String address,
+    String privateKey2Fragment,
   ) async {
     final params = {
       'clientID': clientId,
-      'privateKey2Fragment': jsonEncode(shares[1].toJson()),
+      'privateKey1Fragment': shares[0].extraData,
+      'privateKey2Fragment': privateKey2Fragment,
+      'privateKey3Fragment': shares[2].extraData,
       'privateKey1FragmentHash': bytesToHex(
         hashMessage(ascii.encode(jsonEncode(shares[0].toJson()))),
         include0x: true,
@@ -185,8 +189,14 @@ class SbtAuthApi {
     final result = _checkResponse(response) as Map<String, dynamic>;
     final address = result['privateKeyFragmentInfoPublicKeyAddress'] as String;
     final share = result['privateKeyFragmentInfoPrivateKey2Fragment'] as String;
-    final remote = Share.fromMap(jsonDecode(share) as Map<String, dynamic>);
-    return RemoteShareInfo(address, remote);
+    final localAux =
+        (result['privateKeyFragmentInfoPrivateKey1Fragment'] ?? '') as String;
+    final backupAux =
+        result['privateKeyFragmentInfoPrivateKey3Fragment'] as String;
+    final remote = localAux == ''
+        ? keyToShare(MultiKeypair.fromJson(share))
+        : Share.fromMap(jsonDecode(share) as Map<String, dynamic>);
+    return RemoteShareInfo(address, remote, localAux, backupAux);
   }
 
   /// Backup share via email
@@ -365,6 +375,8 @@ class SbtAuthApi {
     );
     _checkResponse(response);
   }
+
+
 
   static dynamic _checkResponse(Response response) {
     final body =
