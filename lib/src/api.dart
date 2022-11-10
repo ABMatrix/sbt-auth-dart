@@ -192,10 +192,8 @@ class SbtAuthApi {
     final localAux =
         (result['privateKeyFragmentInfoPrivateKey1Fragment'] ?? '') as String;
     final backupAux =
-        result['privateKeyFragmentInfoPrivateKey3Fragment'] as String;
-    final remote = localAux == ''
-        ? keyToShare(MultiKeypair.fromJson(share))
-        : Share.fromMap(jsonDecode(share) as Map<String, dynamic>);
+        (result['privateKeyFragmentInfoPrivateKey3Fragment'] ?? '') as String;
+    final remote = Share.fromMap(jsonDecode(share) as Map<String, dynamic>);
     return RemoteShareInfo(address, remote, localAux, backupAux);
   }
 
@@ -375,8 +373,6 @@ class SbtAuthApi {
     );
     _checkResponse(response);
   }
-
-
 
   static dynamic _checkResponse(Response response) {
     final body =
