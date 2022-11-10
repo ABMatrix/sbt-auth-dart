@@ -326,6 +326,7 @@ class SbtAuth {
         remote: remoteShareInfo.remote,
         local: localShare,
       );
+      _core = core;
     } else {
       final localShare = Share(
         privateKey: shareString,
@@ -346,9 +347,9 @@ class SbtAuth {
         remote: remoteShareInfo.remote,
         local: localShare,
       );
+      _core = core;
     }
     if (!inited) throw SbtAuthException('Init error');
-    _core = core;
     await _authRequestListener();
   }
 
@@ -376,6 +377,7 @@ class SbtAuth {
         remote: remoteShareInfo.remote,
         backup: backup,
       );
+      _core = core;
     } else {
       final core = AuthCore(
         mpcUrl: MpcUrl(
@@ -397,9 +399,9 @@ class SbtAuth {
         backup: backShare,
         backupAux: remoteShareInfo.localAux,
       );
+      _core = core;
     }
     if (!inited) throw SbtAuthException('Init error');
-    _core = core;
   }
 
   // /// Export privateKey
