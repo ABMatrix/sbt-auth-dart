@@ -166,6 +166,7 @@ class SbtAuth {
         }
       }
     }
+    if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();
   }
 
@@ -243,7 +244,7 @@ class SbtAuth {
 
   /// Logout
   void logout() {
-    _saveToken('');
+    DBUtil.tokenBox.delete(TOKEN_KEY);
     _user = null;
     _core = null;
     _eventSource?.client.close();
