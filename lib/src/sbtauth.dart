@@ -112,7 +112,7 @@ class SbtAuth {
   }
 
   /// Init sbtauth
-  Future<void> init() async {
+  Future<void> init({bool isLogin = true}) async {
     final token = DBUtil.tokenBox.get(TOKEN_KEY);
     _user = await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
@@ -166,7 +166,9 @@ class SbtAuth {
         }
       }
     }
-    if (!inited) throw SbtAuthException('Init error');
+    if (!isLogin) {
+      if (!inited) throw SbtAuthException('Init error');
+    }
     await _authRequestListener();
   }
 
