@@ -243,7 +243,7 @@ class SbtAuth {
 
   /// Logout
   void logout() {
-    DBUtil.tokenBox.delete(TOKEN_KEY);
+    _saveToken('');
     _user = null;
     _core = null;
     _eventSource?.client.close();
