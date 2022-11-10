@@ -255,16 +255,21 @@ class SbtAuth {
   /// Approve auth request
   Future<String> approveAuthRequest(String deviceName) async {
     if (core == null) throw SbtAuthException('Auth not inited');
-    final local = core is AuthCore
-        ? (core as AuthCore).localShare
+    dynamic local = core is AuthCore
+        ? (core as AuthCore).localShare!.privateKey
         : (core as LocalAuthCore).localShare;
     if (local == null) throw SbtAuthException('User not login');
     final password = StringBuffer();
     for (var i = 0; i < 6; i++) {
       password.write(Random().nextInt(9).toString());
     }
-    final encrypted =
-        await encryptMsg(jsonEncode(local.toJson()), password.toString());
+    var encrypted = '';
+    if (core is AuthCore) {
+      encrypted = await encryptMsg(local, password.toString());
+    } else {
+      encrypted =
+          await encryptMsg(jsonEncode(local.toJson()), password.toString());
+    }
     await api.approveAuthRequest(deviceName, encrypted);
     return password.toString();
   }
