@@ -290,11 +290,17 @@ class SbtAuth {
     if (status.qrcodeAuthToken != null && status.qrcodeAuthToken != '') {
       throw SbtAuthException('QrCode used already');
     }
-    final local = core is AuthCore
-        ? (core as AuthCore).localShare
+    dynamic local = core is AuthCore
+        ? (core as AuthCore).localShare!.privateKey
         : (core as LocalAuthCore).localShare;
     if (local == null) throw SbtAuthException('SBTAuth not inited');
-    final encrypted = await encryptMsg(jsonEncode(local.toJson()), password);
+    var encrypted = '';
+    if (core is AuthCore) {
+      encrypted = await encryptMsg(local, password.toString());
+    } else {
+      encrypted =
+      await encryptMsg(jsonEncode(local.toJson()), password.toString());
+    }
     await api.confirmLoginWithQrCode(qrCodeId, encrypted);
   }
 
