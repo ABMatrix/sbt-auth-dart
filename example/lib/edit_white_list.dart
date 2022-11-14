@@ -42,7 +42,7 @@ class EditWhiteListPageState extends State<EditWhiteListPage> {
           widget.id != null
               ? TextButton(
                   onPressed: () {
-                    widget.sbtAuth.api.deleteUserWhiteList(widget.id!);
+                    widget.sbtAuth.deleteWhiteList('code', widget.id!);
                     Navigator.pop(context);
                   },
                   child: const Text(
@@ -75,11 +75,13 @@ class EditWhiteListPageState extends State<EditWhiteListPage> {
       bottomNavigationBar: ElevatedButton(
         onPressed: () {
           widget.id == null
-              ? widget.sbtAuth.api.createUserWhiteList(
+              ? widget.sbtAuth.createWhiteList(
+                  'code',
                   addressController.text.trim(),
                   nameController.text.trim(),
                   networkController.text.trim())
-              : widget.sbtAuth.api.editUserWhiteList(
+              : widget.sbtAuth.editWhiteList(
+                  'code',
                   addressController.text.trim(),
                   nameController.text.trim(),
                   widget.id!,

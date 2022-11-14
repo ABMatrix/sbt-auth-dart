@@ -152,13 +152,11 @@ class SbtAuthApi {
 
   /// Upload shares.
   Future<void> uploadShares(
-    String clientId,
     List<Share> shares,
     String address,
     String privateKey2Fragment,
   ) async {
     final params = {
-      'clientID': clientId,
       'privateKey1Fragment': shares[0].extraData,
       'privateKey2Fragment': privateKey2Fragment,
       'privateKey3Fragment': shares[2].extraData,
@@ -285,11 +283,19 @@ class SbtAuthApi {
 
   /// Create user whiteList
   Future<void> createUserWhiteList(
+    String email,
+    String authCode,
     String address,
     String name,
     String network,
   ) async {
-    final data = {'address': address, 'name': name, 'network': network};
+    final data = {
+      'email': email,
+      'authCode': authCode,
+      'address': address,
+      'name': name,
+      'network': network
+    };
     final response = await http.post(
       Uri.parse('$_baseUrl/user-whitelist/user-whitelist'),
       headers: _headers,
@@ -300,6 +306,8 @@ class SbtAuthApi {
 
   /// Edit user whiteList
   Future<void> editUserWhiteList(
+    String email,
+    String authCode,
     String address,
     String name,
     String userWhitelistID,
@@ -307,6 +315,8 @@ class SbtAuthApi {
     String network,
   ) async {
     final data = {
+      'email': email,
+      'authCode': authCode,
       'address': address,
       'name': name,
       'userWhitelistID': userWhitelistID,
@@ -322,8 +332,16 @@ class SbtAuthApi {
   }
 
   /// Delete user whiteList
-  Future<void> deleteUserWhiteList(String userWhitelistID) async {
-    final data = {'userWhitelistID': userWhitelistID};
+  Future<void> deleteUserWhiteList(
+    String email,
+    String authCode,
+    String userWhitelistID,
+  ) async {
+    final data = {
+      'email': email,
+      'authCode': authCode,
+      'userWhitelistID': userWhitelistID
+    };
     final response = await http.delete(
       Uri.parse('$_baseUrl/user-whitelist/user-whitelist'),
       headers: _headers,
@@ -364,8 +382,16 @@ class SbtAuthApi {
   }
 
   /// User white list switch
-  Future<void> switchUserWhiteList({required bool whitelistSwitch}) async {
-    final data = {'whitelistSwitch': whitelistSwitch};
+  Future<void> switchUserWhiteList(
+    String email,
+    String authCode, {
+    required bool whitelistSwitch,
+  }) async {
+    final data = {
+      'email': email,
+      'authCode': authCode,
+      'whitelistSwitch': whitelistSwitch,
+    };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/whitelist:switch'),
       headers: _headers,

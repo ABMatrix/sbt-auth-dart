@@ -72,6 +72,9 @@ class SbtAuth {
 
   UserInfo? _user;
 
+  /// User email
+  String? userEmail;
+
   /// core
   dynamic get core => _core;
 
@@ -116,6 +119,7 @@ class SbtAuth {
     final token = DBUtil.tokenBox.get(TOKEN_KEY);
     _user = await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
+    userEmail = (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
     var inited = false;
     if (_user!.publicKeyAddress == null) {
       final core = AuthCore(
@@ -129,7 +133,6 @@ class SbtAuth {
       );
       final account = await core.generatePubKey();
       await api.uploadShares(
-        _clientId,
         account.shares,
         account.address,
         jsonEncode(AuthCore.getRemoteKeypair(account.shares[1]).toJson()),
@@ -242,6 +245,9 @@ class SbtAuth {
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     await api.backupShare(privateKey, email, code);
+    _user = await api.getUserInfo();
+    if (_user == null) throw SbtAuthException('User not logined');
+    userEmail = (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
   }
 
   /// Logout
@@ -265,10 +271,10 @@ class SbtAuth {
     }
     var encrypted = '';
     if (core is AuthCore) {
-      encrypted = await encryptMsg(local, password.toString());
+      encrypted = await encryptMsg(local as String, password.toString());
     } else {
-      encrypted =
-          await encryptMsg(jsonEncode(local.toJson()), password.toString());
+      encrypted = await encryptMsg(
+          jsonEncode((local as Share).toJson()), password.toString());
     }
     await api.approveAuthRequest(deviceName, encrypted);
     return password.toString();
@@ -296,10 +302,10 @@ class SbtAuth {
     if (local == null) throw SbtAuthException('SBTAuth not inited');
     var encrypted = '';
     if (core is AuthCore) {
-      encrypted = await encryptMsg(local, password.toString());
+      encrypted = await encryptMsg(local as String, password ?? '');
     } else {
-      encrypted =
-      await encryptMsg(jsonEncode(local.toJson()), password.toString());
+      encrypted = await encryptMsg(
+          jsonEncode((local as Share).toJson()), password ?? '');
     }
     await api.confirmLoginWithQrCode(qrCodeId, encrypted);
   }
@@ -441,9 +447,52 @@ class SbtAuth {
   }
 
   /// Switch white list
-  Future<void> switchWhiteList({required bool whitelistSwitch}) async {
-    await api.switchUserWhiteList(whitelistSwitch: whitelistSwitch);
+  Future<void> switchWhiteList(String email, String code,
+      {required bool whitelistSwitch}) async {
+    await api.switchUserWhiteList(
+      email,
+      code,
+      whitelistSwitch: whitelistSwitch,
+    );
     _user = await api.getUserInfo();
+  }
+
+  /// Create white list
+  Future<void> createWhiteList(
+    String authCode,
+    String address,
+    String name,
+    String network,
+  ) async {
+    await api.createUserWhiteList(userEmail!, authCode, address, name, network);
+  }
+
+  /// Delete white list
+  Future<void> deleteWhiteList(
+    String authCode,
+    String userWhitelistID,
+  ) async {
+    await api.deleteUserWhiteList(userEmail!, authCode, userWhitelistID);
+  }
+
+  /// Edit white list
+  Future<void> editWhiteList(
+    String authCode,
+    String address,
+    String name,
+    String userWhitelistID,
+    String userId,
+    String network,
+  ) async {
+    await api.editUserWhiteList(
+      userEmail!,
+      authCode,
+      address,
+      name,
+      userWhitelistID,
+      userId,
+      network,
+    );
   }
 
   String _getLocale(LocaleType localType) {
