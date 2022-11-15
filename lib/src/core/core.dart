@@ -95,8 +95,7 @@ class AuthCore {
   }
 
   /// Sign method
-  Future<String> signDigest(
-    Uint8List message, {
+  Future<String> signDigest(Uint8List message, {
     int? chainId,
     bool isEIP1559 = false,
   }) async {
@@ -119,8 +118,7 @@ class AuthCore {
   }
 
   /// Sign method
-  Future<Signature> signTransaction(
-    Uint8List message, {
+  Future<Signature> signTransaction(Uint8List message, {
     required int chainId,
     bool isEIP1559 = false,
   }) async {
@@ -203,5 +201,17 @@ class AuthCore {
       throw SbtAuthException((body['msg'] ?? '') as String);
     }
     return uid;
+  }
+
+  /// Get backup privateKey
+  Future<String> getBackupPrivateKey(String aux) async {
+    if (_local == null || _remote == null) {
+      throw SbtAuthException('Please init auth core');
+    }
+    final localKey = shareToKey(_local!);
+    final remoteKey = shareToKey(_remote!, index: 2);
+    final backup = await MultiMpc.recover(
+      [localKey, remoteKey], jsonDecode(aux) as Map<String, dynamic>,);
+    return '0x${backup.sk}';
   }
 }

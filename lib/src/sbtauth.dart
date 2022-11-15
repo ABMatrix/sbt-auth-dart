@@ -244,7 +244,8 @@ class SbtAuth {
       final remoteShareInfo = await api.fetchRemoteShare();
       backupPrivateKey = remoteShareInfo.localAux == ''
           ? (_core as LocalAuthCore).getBackupPrivateKey()
-          : remoteShareInfo.localAux;
+          : await (_core as AuthCore)
+              .getBackupPrivateKey(remoteShareInfo.localAux);
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     await api.backupShare(privateKey, email, code);
@@ -452,7 +453,7 @@ class SbtAuth {
   Future<void> switchWhiteList(String code,
       {required bool whitelistSwitch}) async {
     await api.switchUserWhiteList(
-      userEmail!,
+      userEmail,
       code,
       whitelistSwitch: whitelistSwitch,
     );
@@ -466,7 +467,7 @@ class SbtAuth {
     String name,
     String network,
   ) async {
-    await api.createUserWhiteList(userEmail!, authCode, address, name, network);
+    await api.createUserWhiteList(userEmail, authCode, address, name, network);
   }
 
   /// Delete white list
@@ -474,7 +475,7 @@ class SbtAuth {
     String authCode,
     String userWhitelistID,
   ) async {
-    await api.deleteUserWhiteList(userEmail!, authCode, userWhitelistID);
+    await api.deleteUserWhiteList(userEmail, authCode, userWhitelistID);
   }
 
   /// Edit white list
@@ -487,7 +488,7 @@ class SbtAuth {
     String network,
   ) async {
     await api.editUserWhiteList(
-      userEmail!,
+      userEmail,
       authCode,
       address,
       name,

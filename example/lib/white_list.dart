@@ -41,7 +41,7 @@ class WhiteListPageState extends State<WhiteListPage> {
               value: widget.sbtAuth.user!.userWhitelist,
               onChanged: (v) async {
                 await widget.sbtAuth
-                    .switchWhiteList('email', 'code', whitelistSwitch: v);
+                    .switchWhiteList('code', whitelistSwitch: v);
                 final res = await widget.sbtAuth.api.getUserInfo();
                 setState(() {
                   open = res.userWhitelist;
