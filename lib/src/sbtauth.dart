@@ -73,7 +73,7 @@ class SbtAuth {
   UserInfo? _user;
 
   /// User email
-  String? userEmail;
+  String userEmail = '';
 
   /// core
   dynamic get core => _core;
@@ -119,7 +119,10 @@ class SbtAuth {
     final token = DBUtil.tokenBox.get(TOKEN_KEY);
     _user = await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
-    userEmail = (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
+    if (_user!.userLoginParams.contains('email')) {
+      userEmail =
+          (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
+    }
     var inited = false;
     if (_user!.publicKeyAddress == null) {
       final core = AuthCore(
@@ -245,9 +248,7 @@ class SbtAuth {
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     await api.backupShare(privateKey, email, code);
-    _user = await api.getUserInfo();
-    if (_user == null) throw SbtAuthException('User not logined');
-    userEmail = (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
+    userEmail = email;
   }
 
   /// Logout
@@ -256,6 +257,7 @@ class SbtAuth {
     _user = null;
     _core = null;
     _eventSource?.client.close();
+    userEmail = '';
   }
 
   /// Approve auth request
@@ -447,10 +449,10 @@ class SbtAuth {
   }
 
   /// Switch white list
-  Future<void> switchWhiteList(String email, String code,
+  Future<void> switchWhiteList(String code,
       {required bool whitelistSwitch}) async {
     await api.switchUserWhiteList(
-      email,
+      userEmail!,
       code,
       whitelistSwitch: whitelistSwitch,
     );
