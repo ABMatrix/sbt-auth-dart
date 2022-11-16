@@ -1,5 +1,4 @@
 import 'package:http/http.dart';
-import 'package:sbt_auth_dart/src/core/local_signer.dart';
 import 'package:sbt_auth_dart/src/core/signer.dart';
 import 'package:sbt_auth_dart/src/types/error.dart';
 import 'package:sbt_auth_dart/src/types/exception.dart';
@@ -37,14 +36,12 @@ class SbtAuthProvider {
     required this.signer,
     required this.clientId,
   }) {
-    accounts = (signer is Signer)
-        ? (signer as Signer).getAccounts()
-        : (signer as LocalSigner).getAccounts();
+    accounts = signer.getAccounts();
     _setupJsonRpcClient();
   }
 
   /// SBTAuth signer
-  dynamic signer;
+  Signer signer;
 
   ///  Client id
   late String clientId;
@@ -80,17 +77,13 @@ class SbtAuthProvider {
       case 'personal_sign':
       case 'eth_sign':
         final message = arguments.params[0] as String;
-        return signer is Signer
-            ? await (signer as Signer).personalSign(message)
-            : (signer as LocalSigner).personalSign(message);
+        return await signer.personalSign(message);
       default:
         break;
     }
     if (methods.contains(arguments.method)) {
       final typedData = arguments.params[0] as Map<String, dynamic>;
-      return signer is Signer
-          ? await (signer as Signer).signTypedData(typedData)
-          : (signer as LocalSigner).signTypedData(typedData);
+      return await signer.signTypedData(typedData);
     }
     try {
       return await jsonRpcClient!.call(arguments.method, arguments.params);
@@ -148,12 +141,7 @@ class SbtAuthProvider {
   Future<String?> _signTransaction(RequestArgument argument) async {
     final transaction = argument.params[0] as Map<String, dynamic>;
     await _checkTransaction(transaction);
-    final res = signer is Signer
-        ? await (signer as Signer).signTransaction(
-            UnsignedTransaction.fromMap(transaction),
-            int.parse(chainId),
-          )
-        : (signer as LocalSigner).signTransaction(
+    final res = await signer.signTransaction(
             UnsignedTransaction.fromMap(transaction),
             int.parse(chainId),
           );

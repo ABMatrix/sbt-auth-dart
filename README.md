@@ -108,7 +108,6 @@ await auth.api.sendAuthRequest(deviceName);
 
 // 输入已登录设备生成的授权码 code 获取授权
 await auth.recoverWithDevice(code);
-
 ```
 
 2. 通过保存的私钥碎片恢复,获取碎片 `backupPrivateKey` 和密码 `password` 进行恢复。
@@ -157,6 +156,65 @@ final txHash = await provider.sendTransaction(
     value: value,
     data: data,
     gasPrice: gasPrice);
+```
+
+## 白名单相关功能
+
+交易白名单是更高级的安全模式，开启白名单之后账户只能对白名单内的地址进行转账交易
+
+```dart
+
+// 开启修改关闭等对白名单的操作都需要进行邮箱验证码验证，所以如果用户没有绑定邮箱，则需要提示用户先备份私钥并绑定邮箱
+
+// 输入加密私钥的安全码 password，邮箱 email，邮箱验证码 code
+await sbtauth.sendBackupPrivateKey(password, email, code);
+
+// 开启/关闭白名单
+// 输入邮箱验证码 authCode，白名单开启关闭状态 whitelistSwitch 来开启或关闭白名单
+await sbtauth.switchWhiteList(authCode, whitelistSwitch：whitelistSwitch);
+
+// 获取白名单列表
+// 可选参数 network，输入即可查询对应网络的白名单列表,不输即为所有网络的白名单列表
+fianl whiteList = await sbtauth.api.getUserWhiteList(page, pageSize,network:network);
+
+// 获取单个白名单详情
+// 输入白名单的 id userWhitelistID 来获取详情
+final whiteListItem = await sbtAuth.api.getUserWhiteListItem(userWhitelistID);
+
+// 新增白名单
+// 输入邮箱验证码 authCode，白名单地址 address，白名单名称 name，白名单网络 network 新增白名单地址
+await sbtauth.createWhiteList(authCode,address,name,network)；
+
+// 删除白名单
+// 输入邮箱验证码 authCode，白名单 id userWhitelistID 来删除白名单
+await sbtauth.deleteWhiteList(authCode,userWhitelistID)；
+
+// 修改白名单
+// 输入邮箱验证码 authCode,白名单地址 address，白名单名称 name，白名单 id userWhitelistID，用户 id userId 和白名单网络 network 来修改白名单
+await sbtAuth.editWhiteList(authCode,address,name,userWhitelistID,userId,network);
+```
+
+### 目前支持的网络以及网络名称 network
+
+```
+
+//以太坊
+ETH("Ethereum", 1),
+
+//币安链
+BSC("BNB Smart Chain", 56),
+
+//Polygon
+Polygon("Polygon", 137),
+
+//以太坊测试网 Goerli
+Goerli("Goerli", 5),
+
+//币安链测试网
+BSC_test("BSC testnet", 97),
+
+//Polygon testnet
+Polygon_test("Polygon testnet", 80001),
 ```
 
 [flutter_install_link]: https://docs.flutter.dev/get-started/install

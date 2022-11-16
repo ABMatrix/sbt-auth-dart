@@ -29,7 +29,11 @@ class MpcUrl {
 /// SBTAuth core, manage shares
 class AuthCore {
   /// Auth core
-  AuthCore({required this.mpcUrl, required this.signUrl, required this.token});
+  AuthCore({
+    required this.mpcUrl,
+    required this.signUrl,
+    required this.token,
+  });
 
   /// Local share, saved on user device
   late Share? _local;
@@ -48,6 +52,9 @@ class AuthCore {
 
   /// token
   late String token;
+
+  /// Remote sign
+  bool remoteSign = false;
 
   /// Init core
   /// The most common case is use remote share to init auth core,
@@ -95,47 +102,71 @@ class AuthCore {
   }
 
   /// Sign method
-  Future<String> signDigest(Uint8List message, {
+  Future<String> signDigest(
+    Uint8List message, {
     int? chainId,
     bool isEIP1559 = false,
   }) async {
-    final uid = await _setTaskId(listToHex(message), chainId ?? 0);
     final rawMessage = keccak256(message);
-    final result = await MultiMpc.sign(
-      MultiSignParams(
-        keypair: shareToKey(_local!),
-        msgs: [rawMessage],
-        rawMsg: '',
-        url: mpcUrl.url,
-        get: mpcUrl.get,
-        set: mpcUrl.set,
-        uid: uid,
-        token: 'Bearer $token',
-      ),
-    );
+    var result = '';
+    if (remoteSign) {
+      final uid = await _setTaskId(listToHex(message), chainId ?? 0);
+      result = await MultiMpc.sign(
+        MultiSignParams(
+          keypair: shareToKey(_local!),
+          msgs: [rawMessage],
+          rawMsg: '',
+          url: mpcUrl.url,
+          get: mpcUrl.get,
+          set: mpcUrl.set,
+          uid: uid,
+          token: 'Bearer $token',
+        ),
+      );
+    } else {
+      result = await MultiMpc.localSign(
+        MultiSignLocalParams(
+          [rawMessage],
+          1,
+          [shareToKey(_local!), shareToKey(_remote!)],
+        ),
+      );
+    }
     final signature = Signature.from(hexToBytes(result));
     return bytesToHex(signature.join(), include0x: true);
   }
 
   /// Sign method
-  Future<Signature> signTransaction(Uint8List message, {
+  Future<Signature> signTransaction(
+    Uint8List message, {
     required int chainId,
     bool isEIP1559 = false,
   }) async {
-    final uid = await _setTaskId(listToHex(message), chainId);
     final rawMessage = keccak256(message);
-    final result = await MultiMpc.sign(
-      MultiSignParams(
-        keypair: shareToKey(_local!),
-        msgs: [rawMessage],
-        rawMsg: '',
-        url: mpcUrl.url,
-        get: mpcUrl.get,
-        set: mpcUrl.set,
-        uid: uid,
-        token: 'Bearer $token',
-      ),
-    );
+    var result = '';
+    if (remoteSign) {
+      final uid = await _setTaskId(listToHex(message), chainId);
+      result = await MultiMpc.sign(
+        MultiSignParams(
+          keypair: shareToKey(_local!),
+          msgs: [rawMessage],
+          rawMsg: '',
+          url: mpcUrl.url,
+          get: mpcUrl.get,
+          set: mpcUrl.set,
+          uid: uid,
+          token: 'Bearer $token',
+        ),
+      );
+    } else {
+      result = await MultiMpc.localSign(
+        MultiSignLocalParams(
+          [rawMessage],
+          1,
+          [shareToKey(_local!), shareToKey(_remote!)],
+        ),
+      );
+    }
     final signature = Signature.from(hexToBytes(result));
     var chainIdV = signature.v;
     if (isEIP1559) {
@@ -211,7 +242,13 @@ class AuthCore {
     final localKey = shareToKey(_local!);
     final remoteKey = shareToKey(_remote!, index: 2);
     final backup = await MultiMpc.recover(
-      [localKey, remoteKey], jsonDecode(aux) as Map<String, dynamic>,);
+      [localKey, remoteKey],
+      jsonDecode(aux) as Map<String, dynamic>,
+    );
     return '0x${backup.sk}';
+  }
+
+  void setSignModel(bool signModel) {
+    remoteSign = signModel;
   }
 }

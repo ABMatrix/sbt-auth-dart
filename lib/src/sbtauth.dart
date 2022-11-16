@@ -9,7 +9,6 @@ import 'package:app_links/app_links.dart';
 import 'package:eventsource/eventsource.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
-import 'package:sbt_auth_dart/src/core/local_core.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/api.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -76,9 +75,9 @@ class SbtAuth {
   String userEmail = '';
 
   /// core
-  dynamic get core => _core;
+  AuthCore? get core => _core;
 
-  dynamic _core;
+  late AuthCore? _core;
 
   EventSource? _eventSource;
 
@@ -103,9 +102,7 @@ class SbtAuth {
   SbtAuthProvider? get provider => core == null
       ? null
       : SbtAuthProvider(
-          signer: core is AuthCore
-              ? (core as AuthCore).signer
-              : (core as LocalAuthCore).signer,
+          signer: core!.signer,
           clientId: _clientId,
         );
 
@@ -115,7 +112,7 @@ class SbtAuth {
   }
 
   /// Init sbtauth
-  Future<void> init({bool isLogin = true}) async {
+  Future<void> init() async {
     final token = DBUtil.tokenBox.get(TOKEN_KEY);
     _user = await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
@@ -123,17 +120,16 @@ class SbtAuth {
       userEmail =
           (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
     }
-    var inited = false;
+    final core = AuthCore(
+      mpcUrl: MpcUrl(
+        url: _baseUrl,
+        get: 'user/forward:query:data',
+        set: 'user/forward:data',
+      ),
+      signUrl: '$_baseUrl/user:sign',
+      token: token!,
+    );
     if (_user!.publicKeyAddress == null) {
-      final core = AuthCore(
-        mpcUrl: MpcUrl(
-          url: _baseUrl,
-          get: 'user/forward:query:data',
-          set: 'user/forward:data',
-        ),
-        signUrl: '$_baseUrl/user:sign',
-        token: token!,
-      );
       final account = await core.generatePubKey();
       await api.uploadShares(
         account.shares,
@@ -144,37 +140,16 @@ class SbtAuth {
       user!.backupPrivateKey = '0x${account.shares[2].privateKey}';
     } else {
       final remoteLocalShareInfo = await api.fetchRemoteShare();
-      if (remoteLocalShareInfo.localAux == '') {
-        final core = LocalAuthCore();
-        inited = await core.init(
-          address: remoteLocalShareInfo.address,
-          remote: remoteLocalShareInfo.remote,
-        );
-        if (inited) {
-          _core = core;
-        }
-      } else {
-        final core = AuthCore(
-          mpcUrl: MpcUrl(
-            url: _baseUrl,
-            get: 'user/forward:query:data',
-            set: 'user/forward:data',
-          ),
-          signUrl: '$_baseUrl/user:sign',
-          token: token!,
-        );
-        inited = await core.init(
-          address: remoteLocalShareInfo.address,
-          remote: remoteLocalShareInfo.remote,
-        );
-        if (inited) {
-          _core = core;
-        }
+      final inited = await core.init(
+        address: remoteLocalShareInfo.address,
+        remote: remoteLocalShareInfo.remote,
+      );
+      if (inited) {
+        _core = core;
       }
-    }
-    if (!isLogin) {
       if (!inited) throw SbtAuthException('Init error');
     }
+    core.setSignModel(user!.userWhitelist);
     await _authRequestListener();
   }
 
@@ -242,10 +217,8 @@ class SbtAuth {
     var backupPrivateKey = user?.backupPrivateKey;
     if (backupPrivateKey == null) {
       final remoteShareInfo = await api.fetchRemoteShare();
-      backupPrivateKey = remoteShareInfo.localAux == ''
-          ? (_core as LocalAuthCore).getBackupPrivateKey()
-          : await (_core as AuthCore)
-              .getBackupPrivateKey(remoteShareInfo.localAux);
+      backupPrivateKey =
+          await _core!.getBackupPrivateKey(remoteShareInfo.localAux);
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     await api.backupShare(privateKey, email, code);
@@ -264,21 +237,12 @@ class SbtAuth {
   /// Approve auth request
   Future<String> approveAuthRequest(String deviceName) async {
     if (core == null) throw SbtAuthException('Auth not inited');
-    dynamic local = core is AuthCore
-        ? (core as AuthCore).localShare!.privateKey
-        : (core as LocalAuthCore).localShare;
-    if (local == null) throw SbtAuthException('User not login');
+    final local = core!.localShare!.privateKey;
     final password = StringBuffer();
     for (var i = 0; i < 6; i++) {
       password.write(Random().nextInt(9).toString());
     }
-    var encrypted = '';
-    if (core is AuthCore) {
-      encrypted = await encryptMsg(local as String, password.toString());
-    } else {
-      encrypted = await encryptMsg(
-          jsonEncode((local as Share).toJson()), password.toString());
-    }
+    final encrypted = await encryptMsg(local, password.toString());
     await api.approveAuthRequest(deviceName, encrypted);
     return password.toString();
   }
@@ -299,17 +263,9 @@ class SbtAuth {
     if (status.qrcodeAuthToken != null && status.qrcodeAuthToken != '') {
       throw SbtAuthException('QrCode used already');
     }
-    dynamic local = core is AuthCore
-        ? (core as AuthCore).localShare!.privateKey
-        : (core as LocalAuthCore).localShare;
-    if (local == null) throw SbtAuthException('SBTAuth not inited');
-    var encrypted = '';
-    if (core is AuthCore) {
-      encrypted = await encryptMsg(local as String, password ?? '');
-    } else {
-      encrypted = await encryptMsg(
-          jsonEncode((local as Share).toJson()), password ?? '');
-    }
+    if (core == null) throw SbtAuthException('Auth not inited');
+    final local = core!.localShare!.privateKey;
+    final encrypted = await encryptMsg(local, password);
     await api.confirmLoginWithQrCode(qrCodeId, encrypted);
   }
 
@@ -337,38 +293,26 @@ class SbtAuth {
       (jsonDecode(data) as Map)['encryptedFragment'].toString(),
       code,
     );
-    var inited = false;
-    if (remoteShareInfo.localAux == '' || remoteShareInfo.backupAux == '') {
-      final localShare = Share.fromMap(jsonDecode(shareString) as Map);
-      final core = LocalAuthCore();
-      inited = await core.init(
-        address: remoteShareInfo.address,
-        remote: remoteShareInfo.remote,
-        local: localShare,
-      );
-      _core = core;
-    } else {
-      final localShare = Share(
-        privateKey: shareString,
-        publicKey: remoteShareInfo.remote.publicKey,
-        extraData: remoteShareInfo.localAux,
-      );
-      final core = AuthCore(
-        mpcUrl: MpcUrl(
-          url: _baseUrl,
-          get: 'user/forward:query:data',
-          set: 'user/forward:data',
-        ),
-        signUrl: '$_baseUrl/user:sign',
-        token: token!,
-      );
-      inited = await core.init(
-        address: remoteShareInfo.address,
-        remote: remoteShareInfo.remote,
-        local: localShare,
-      );
-      _core = core;
-    }
+    final localShare = Share(
+      privateKey: shareString,
+      publicKey: remoteShareInfo.remote.publicKey,
+      extraData: remoteShareInfo.localAux,
+    );
+    final core = AuthCore(
+      mpcUrl: MpcUrl(
+        url: _baseUrl,
+        get: 'user/forward:query:data',
+        set: 'user/forward:data',
+      ),
+      signUrl: '$_baseUrl/user:sign',
+      token: token!,
+    );
+    final inited = await core.init(
+      address: remoteShareInfo.address,
+      remote: remoteShareInfo.remote,
+      local: localShare,
+    );
+    _core = core;
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();
   }
@@ -389,50 +333,29 @@ class SbtAuth {
     if (backup.startsWith('0x')) {
       backup = backup.substring(2);
     }
-    var inited = false;
-    if (remoteShareInfo.localAux == '' || remoteShareInfo.backupAux == '') {
-      final core = LocalAuthCore();
-      inited = await core.init(
-        address: remoteShareInfo.address,
-        remote: remoteShareInfo.remote,
-        backup: backup,
-      );
-      _core = core;
-    } else {
-      final core = AuthCore(
-        mpcUrl: MpcUrl(
-          url: _baseUrl,
-          get: 'user/forward:query:data',
-          set: 'user/forward:data',
-        ),
-        signUrl: '$_baseUrl/user:sign',
-        token: token!,
-      );
-      final backShare = Share(
-        privateKey: backup,
-        publicKey: remoteShareInfo.remote.publicKey,
-        extraData: remoteShareInfo.backupAux,
-      );
-      inited = await core.init(
-        address: remoteShareInfo.address,
-        remote: remoteShareInfo.remote,
-        backup: backShare,
-        backupAux: remoteShareInfo.localAux,
-      );
-      _core = core;
-    }
+    final core = AuthCore(
+      mpcUrl: MpcUrl(
+        url: _baseUrl,
+        get: 'user/forward:query:data',
+        set: 'user/forward:data',
+      ),
+      signUrl: '$_baseUrl/user:sign',
+      token: token!,
+    );
+    final backShare = Share(
+      privateKey: backup,
+      publicKey: remoteShareInfo.remote.publicKey,
+      extraData: remoteShareInfo.backupAux,
+    );
+    final inited = await core.init(
+      address: remoteShareInfo.address,
+      remote: remoteShareInfo.remote,
+      backup: backShare,
+      backupAux: remoteShareInfo.localAux,
+    );
+    _core = core;
     if (!inited) throw SbtAuthException('Init error');
   }
-
-  // /// Export privateKey
-  // String exportPrivateKey() {
-  //   return core!.getPrivateKey();
-  // }
-
-  // /// Export backup privateKey
-  // String exportBackupPrivateKey() {
-  //   return core!.getBackupPrivateKey();
-  // }
 
   /// Auth request listener
   Future<void> _authRequestListener() async {
@@ -450,14 +373,17 @@ class SbtAuth {
   }
 
   /// Switch white list
-  Future<void> switchWhiteList(String code,
-      {required bool whitelistSwitch}) async {
+  Future<void> switchWhiteList(
+    String code, {
+    required bool whitelistSwitch,
+  }) async {
     await api.switchUserWhiteList(
       userEmail,
       code,
       whitelistSwitch: whitelistSwitch,
     );
     _user = await api.getUserInfo();
+    core!.setSignModel(user!.userWhitelist);
   }
 
   /// Create white list
@@ -517,4 +443,5 @@ class SbtAuth {
   void _saveToken(String token) {
     DBUtil.tokenBox.put(TOKEN_KEY, token);
   }
+
 }

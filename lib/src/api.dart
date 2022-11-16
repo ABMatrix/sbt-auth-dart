@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
-import 'package:mpc_dart/mpc_dart.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/types/api.dart';
 import 'package:web3dart/crypto.dart';
@@ -353,11 +352,12 @@ class SbtAuthApi {
   /// Get user whiteList
   Future<List<UserWhiteListItem>> getUserWhiteList(
     int pageNo,
-    int pageSize,
-  ) async {
+    int pageSize, {
+    String network = '',
+  }) async {
     final response = await http.get(
       Uri.parse(
-        '$_baseUrl/user-whitelist/user-whitelists?pageNo=$pageNo&pageSize=$pageSize',
+        '$_baseUrl/user-whitelist/user-whitelists?pageNo=$pageNo&pageSize=$pageSize&network=$network',
       ),
       headers: _headers,
     );
