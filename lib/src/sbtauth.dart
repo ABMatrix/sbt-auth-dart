@@ -112,7 +112,7 @@ class SbtAuth {
   }
 
   /// Init sbtauth
-  Future<void> init() async {
+  Future<void> init({bool isLogin = false}) async {
     final token = DBUtil.tokenBox.get(TOKEN_KEY);
     _user = await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
@@ -147,7 +147,7 @@ class SbtAuth {
       if (inited) {
         _core = core;
       }
-      if (!inited) throw SbtAuthException('Init error');
+      if (!inited && !isLogin) throw SbtAuthException('Init error');
     }
     core.setSignModel(user!.userWhitelist);
     await _authRequestListener();
@@ -205,7 +205,7 @@ class SbtAuth {
     }
     if (token == null) return;
     _saveToken(token);
-    await init();
+    await init(isLogin: true);
   }
 
   /// Send privateKey fragment
@@ -443,5 +443,4 @@ class SbtAuth {
   void _saveToken(String token) {
     DBUtil.tokenBox.put(TOKEN_KEY, token);
   }
-
 }
