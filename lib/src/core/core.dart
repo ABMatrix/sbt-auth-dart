@@ -107,14 +107,14 @@ class AuthCore {
     int? chainId,
     bool isEIP1559 = false,
   }) async {
-    final rawMessage = keccak256(message);
+    final hashMessage = keccak256(message);
     var result = '';
     if (remoteSign) {
       final uid = await _setTaskId(listToHex(message), chainId ?? 0);
       result = await MultiMpc.sign(
         MultiSignParams(
           keypair: shareToKey(_local!),
-          msgs: [rawMessage],
+          msgs: [hashMessage],
           rawMsg: '',
           url: mpcUrl.url,
           get: mpcUrl.get,
@@ -126,9 +126,9 @@ class AuthCore {
     } else {
       result = await MultiMpc.localSign(
         MultiSignLocalParams(
-          [rawMessage],
+          [hashMessage],
           1,
-          [shareToKey(_local!), shareToKey(_remote!)],
+          [shareToKey(_local!), shareToKey(_remote!, index: 2)],
         ),
       );
     }
@@ -142,14 +142,14 @@ class AuthCore {
     required int chainId,
     bool isEIP1559 = false,
   }) async {
-    final rawMessage = keccak256(message);
+    final hashMessage = keccak256(message);
     var result = '';
     if (remoteSign) {
       final uid = await _setTaskId(listToHex(message), chainId);
       result = await MultiMpc.sign(
         MultiSignParams(
           keypair: shareToKey(_local!),
-          msgs: [rawMessage],
+          msgs: [hashMessage],
           rawMsg: '',
           url: mpcUrl.url,
           get: mpcUrl.get,
@@ -161,9 +161,9 @@ class AuthCore {
     } else {
       result = await MultiMpc.localSign(
         MultiSignLocalParams(
-          [rawMessage],
+          [hashMessage],
           1,
-          [shareToKey(_local!), shareToKey(_remote!)],
+          [shareToKey(_local!), shareToKey(_remote!, index: 2)],
         ),
       );
     }
