@@ -77,7 +77,7 @@ class SbtAuth {
   /// core
   AuthCore? get core => _core;
 
-  late AuthCore? _core;
+  AuthCore? _core;
 
   EventSource? _eventSource;
 
@@ -120,16 +120,17 @@ class SbtAuth {
       userEmail =
           (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
     }
-    final core = AuthCore(
-      mpcUrl: MpcUrl(
-        url: _baseUrl,
-        get: 'user/forward:query:data',
-        set: 'user/forward:data',
-      ),
-      signUrl: '$_baseUrl/user:sign',
-      token: token!,
-    );
+    var inited = false;
     if (_user!.publicKeyAddress == null) {
+      final core = AuthCore(
+        mpcUrl: MpcUrl(
+          url: _baseUrl,
+          get: 'user/forward:query:data',
+          set: 'user/forward:data',
+        ),
+        signUrl: '$_baseUrl/user:sign',
+        token: token!,
+      );
       final account = await core.generatePubKey();
       await api.uploadShares(
         account.shares,
@@ -140,16 +141,26 @@ class SbtAuth {
       user!.backupPrivateKey = '0x${account.shares[2].privateKey}';
     } else {
       final remoteLocalShareInfo = await api.fetchRemoteShare();
-      final inited = await core.init(
+      final core = AuthCore(
+        mpcUrl: MpcUrl(
+          url: _baseUrl,
+          get: 'user/forward:query:data',
+          set: 'user/forward:data',
+        ),
+        signUrl: '$_baseUrl/user:sign',
+        token: token!,
+      );
+      inited = await core.init(
         address: remoteLocalShareInfo.address,
         remote: remoteLocalShareInfo.remote,
       );
       if (inited) {
         _core = core;
       }
-      if (!inited && !isLogin) throw SbtAuthException('Init error');
     }
-    core.setSignModel(user!.userWhitelist);
+    if (!isLogin) {
+      if (!inited) throw SbtAuthException('Init error');
+    }
     await _authRequestListener();
   }
 
