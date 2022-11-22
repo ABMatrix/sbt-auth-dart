@@ -14,17 +14,10 @@ import 'package:sbt_auth_dart/src/types/api.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Develop app url
-const DEVELOP_APP_URL = 'https://test-connect.sbtauth.io/login';
+const DEVELOP_APP_URL = 'https://test-connect.sbtauth.io';
 
 /// Production app url
-const PRODUCTION_APP_URL = 'https://connect.sbtauth.io/login';
-
-/// Develop one drive url
-const DEVELOP_ONE_DRIVE_URL =
-    'https://test-connect.sbtauth.io/onedrive?scheme=';
-
-/// Production one drive url
-const PRODUCTION_ONE_DRIVE_URL = 'https://connect.sbtauth.io/onedrive?scheme=';
+const PRODUCTION_APP_URL = 'https://connect.sbtauth.io';
 
 /// Login types
 enum LoginType {
@@ -199,7 +192,7 @@ class SbtAuth {
       final deviceName = await getDeviceName();
       final appUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
       final loginUrl =
-          '$appUrl?loginType=${loginType.name}&scheme=$_scheme&deviceName=$deviceName&clientId=$_clientId';
+          '$appUrl/login?loginType=${loginType.name}&scheme=$_scheme&deviceName=$deviceName&clientId=$_clientId';
       unawaited(
         launchUrl(
           Uri.parse(loginUrl),
@@ -388,8 +381,8 @@ class SbtAuth {
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     final baseUrl =
-        developMode ? DEVELOP_ONE_DRIVE_URL : PRODUCTION_ONE_DRIVE_URL;
-    final oneDriveUrl = baseUrl + _scheme;
+        developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
+    final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
     unawaited(
       launchUrl(
         Uri.parse(oneDriveUrl),
