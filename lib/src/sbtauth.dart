@@ -19,6 +19,14 @@ const DEVELOP_APP_URL = 'https://test-connect.sbtauth.io/login';
 /// Production app url
 const PRODUCTION_APP_URL = 'https://connect.sbtauth.io/login';
 
+/// Develop one drive url
+const DEVELOP_ONE_DRIVE_URL =
+    'https://test-connect.sbtauth.io/onedrive?scheme=';
+
+/// Production one drive url
+const PRODUCTION_ONE_DRIVE_URL =
+    'https://test-connect.sbtauth.io/onedrive?scheme=';
+
 /// Login types
 enum LoginType {
   /// Login with google account
@@ -368,6 +376,45 @@ class SbtAuth {
     if (!inited) throw SbtAuthException('Init error');
   }
 
+  /// Backup with one drive
+  Future<void> backupWithOneDrive(String password) async {
+    var backupPrivateKey = user?.backupPrivateKey;
+    if (backupPrivateKey == null) {
+      final remoteShareInfo = await api.fetchRemoteShare();
+      backupPrivateKey =
+          await _core!.getBackupPrivateKey(remoteShareInfo.localAux);
+    }
+    final privateKey = await encryptMsg(backupPrivateKey, password);
+    final baseUrl =
+        developMode ? DEVELOP_ONE_DRIVE_URL : PRODUCTION_ONE_DRIVE_URL;
+    final oneDriveUrl = baseUrl + _scheme;
+    unawaited(
+      launchUrl(
+        Uri.parse(oneDriveUrl),
+        mode: Platform.isAndroid
+            ? LaunchMode.externalApplication
+            : LaunchMode.platformDefault,
+      ),
+    );
+    final completer = Completer<String?>();
+    final appLinks = AppLinks();
+    final linkSubscription = appLinks.uriLinkStream.listen((uri) {
+      if (uri.toString().startsWith(_scheme)) {
+        completer.complete(jsonEncode(uri.queryParameters));
+      }
+    });
+    final data = await completer.future;
+    final dataMap = jsonDecode(data!) as Map<String, dynamic>;
+    final code = dataMap['code'] as String;
+    final state = dataMap['state'] as String;
+    await api.backupByOneDrive(
+        code, state == 'undefined' ? 'state' : state, privateKey);
+    if (Platform.isIOS) {
+      await closeInAppWebView();
+    }
+    await linkSubscription.cancel();
+  }
+
   /// Auth request listener
   Future<void> _authRequestListener() async {
     final token = DBUtil.tokenBox.get(TOKEN_KEY);
@@ -377,8 +424,8 @@ class SbtAuth {
       if (event.event == 'AUTH_APPLY') {
         if (!authRequestStreamController.isClosed && event.id != null) {
           authRequestStreamController.add(event.data!);
+          api.confirmEventReceived(event.id!, 'AUTH_APPLY');
         }
-        api.confirmEventReceived(event.id!, 'AUTH_APPLY');
       }
     });
   }

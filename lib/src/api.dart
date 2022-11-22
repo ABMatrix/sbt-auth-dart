@@ -400,6 +400,25 @@ class SbtAuthApi {
     _checkResponse(response);
   }
 
+  /// Backup by one drive
+  Future<void> backupByOneDrive(
+    String code,
+    String state,
+    String privateKey3Fragment,
+  ) async {
+    final data = {
+      'code': code,
+      'state': state,
+      'privateKey3Fragment': privateKey3Fragment,
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/microsoft:upload-file'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
   static dynamic _checkResponse(Response response) {
     final body =
         jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;

@@ -51,6 +51,12 @@ class _SignPageState extends State<SignPage> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          TextButton(
+              onPressed: () {
+                widget.sbtauth.backupWithOneDrive('123');
+              },
+              child: const Text('Backup by one drive')),
+          const SizedBox(height: 40),
           TextField(
             controller: _emailController,
           ),
