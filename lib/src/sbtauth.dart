@@ -24,8 +24,7 @@ const DEVELOP_ONE_DRIVE_URL =
     'https://test-connect.sbtauth.io/onedrive?scheme=';
 
 /// Production one drive url
-const PRODUCTION_ONE_DRIVE_URL =
-    'https://test-connect.sbtauth.io/onedrive?scheme=';
+const PRODUCTION_ONE_DRIVE_URL = 'https://connect.sbtauth.io/onedrive?scheme=';
 
 /// Login types
 enum LoginType {
