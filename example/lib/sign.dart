@@ -57,6 +57,12 @@ class _SignPageState extends State<SignPage> {
               },
               child: const Text('Backup by one drive')),
           const SizedBox(height: 40),
+          TextButton(
+              onPressed: () {
+                widget.sbtauth.recoverByOneDrive('123');
+              },
+              child: const Text('Recover by one drive')),
+          const SizedBox(height: 40),
           TextField(
             controller: _emailController,
           ),

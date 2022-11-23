@@ -419,6 +419,25 @@ class SbtAuthApi {
     _checkResponse(response);
   }
 
+  /// Recover by one drive
+  Future<String> recoverByOneDrive(
+      String code,
+      String state,
+      ) async {
+    final data = {
+      'code': code,
+      'state': state,
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/microsoft:query-file'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+
+    final res = _checkResponse(response) as String;
+    return res;
+  }
+
   static dynamic _checkResponse(Response response) {
     final body =
         jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;

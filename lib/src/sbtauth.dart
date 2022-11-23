@@ -380,8 +380,7 @@ class SbtAuth {
           await _core!.getBackupPrivateKey(remoteShareInfo.localAux);
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
-    final baseUrl =
-        developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
+    final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
     unawaited(
       launchUrl(
@@ -408,6 +407,38 @@ class SbtAuth {
       await closeInAppWebView();
     }
     await linkSubscription.cancel();
+  }
+
+  /// Recover by one drive
+  Future<void> recoverByOneDrive(String password) async {
+    final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
+    final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
+    unawaited(
+      launchUrl(
+        Uri.parse(oneDriveUrl),
+        mode: Platform.isAndroid
+            ? LaunchMode.externalApplication
+            : LaunchMode.platformDefault,
+      ),
+    );
+    final completer = Completer<String?>();
+    final appLinks = AppLinks();
+    final linkSubscription = appLinks.uriLinkStream.listen((uri) {
+      if (uri.toString().startsWith(_scheme)) {
+        completer.complete(jsonEncode(uri.queryParameters));
+      }
+    });
+    final data = await completer.future;
+    final dataMap = jsonDecode(data!) as Map<String, dynamic>;
+    final code = dataMap['code'] as String;
+    final state = dataMap['state'] as String;
+    final privateKey = await api.recoverByOneDrive(
+        code, state == 'undefined' ? 'state' : state);
+    if (Platform.isIOS) {
+      await closeInAppWebView();
+    }
+    await linkSubscription.cancel();
+    await recoverWidthBackup(privateKey, password);
   }
 
   /// Auth request listener
