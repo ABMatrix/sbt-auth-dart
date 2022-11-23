@@ -66,6 +66,9 @@ class SbtAuth {
   late String _scheme;
   LocaleType _locale = LocaleType.en_US;
 
+  /// Loading stream
+  StreamController<bool> loadingStreamController = StreamController.broadcast();
+
   /// Login user
   UserInfo? get user => _user;
 
@@ -209,6 +212,7 @@ class SbtAuth {
         }
       });
       token = await completer.future;
+      loadingStreamController.add(true);
       if (Platform.isIOS) {
         await closeInAppWebView();
       }
@@ -217,6 +221,7 @@ class SbtAuth {
     if (token == null) return;
     _saveToken(token);
     await init(isLogin: true);
+    loadingStreamController.add(false);
   }
 
   /// Send privateKey fragment
@@ -401,12 +406,14 @@ class SbtAuth {
     final dataMap = jsonDecode(data!) as Map<String, dynamic>;
     final code = dataMap['code'] as String;
     final state = dataMap['state'] as String;
+    loadingStreamController.add(true);
     await api.backupByOneDrive(
         code, state == 'undefined' ? 'state' : state, privateKey);
     if (Platform.isIOS) {
       await closeInAppWebView();
     }
     await linkSubscription.cancel();
+    loadingStreamController.add(false);
   }
 
   /// Recover by one drive
@@ -433,12 +440,16 @@ class SbtAuth {
     final code = dataMap['code'] as String;
     final state = dataMap['state'] as String;
     final privateKey = await api.recoverByOneDrive(
-        code, state == 'undefined' ? 'state' : state);
+      code,
+      state == 'undefined' ? 'state' : state,
+    );
     if (Platform.isIOS) {
       await closeInAppWebView();
     }
+    loadingStreamController.add(true);
     await linkSubscription.cancel();
     await recoverWidthBackup(privateKey, password);
+    loadingStreamController.add(false);
   }
 
   /// Auth request listener
