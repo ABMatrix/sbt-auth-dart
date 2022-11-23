@@ -42,7 +42,6 @@ Share keyToShare(MultiKeypair key) {
   );
 }
 
-
 /// Convert local share to keypair
 KeyPair localShareToKey(Share share, [int index = 1]) {
   return KeyPair(
@@ -62,7 +61,7 @@ MultiKeypair shareToKey(Share share, {int index = 1}) {
       partyInd: index,
       threshold: 1,
       sharCount: 3,
-      aux: jsonDecode(share.extraData) as Map<String,dynamic>);
+      aux: jsonDecode(share.extraData) as Map<String, dynamic>);
 }
 
 /// Keccak hash
@@ -187,12 +186,8 @@ Future<String> decryptMsg(String encrypted, String password) async {
     final decrypted = await decrypt(encrypted, password);
     return decrypted;
   } catch (e) {
-    if (e.toString().contains('Invalid or corrupted pad block')) {
-      throw SbtAuthException('Verification Code error');
-    }
-    rethrow;
+    throw SbtAuthException('Verification Code error');
   }
-
 }
 
 /// List to hex
