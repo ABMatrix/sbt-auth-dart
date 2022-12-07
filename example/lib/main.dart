@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
           context,
           MaterialPageRoute(
             builder: (context) => SignPage(
-              address: sbtAuth.user!.publicKeyAddress!['EVM'] ??
+              address: sbtAuth.user!.publicKeyAddress['EVM'] ??
                   sbtAuth.core!.getAddress(),
               sbtauth: sbtAuth,
             ),
@@ -163,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
             context,
             MaterialPageRoute(
               builder: (context) => SignPage(
-                address: sbtAuth.user!.publicKeyAddress!['EVM'] ??
+                address: sbtAuth.user!.publicKeyAddress['EVM'] ??
                     sbtAuth.core!.getAddress(),
                 sbtauth: sbtAuth,
               ),

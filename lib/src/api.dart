@@ -36,6 +36,23 @@ class SbtAuthApi {
         'Accept-Language': _local
       };
 
+  /// Query user
+  static Future<CheckResult> queryUser(
+    String email, {
+    required String baseUrl,
+    required String localLan,
+  }) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/user/user:email?email=$email'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Accept-Language': localLan
+      },
+    );
+    final res = _checkResponse(response) as Map<String, dynamic>;
+    return CheckResult.fromMap(res);
+  }
+
   /// Send email verification code
   static Future<void> sendEmailCode({
     required String email,
@@ -89,7 +106,6 @@ class SbtAuthApi {
     String encryptedFragment,
   ) async {
     final data = {'qrCodeID': qrCodeId, 'encryptedFragment': encryptedFragment};
-
     final response = await http.post(
       Uri.parse('$_baseUrl/user/confirm:qrcode'),
       headers: _headers,

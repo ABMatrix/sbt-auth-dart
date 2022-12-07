@@ -89,17 +89,17 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
                   errorAnimationController: errorController,
                   controller: textEditingController,
                   onCompleted: (v) {
-                    print("Completed");
-                    print(currentText);
+                    debugPrint("Completed");
+                    debugPrint(currentText);
                   },
                   onChanged: (value) {
-                    print(value);
+                    debugPrint(value);
                     setState(() {
                       currentText = value;
                     });
                   },
                   beforeTextPaste: (text) {
-                    print("Allowing to paste $text");
+                    debugPrint("Allowing to paste $text");
                     return true;
                   },
                   appContext: context,
@@ -151,7 +151,7 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
                 MaterialPageRoute(
                     builder: (context) => SignPage(
                           address:
-                              widget.auth.user!.publicKeyAddress!['EVM'] ?? '',
+                              widget.auth.user!.publicKeyAddress['EVM'] ?? '',
                           sbtauth: widget.auth,
                         )));
           }

@@ -96,6 +96,9 @@ class SbtAuth {
 
   Timer? _timer;
 
+  /// check user result
+  CheckResult checkResult = CheckResult(exist: false, password: false);
+
   /// SBTAuth api
   SbtAuthApi get api {
     final token = DBUtil.tokenBox.get(TOKEN_KEY);
@@ -118,6 +121,15 @@ class SbtAuth {
   /// Init sbtauth hive
   static Future<void> initHive() async {
     await DBUtil.init();
+  }
+
+  /// check user
+  Future<void> checkUser(String email, {String localLan = 'en-US'}) async {
+    checkResult = await SbtAuthApi.queryUser(
+      email,
+      baseUrl: _baseUrl,
+      localLan: localLan,
+    );
   }
 
   /// Init sbtauth
