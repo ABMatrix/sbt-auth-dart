@@ -150,7 +150,8 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => SignPage(
-                          address: widget.auth.user!.publicKeyAddress!,
+                          address:
+                              widget.auth.user!.publicKeyAddress!['EVM'] ?? '',
                           sbtauth: widget.auth,
                         )));
           }

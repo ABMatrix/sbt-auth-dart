@@ -99,6 +99,22 @@ class SbtAuthApi {
     _checkResponse(response) as Map<String, dynamic>;
   }
 
+  /// Get qrcode
+  Future<String> getLoginQrcode(String clientID) async {
+    final deviceName = await getDeviceName();
+    final data = {
+      'deviceName': deviceName,
+      'clientID': clientID,
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/create:qrcode'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    final qrcode = _checkResponse(response) as String;
+    return qrcode;
+  }
+
   /// Get qrcode status
   Future<QrCodeStatus> getQrCodeStatus(String qrCodeId) async {
     final response = await http.get(
@@ -151,10 +167,8 @@ class SbtAuthApi {
 
   /// Upload shares.
   Future<void> uploadShares(
-    List<Share> shares,
-    String address,
-    String privateKey2Fragment,
-  ) async {
+      List<Share> shares, String address, String privateKey2Fragment,
+      {String keyType = 'EVM'}) async {
     final params = {
       'privateKey1Fragment': shares[0].extraData,
       'privateKey2Fragment': privateKey2Fragment,
@@ -168,6 +182,7 @@ class SbtAuthApi {
         include0x: true,
       ),
       'publicKeyAddress': address,
+      'keyType': keyType
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/private-key-fragment-info'),
@@ -178,9 +193,9 @@ class SbtAuthApi {
   }
 
   /// Fetch remote share
-  Future<RemoteShareInfo> fetchRemoteShare() async {
+  Future<RemoteShareInfo> fetchRemoteShare({String keyType = 'EVM'}) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/user/private-key-fragment-info'),
+      Uri.parse('$_baseUrl/user/private-key-fragment-info?keyType=$keyType'),
       headers: _headers,
     );
     final result = _checkResponse(response) as Map<String, dynamic>;
@@ -421,9 +436,9 @@ class SbtAuthApi {
 
   /// Recover by one drive
   Future<String> recoverByOneDrive(
-      String code,
-      String state,
-      ) async {
+    String code,
+    String state,
+  ) async {
     final data = {
       'code': code,
       'state': state,

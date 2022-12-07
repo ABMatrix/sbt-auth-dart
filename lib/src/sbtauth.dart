@@ -7,6 +7,7 @@ import 'dart:math';
 
 import 'package:app_links/app_links.dart';
 import 'package:eventsource/eventsource.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
@@ -69,6 +70,9 @@ class SbtAuth {
   /// Loading stream
   StreamController<bool> loadingStreamController = StreamController.broadcast();
 
+  /// Login stream
+  StreamController<bool> loginStreamController = StreamController.broadcast();
+
   /// Login user
   UserInfo? get user => _user;
 
@@ -89,6 +93,8 @@ class SbtAuth {
       StreamController.broadcast();
 
   String get _baseUrl => developMode ? DEVELOP_BASE_URL : PRODUCTION_BASE_URL;
+
+  Timer? _timer;
 
   /// SBTAuth api
   SbtAuthApi get api {
@@ -124,7 +130,7 @@ class SbtAuth {
           (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
     }
     var inited = false;
-    if (_user!.publicKeyAddress == null) {
+    if (_user!.publicKeyAddress.isEmpty) {
       final core = AuthCore(
         mpcUrl: MpcUrl(
           url: _baseUrl,
@@ -217,6 +223,7 @@ class SbtAuth {
       }
       await linkSubscription.cancel();
     }
+    _timer?.cancel();
     loadingStreamController.add(true);
     try {
       if (token == null) return;
@@ -266,6 +273,25 @@ class SbtAuth {
     final encrypted = await encryptMsg(local, password.toString());
     await api.approveAuthRequest(deviceName, encrypted);
     return password.toString();
+  }
+
+  /// Get login QrCode
+  Future<String> getLoginQrCode() async {
+    final qrCodeId = await api.getLoginQrcode(_clientId);
+    final password = StringBuffer();
+    for (var i = 0; i < 6; i++) {
+      password.write(Random().nextInt(9).toString());
+    }
+    final controller = StreamController<StreamResponse>();
+    final completer = Completer<String?>();
+    _queryWhetherSuccess(password.toString(), qrCodeId, controller)
+        .listen((event) {
+      if (event.data != null) {
+        completer.complete(event.data);
+      }
+    });
+    final dataMap = {'qrCodeId': qrCodeId, 'password': password.toString()};
+    return jsonEncode(dataMap);
   }
 
   /// Get login with qrcode encrypted message
@@ -553,4 +579,102 @@ class SbtAuth {
   void _saveToken(String token) {
     DBUtil.tokenBox.put(TOKEN_KEY, token);
   }
+
+  // login success
+  Stream<StreamResponse> _queryWhetherSuccess(
+    String password,
+    String qrcode,
+    StreamController<StreamResponse> controller,
+  ) {
+    var counter = 0;
+    const interval = Duration(seconds: 2);
+    var result = QrCodeStatus(
+      qrcodeName: '',
+      qrcodeClientID: '',
+      qrcodeExpireAt: '',
+      fail: true,
+      qrcodeEncryptedFragment: '',
+    );
+
+    Future<void> tick(_) async {
+      counter++;
+      debugPrint('trying $counter time');
+
+      try {
+        result = await api.getQrCodeStatus(qrcode);
+      } catch (e) {
+        _timer?.cancel();
+      }
+      if (result.qrcodeEncryptedFragment != '') {
+        final token = result.qrcodeAuthToken!;
+        _saveToken(token);
+        _user = await api.getUserInfo();
+        final shareData = result.qrcodeEncryptedFragment!;
+        final remoteShareInfo = await api.fetchRemoteShare();
+        final shareString = await decryptMsg(
+          shareData,
+          password,
+        );
+        final localShare = Share(
+          privateKey: shareString,
+          publicKey: remoteShareInfo.remote.publicKey,
+          extraData: remoteShareInfo.localAux,
+        );
+        final core = AuthCore(
+          mpcUrl: MpcUrl(
+            url: _baseUrl,
+            get: 'user/forward:query:data',
+            set: 'user/forward:data',
+          ),
+          signUrl: '$_baseUrl/user:sign',
+          token: token,
+        );
+        final inited = await core.init(
+          address: remoteShareInfo.address,
+          remote: remoteShareInfo.remote,
+          local: localShare,
+        );
+        _core = core;
+        if (!inited) throw SbtAuthException('Init error');
+        await _authRequestListener();
+        loginStreamController.add(true);
+      }
+
+      if (result.qrcodeEncryptedFragment != '') {
+        _timer?.cancel();
+      }
+    }
+
+    void startTimer() {
+      _timer = Timer.periodic(interval, tick);
+    }
+
+    void stopTimer() {
+      _timer?.cancel();
+      _timer = null;
+    }
+
+    controller = StreamController<StreamResponse>(
+        onListen: startTimer,
+        onPause: stopTimer,
+        onResume: startTimer,
+        onCancel: stopTimer);
+
+    return controller.stream;
+  }
+}
+
+/// Stream Response
+class StreamResponse {
+  /// Stream Response
+  StreamResponse(this.time, this.data);
+
+  /// time
+  final int time;
+
+  /// data
+  final FutureOr<String?>? data;
+
+  @override
+  String toString() => 'StreamResponse(time: $time, data: $data)';
 }

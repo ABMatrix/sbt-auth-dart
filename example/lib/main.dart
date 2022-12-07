@@ -5,6 +5,7 @@ import 'package:example/confirm_auth.dart';
 import 'package:example/grant_authorization.dart';
 import 'package:example/sign.dart';
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
 void main() async {
@@ -41,10 +42,12 @@ class _MyHomePageState extends State<MyHomePage> {
   late TextEditingController _controller;
   final sbtAuth =
       SbtAuth(developMode: true, clientId: 'Demo', scheme: 'sbtauth');
+  String code = '';
 
   @override
   void initState() {
     super.initState();
+    getCode();
     _controller = TextEditingController();
     _controller.text = '30min18@gmail.com';
     sbtAuth.authRequestStreamController.stream.listen((event) {
@@ -58,6 +61,27 @@ class _MyHomePageState extends State<MyHomePage> {
                       auth: sbtAuth,
                     )));
       }
+    });
+    sbtAuth.loginStreamController.stream.listen((event) {
+      if (event) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SignPage(
+              address: sbtAuth.user!.publicKeyAddress!['EVM'] ??
+                  sbtAuth.core!.getAddress(),
+              sbtauth: sbtAuth,
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  getCode() async {
+    final res = await sbtAuth.getLoginQrCode();
+    setState(() {
+      code = res;
     });
   }
 
@@ -79,6 +103,15 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              GestureDetector(
+                onTap: () async {
+                  final res = await sbtAuth.getLoginQrCode();
+                  setState(() {
+                    code = res;
+                  });
+                },
+                child: QrImage(data: code),
+              ),
               TextField(
                 controller: _controller,
                 decoration: const InputDecoration(
@@ -130,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
             context,
             MaterialPageRoute(
               builder: (context) => SignPage(
-                address: sbtAuth.user!.publicKeyAddress ??
+                address: sbtAuth.user!.publicKeyAddress!['EVM'] ??
                     sbtAuth.core!.getAddress(),
                 sbtauth: sbtAuth,
               ),

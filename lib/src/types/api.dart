@@ -3,7 +3,7 @@ import 'package:sbt_auth_dart/src/types/account.dart';
 /// Remote share info
 class RemoteShareInfo {
   /// Remote share info stored on server.
-  RemoteShareInfo(this.address, this.remote,this.localAux,this.backupAux);
+  RemoteShareInfo(this.address, this.remote, this.localAux, this.backupAux);
 
   /// Wallet address.
   final String address;
@@ -41,7 +41,7 @@ class UserInfo {
       avatar: map['avatar'] as String?,
       userLoginParams: map['userLoginParams'] as String,
       userLoginType: map['userLoginType'] as String,
-      publicKeyAddress: map['publicKeyAddress'] as String?,
+      publicKeyAddress: map['publicKeyAddress'] as Map<String, dynamic>,
       userWhitelist: (map['userWhitelist'] ?? false) as bool,
     );
   }
@@ -65,7 +65,7 @@ class UserInfo {
   String userLoginType;
 
   /// User wallet address
-  String? publicKeyAddress;
+  Map<String, dynamic> publicKeyAddress;
 
   /// Backup private key
   String? backupPrivateKey;
@@ -82,6 +82,7 @@ class QrCodeStatus {
     required this.qrcodeClientID,
     required this.qrcodeExpireAt,
     required this.fail,
+    required this.qrcodeEncryptedFragment,
     this.qrcodeAuthToken,
   });
 
@@ -92,6 +93,7 @@ class QrCodeStatus {
       qrcodeClientID: (map['qrcodeClientID'] ?? '') as String,
       qrcodeExpireAt: (map['qrcodeExpireAt'] ?? '') as String,
       qrcodeAuthToken: (map['qrcodeAuthToken'] ?? '') as String,
+      qrcodeEncryptedFragment: (map['qrcodeEncryptedFragment'] ?? '') as String,
       fail: (map['fail'] ?? false) as bool,
     );
   }
@@ -110,6 +112,9 @@ class QrCodeStatus {
 
   /// QrCode
   bool fail;
+
+  /// qrcode EncryptedFragment
+  String? qrcodeEncryptedFragment;
 }
 
 /// Device
