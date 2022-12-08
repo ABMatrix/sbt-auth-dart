@@ -311,11 +311,12 @@ class SbtAuthApi {
       'type': 'PRIVATE_KEY1',
       'keyType': keyType
     };
-    await http.post(
+    final response = await http.post(
       Uri.parse('$_baseUrl/user/verify:identity'),
       headers: _headers,
       body: jsonEncode(data),
     );
+    _checkResponse(response);
   }
 
   /// Create user whiteList
