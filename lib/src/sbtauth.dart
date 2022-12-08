@@ -326,7 +326,7 @@ class SbtAuth {
     if (password == null || qrCodeId == null) {
       throw SbtAuthException('Invalid QrCode');
     }
-    final status = await api.getQrCodeStatus(qrCodeId);
+    final status = await SbtAuthApi.getQrCodeStatus(_baseUrl, qrCodeId);
     // if (int.parse(status.qrcodeExpireAt) >=
     //     DateTime.now().millisecondsSinceEpoch) {
     //   throw SbtAuthException('QrCode expired');
@@ -625,7 +625,7 @@ class SbtAuth {
       debugPrint('trying $counter time');
 
       try {
-        result = await api.getQrCodeStatus(qrcode);
+        result = await SbtAuthApi.getQrCodeStatus(_baseUrl, qrcode);
       } catch (e) {
         _timer?.cancel();
       }

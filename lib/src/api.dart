@@ -133,10 +133,13 @@ class SbtAuthApi {
   }
 
   /// Get qrcode status
-  Future<QrCodeStatus> getQrCodeStatus(String qrCodeId) async {
+  static Future<QrCodeStatus> getQrCodeStatus(
+      String baseUrl, String qrCodeId) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/user/qrcode?qrCodeID=$qrCodeId'),
-      headers: _headers,
+      Uri.parse('$baseUrl/user/qrcode?qrCodeID=$qrCodeId'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
     );
 
     final result = _checkResponse(response) as Map<String, dynamic>;
