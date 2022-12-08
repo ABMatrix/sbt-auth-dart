@@ -115,15 +115,17 @@ class SbtAuthApi {
   }
 
   /// Get qrcode
-  Future<String> getLoginQrcode(String clientID) async {
+  static Future<String> getLoginQrcode(String baseUrl, String clientID) async {
     final deviceName = await getDeviceName();
     final data = {
       'deviceName': deviceName,
       'clientID': clientID,
     };
     final response = await http.post(
-      Uri.parse('$_baseUrl/user/create:qrcode'),
-      headers: _headers,
+      Uri.parse('$baseUrl/user/create:qrcode'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
       body: jsonEncode(data),
     );
     final qrcode = _checkResponse(response) as String;
@@ -294,20 +296,20 @@ class SbtAuthApi {
   }
 
   /// Verify identity
-  Future<void> verifyIdentity(Share share) async {
+  Future<void> verifyIdentity(Share share, {String keyType = 'EVM'}) async {
     final data = {
       'privateKeyFragmentHash': bytesToHex(
         hashMessage(ascii.encode(jsonEncode(share.toJson()))),
         include0x: true,
       ),
-      'type': 'PRIVATE_KEY1'
+      'type': 'PRIVATE_KEY1',
+      'keyType': keyType
     };
-    final response = await http.post(
+    await http.post(
       Uri.parse('$_baseUrl/user/verify:identity'),
       headers: _headers,
       body: jsonEncode(data),
     );
-    _checkResponse(response);
   }
 
   /// Create user whiteList

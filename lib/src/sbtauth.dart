@@ -287,7 +287,7 @@ class SbtAuth {
 
   /// Get login QrCode
   Future<String> getLoginQrCode() async {
-    final qrCodeId = await api.getLoginQrcode(_clientId);
+    final qrCodeId = await SbtAuthApi.getLoginQrcode(_baseUrl, _clientId);
     final password = StringBuffer();
     for (var i = 0; i < 6; i++) {
       password.write(Random().nextInt(9).toString());
