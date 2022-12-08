@@ -37,7 +37,7 @@ class SbtAuthApi {
       };
 
   /// Query user
-  static Future<CheckResult> queryUser(
+  static Future<bool> queryUser(
     String email, {
     required String baseUrl,
     required String localLan,
@@ -49,8 +49,7 @@ class SbtAuthApi {
         'Accept-Language': localLan
       },
     );
-    final res = _checkResponse(response) as Map<String, dynamic>;
-    return CheckResult.fromMap(res);
+    return _checkResponse(response) as bool;
   }
 
   /// Send email verification code
@@ -435,12 +434,14 @@ class SbtAuthApi {
   Future<void> backupByOneDrive(
     String code,
     String state,
-    String privateKey3Fragment,
-  ) async {
+    String privateKey3Fragment, {
+    String keyType = 'EVM',
+  }) async {
     final data = {
       'code': code,
       'state': state,
       'privateKey3Fragment': privateKey3Fragment,
+      'ketType': keyType
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/microsoft:upload-file'),
@@ -453,12 +454,10 @@ class SbtAuthApi {
   /// Recover by one drive
   Future<String> recoverByOneDrive(
     String code,
-    String state,
-  ) async {
-    final data = {
-      'code': code,
-      'state': state,
-    };
+    String state, {
+    String keyType = 'EVM',
+  }) async {
+    final data = {'code': code, 'state': state, 'keyType': keyType};
     final response = await http.post(
       Uri.parse('$_baseUrl/user/microsoft:query-file'),
       headers: _headers,

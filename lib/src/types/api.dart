@@ -187,23 +187,3 @@ class UserWhiteListItem {
   /// Address
   String userWhitelistAddress;
 }
-
-/// Query user result
-class CheckResult {
-  /// Query user result
-  CheckResult({required this.exist, required this.password});
-
-  /// from map
-  factory CheckResult.fromMap(Map<String, dynamic> map) {
-    return CheckResult(
-      exist: (map['exist'] ?? false) as bool,
-      password: (map['password'] ?? false) as bool,
-    );
-  }
-
-  /// Exist
-  late bool exist;
-
-  /// Password
-  late bool password;
-}
