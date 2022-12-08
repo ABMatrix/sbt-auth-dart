@@ -183,6 +183,20 @@ class SbtAuth {
     await _authRequestListener();
   }
 
+  /// Timer cancel
+  void timerCancel() {
+    _timer?.cancel();
+  }
+
+  ///Reset password
+  Future<void> resetPwd(
+    String emailAddress,
+    String authCode,
+    String password,
+  ) async {
+    await SbtAuthApi.resetPassword(emailAddress, authCode, password, _baseUrl);
+  }
+
   /// Login
   Future<void> login(
     LoginType loginType, {

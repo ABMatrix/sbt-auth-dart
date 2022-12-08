@@ -164,10 +164,11 @@ class SbtAuthApi {
   }
 
   /// Reset password
-  Future<void> resetPassword(
+  static Future<void> resetPassword(
     String emailAddress,
     String authCode,
     String password,
+    String baseUrl,
   ) async {
     final data = {
       'emailAddress': emailAddress,
@@ -175,8 +176,10 @@ class SbtAuthApi {
       'password': password
     };
     final response = await http.post(
-      Uri.parse('$_baseUrl/user/reset:password'),
-      headers: _headers,
+      Uri.parse('$baseUrl/user/reset:password'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
       body: jsonEncode(data),
     );
     _checkResponse(response);
