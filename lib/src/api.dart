@@ -441,7 +441,7 @@ class SbtAuthApi {
       'code': code,
       'state': state,
       'privateKey3Fragment': privateKey3Fragment,
-      'ketType': keyType
+      'keyType': keyType
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/microsoft:upload-file'),
