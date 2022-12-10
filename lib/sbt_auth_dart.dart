@@ -12,6 +12,7 @@ export 'src/core/core.dart';
 export 'src/provider/provider.dart';
 export 'src/sbtauth.dart';
 export 'src/types/account.dart';
+export 'src/types/api.dart';
 export 'src/types/error.dart';
 export 'src/types/exception.dart';
 export 'src/types/provider.dart';
