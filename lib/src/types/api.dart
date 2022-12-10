@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:sbt_auth_dart/src/types/account.dart';
 
 /// Remote share info
@@ -255,4 +257,24 @@ class TokenInfo {
 
   /// Total supply
   String? totalSupply;
+
+  /// to json
+  String toJson() => json.encode(toMap());
+
+  /// to map
+  Map<String, dynamic> toMap() {
+    return {
+      'tokenInfoID': tokenInfoID,
+      'tokenInfoName': tokenInfoName,
+      'tokenInfoNetwork': tokenInfoNetwork,
+      'tokenInfoAddress': tokenInfoAddress,
+      'tokenInfoSymbol': tokenInfoSymbol,
+      'tokenInfoIconUrl': tokenInfoIconUrl,
+      'tokenInfoTokenType': tokenInfoTokenType,
+      'decimals': decimals,
+      'description': description,
+      'additionalInfo': additionalInfo,
+      'totalSupply': totalSupply,
+    };
+  }
 }
