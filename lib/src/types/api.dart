@@ -187,3 +187,72 @@ class UserWhiteListItem {
   /// Address
   String userWhitelistAddress;
 }
+
+/// Token info
+class TokenInfo {
+
+  /// Token info
+  TokenInfo({
+    required this.tokenInfoID,
+    required this.tokenInfoName,
+    required this.tokenInfoNetwork,
+    required this.tokenInfoAddress,
+    required this.tokenInfoSymbol,
+    required this.tokenInfoIconUrl,
+    required this.tokenInfoTokenType,
+    required this.decimals,
+    required this.description,
+    required this.additionalInfo,
+    required this.totalSupply,
+  });
+
+  /// TokenInfo from map
+  factory TokenInfo.fromMap(Map<String, dynamic> map) {
+    return TokenInfo(
+      tokenInfoID: (map['tokenInfoID'] ?? '') as String,
+      tokenInfoName: (map['tokenInfoName'] ?? '') as String,
+      tokenInfoNetwork: (map['tokenInfoNetwork'] ?? '') as String,
+      tokenInfoAddress: (map['tokenInfoAddress'] ?? '') as String,
+      tokenInfoSymbol: (map['tokenInfoSymbol'] ?? '') as String,
+      tokenInfoIconUrl: (map['tokenInfoIconUrl'] ?? '') as String,
+      tokenInfoTokenType: (map['tokenInfoTokenType'] ?? '') as String,
+      decimals: (map['decimals'] ?? 0) as int,
+      description: (map['description'] ?? '') as String,
+      additionalInfo: (map['additionalInfo'] ?? '') as String,
+      totalSupply: (map['totalSupply'] ?? '') as String,
+    );
+  }
+
+  /// Id
+  String? tokenInfoID;
+
+  /// Name
+  String? tokenInfoName;
+
+  /// Network
+  String? tokenInfoNetwork;
+
+  /// Address
+  String? tokenInfoAddress;
+
+  /// Symbol
+  String? tokenInfoSymbol;
+
+  /// Icon
+  String? tokenInfoIconUrl;
+
+  /// Type
+  String? tokenInfoTokenType;
+
+  /// Decimals
+  int? decimals;
+
+  /// Description
+  String? description;
+
+  /// Additional info
+  String? additionalInfo;
+
+  /// Total supply
+  String? totalSupply;
+}

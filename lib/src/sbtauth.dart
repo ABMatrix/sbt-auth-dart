@@ -88,6 +88,9 @@ class SbtAuth {
 
   EventSource? _eventSource;
 
+  /// Token list
+  List<TokenInfo> tokenList = [];
+
   /// Grant authorization listen controller
   StreamController<String> authRequestStreamController =
       StreamController.broadcast();
@@ -603,6 +606,19 @@ class SbtAuth {
   void _saveToken(String token) {
     DBUtil.tokenBox.put(TOKEN_KEY, token);
   }
+
+  /// Get token list
+  Future<void> getTokenList(
+    int pageNo,
+    int pageSize,
+    String network,
+    String condition,
+  ) async {
+    tokenList = await api.getTokenList(pageNo, pageSize, network, condition);
+  }
+
+  /// Import token
+
 
   // login success
   Stream<StreamResponse> _queryWhetherSuccess(

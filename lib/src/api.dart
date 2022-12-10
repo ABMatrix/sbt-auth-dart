@@ -477,6 +477,37 @@ class SbtAuthApi {
     return res;
   }
 
+  /// Get ERC20 list
+  Future<List<TokenInfo>> getTokenList(
+    int pageNo,
+    int pageSize,
+    String network,
+    String condition,
+  ) async {
+    final response = await http.get(
+      Uri.parse(
+        '$_baseUrl/token-info/token-infos?pageNo=$pageNo&pageSize=$pageSize&network=$network&condition=$condition',
+      ),
+      headers: _headers,
+    );
+    final data = _checkResponse(response) as Map<String, dynamic>;
+    return [
+      for (var t in data['items'] as List)
+        TokenInfo.fromMap(t as Map<String, dynamic>)
+    ];
+  }
+
+  /// Import token
+  Future<void> importToken(String network, String address) async {
+    final data = {'tokenInfoNetwork': network, 'tokenInfoAddress': address};
+    final response = await http.post(
+      Uri.parse('$_baseUrl/token-info/token:import'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response) as String;
+  }
+
   static dynamic _checkResponse(Response response) {
     final body =
         jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
