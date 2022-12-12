@@ -190,18 +190,68 @@ class UserWhiteListItem {
   String userWhitelistAddress;
 }
 
+/// Token list info
+class TokenListInfo {
+  /// Token list info
+  TokenListInfo({
+    required this.hasPrev,
+    required this.pageNo,
+    required this.totalPage,
+    required this.pageSize,
+    required this.hasNext,
+    required this.totalCount,
+    required this.items,
+  });
+
+  /// TokenListInfo from map
+  factory TokenListInfo.fromMap(Map<String, dynamic> map) {
+    return TokenListInfo(
+      hasPrev: (map['hasPrev'] ?? false) as bool,
+      pageNo: (map['pageNo'] ?? 1) as int,
+      totalPage: (map['totalPage'] ?? 0) as int,
+      pageSize: (map['pageSize'] ?? 0) as int,
+      hasNext: (map['hasNext'] ?? false) as bool,
+      totalCount: (map['totalCount'] ?? 0) as int,
+      items: [
+        for (var t in (map['items'] ?? []) as List)
+          TokenInfo.fromMap(t as Map<String, dynamic>)
+      ],
+    );
+  }
+
+  /// Has prev
+  late bool hasPrev;
+
+  /// PageNo
+  late int pageNo;
+
+  /// Total page
+  late int totalPage;
+
+  /// Page size
+  late int pageSize;
+
+  /// Has next
+  late bool hasNext;
+
+  /// Total count
+  late int totalCount;
+
+  /// Items
+  late List<TokenInfo> items;
+}
+
 /// Token info
 class TokenInfo {
-
   /// Token info
   TokenInfo({
-    required this.tokenInfoID,
-    required this.tokenInfoName,
-    required this.tokenInfoNetwork,
-    required this.tokenInfoAddress,
-    required this.tokenInfoSymbol,
-    required this.tokenInfoIconUrl,
-    required this.tokenInfoTokenType,
+    required this.name,
+    required this.tokenID,
+    required this.symbol,
+    required this.iconUrl,
+    required this.network,
+    required this.address,
+    required this.tokenType,
     required this.decimals,
     required this.description,
     required this.additionalInfo,
@@ -211,13 +261,13 @@ class TokenInfo {
   /// TokenInfo from map
   factory TokenInfo.fromMap(Map<String, dynamic> map) {
     return TokenInfo(
-      tokenInfoID: (map['tokenInfoID'] ?? '') as String,
-      tokenInfoName: (map['tokenInfoName'] ?? '') as String,
-      tokenInfoNetwork: (map['tokenInfoNetwork'] ?? '') as String,
-      tokenInfoAddress: (map['tokenInfoAddress'] ?? '') as String,
-      tokenInfoSymbol: (map['tokenInfoSymbol'] ?? '') as String,
-      tokenInfoIconUrl: (map['tokenInfoIconUrl'] ?? '') as String,
-      tokenInfoTokenType: (map['tokenInfoTokenType'] ?? '') as String,
+      name: (map['name'] ?? '') as String,
+      tokenID: (map['tokenID'] ?? '') as String,
+      symbol: (map['symbol'] ?? '') as String,
+      iconUrl: (map['iconUrl'] ?? '') as String,
+      network: (map['network'] ?? '') as String,
+      address: (map['address'] ?? '') as String,
+      tokenType: (map['tokenType'] ?? '') as String,
       decimals: (map['decimals'] ?? 0) as int,
       description: (map['description'] ?? '') as String,
       additionalInfo: (map['additionalInfo'] ?? '') as String,
@@ -226,25 +276,25 @@ class TokenInfo {
   }
 
   /// Id
-  String? tokenInfoID;
+  String? tokenID;
 
   /// Name
-  String? tokenInfoName;
+  String? name;
 
   /// Network
-  String? tokenInfoNetwork;
+  String? network;
 
   /// Address
-  String? tokenInfoAddress;
+  String? address;
 
   /// Symbol
-  String? tokenInfoSymbol;
+  String? symbol;
 
   /// Icon
-  String? tokenInfoIconUrl;
+  String? iconUrl;
 
   /// Type
-  String? tokenInfoTokenType;
+  String? tokenType;
 
   /// Decimals
   int? decimals;
@@ -264,13 +314,13 @@ class TokenInfo {
   /// to map
   Map<String, dynamic> toMap() {
     return {
-      'tokenInfoID': tokenInfoID,
-      'tokenInfoName': tokenInfoName,
-      'tokenInfoNetwork': tokenInfoNetwork,
-      'tokenInfoAddress': tokenInfoAddress,
-      'tokenInfoSymbol': tokenInfoSymbol,
-      'tokenInfoIconUrl': tokenInfoIconUrl,
-      'tokenInfoTokenType': tokenInfoTokenType,
+      'name': name,
+      'tokenID': tokenID,
+      'symbol': symbol,
+      'iconUrl': iconUrl,
+      'network': network,
+      'address': address,
+      'tokenType': tokenType,
       'decimals': decimals,
       'description': description,
       'additionalInfo': additionalInfo,

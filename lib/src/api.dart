@@ -272,10 +272,11 @@ class SbtAuthApi {
   }
 
   /// Approve auth request
-  Future<void> approveAuthRequest(String deviceName, String encrypted) async {
+  Future<void> approveAuthRequest(String deviceName, String encrypted,String keyType) async {
     final params = {
       'newDeviceName': deviceName,
       'encryptedFragment': encrypted,
+      'keyType':keyType,
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/confirm:auth'),
@@ -478,7 +479,7 @@ class SbtAuthApi {
   }
 
   /// Get ERC20 list
-  Future<List<TokenInfo>> getTokenList(
+  Future<TokenListInfo> getTokenList(
     int pageNo,
     int pageSize,
     String network,
@@ -491,10 +492,7 @@ class SbtAuthApi {
       headers: _headers,
     );
     final data = _checkResponse(response) as Map<String, dynamic>;
-    return [
-      for (var t in data['items'] as List)
-        TokenInfo.fromMap(t as Map<String, dynamic>)
-    ];
+    return TokenListInfo.fromMap(data);
   }
 
   /// Import token

@@ -11,7 +11,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
-import 'package:sbt_auth_dart/src/types/api.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Develop app url
@@ -87,6 +86,9 @@ class SbtAuth {
   AuthCore? _core;
 
   EventSource? _eventSource;
+
+  /// hasNext
+  bool hasNext = false;
 
   /// Token list
   List<TokenInfo> tokenList = [];
@@ -290,7 +292,10 @@ class SbtAuth {
   }
 
   /// Approve auth request
-  Future<String> approveAuthRequest(String deviceName) async {
+  Future<String> approveAuthRequest(
+    String deviceName, {
+    String keyType = 'EVM',
+  }) async {
     if (core == null) throw SbtAuthException('Auth not inited');
     final local = core!.localShare!.privateKey;
     final password = StringBuffer();
@@ -298,7 +303,7 @@ class SbtAuth {
       password.write(Random().nextInt(9).toString());
     }
     final encrypted = await encryptMsg(local, password.toString());
-    await api.approveAuthRequest(deviceName, encrypted);
+    await api.approveAuthRequest(deviceName, encrypted, keyType);
     return password.toString();
   }
 
@@ -614,11 +619,12 @@ class SbtAuth {
     String network,
     String condition,
   ) async {
-    tokenList = await api.getTokenList(pageNo, pageSize, network, condition);
+    final res = await api.getTokenList(pageNo, pageSize, network, condition);
+    tokenList = res.items;
+    hasNext = res.hasNext;
   }
 
   /// Import token
-
 
   // login success
   Stream<StreamResponse> _queryWhetherSuccess(
