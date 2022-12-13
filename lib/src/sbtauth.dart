@@ -101,6 +101,9 @@ class SbtAuth {
 
   Timer? _timer;
 
+  /// token
+  String get token => DBUtil.tokenBox.get(TOKEN_KEY) ?? '';
+
   /// SBTAuth api
   SbtAuthApi get api {
     final token = DBUtil.tokenBox.get(TOKEN_KEY);
