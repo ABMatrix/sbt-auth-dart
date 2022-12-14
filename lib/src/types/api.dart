@@ -211,7 +211,7 @@ class TokenListInfo {
       totalPage: (map['totalPage'] ?? 0) as int,
       pageSize: (map['pageSize'] ?? 0) as int,
       hasNext: (map['hasNext'] ?? false) as bool,
-      totalCount: (map['totalCount'] ?? 0) as int,
+      totalCount: (map['totalCount'] ?? '0') as String,
       items: [
         for (var t in (map['items'] ?? []) as List)
           TokenInfo.fromMap(t as Map<String, dynamic>)
@@ -235,7 +235,7 @@ class TokenListInfo {
   late bool hasNext;
 
   /// Total count
-  late int totalCount;
+  late String totalCount;
 
   /// Items
   late List<TokenInfo> items;
