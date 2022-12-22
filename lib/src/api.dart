@@ -514,8 +514,10 @@ class SbtAuthApi {
     String network,
     String keyType,
   ) async {
-    final response = await http
-        .get(Uri.parse('$_baseUrl/user-token/user-tokens'), headers: _headers);
+    final response = await http.get(
+        Uri.parse(
+            '$_baseUrl/user-token/user-tokens?pageNo=$pageNo&pageSize=$pageSize&network=$network&keyType=$keyType'),
+        headers: _headers);
     final data = _checkResponse(response) as Map<String, dynamic>;
     return UserTokenList.fromMap(data).items;
   }
