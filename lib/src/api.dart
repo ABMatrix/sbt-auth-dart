@@ -498,7 +498,7 @@ class SbtAuthApi {
 
   /// Import token
   Future<void> importToken(String network, String address) async {
-    final data = {'tokenInfoNetwork': network, 'tokenInfoAddress': address};
+    final data = {'network': network, 'address': address};
     final response = await http.post(
       Uri.parse('$_baseUrl/token-info/token:import'),
       headers: _headers,
