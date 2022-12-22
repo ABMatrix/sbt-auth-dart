@@ -508,7 +508,7 @@ class SbtAuthApi {
   }
 
   /// Get user token list
-  Future<UserTokenList> getUserTokenList(
+  Future<List<UserToken>> getUserTokenList(
     int pageNo,
     int pageSize,
     String network,
@@ -517,7 +517,7 @@ class SbtAuthApi {
     final response = await http
         .get(Uri.parse('$_baseUrl/user-token/user-tokens'), headers: _headers);
     final data = _checkResponse(response) as Map<String, dynamic>;
-    return UserTokenList.fromMap(data);
+    return UserTokenList.fromMap(data).items;
   }
 
   static dynamic _checkResponse(Response response) {

@@ -87,10 +87,6 @@ class SbtAuth {
 
   EventSource? _eventSource;
 
-
-  /// Token list
-  List<TokenInfo> tokenList = [];
-
   /// Grant authorization listen controller
   StreamController<String> authRequestStreamController =
       StreamController.broadcast();
