@@ -272,11 +272,12 @@ class SbtAuthApi {
   }
 
   /// Approve auth request
-  Future<void> approveAuthRequest(String deviceName, String encrypted,String keyType) async {
+  Future<void> approveAuthRequest(
+      String deviceName, String encrypted, String keyType) async {
     final params = {
       'newDeviceName': deviceName,
       'encryptedFragment': encrypted,
-      'keyType':keyType,
+      'keyType': keyType,
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/confirm:auth'),
@@ -503,7 +504,20 @@ class SbtAuthApi {
       headers: _headers,
       body: jsonEncode(data),
     );
-    _checkResponse(response) as String;
+    _checkResponse(response);
+  }
+
+  /// Get user token list
+  Future<UserTokenList> getUserTokenList(
+    int pageNo,
+    int pageSize,
+    String network,
+    String keyType,
+  ) async {
+    final response = await http
+        .get(Uri.parse('$_baseUrl/user-token/user-tokens'), headers: _headers);
+    final data = _checkResponse(response) as Map<String, dynamic>;
+    return UserTokenList.fromMap(data);
   }
 
   static dynamic _checkResponse(Response response) {

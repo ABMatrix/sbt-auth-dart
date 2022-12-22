@@ -328,3 +328,142 @@ class TokenInfo {
     };
   }
 }
+
+/// User Token List
+class UserTokenList {
+  /// User Token List
+  UserTokenList({
+    required this.hasPrev,
+    required this.pageNo,
+    required this.totalPage,
+    required this.pageSize,
+    required this.hasNext,
+    required this.totalCount,
+    required this.items,
+  });
+
+  /// UserTokenList from map
+  factory UserTokenList.fromMap(Map<String, dynamic> map) {
+    return UserTokenList(
+      hasPrev: (map['hasPrev'] ?? false) as bool,
+      pageNo: (map['pageNo'] ?? 1) as int,
+      totalPage: (map['totalPage'] ?? 0) as int,
+      pageSize: (map['pageSize'] ?? 0) as int,
+      hasNext: (map['hasNext'] ?? false) as bool,
+      totalCount: (map['totalCount'] ?? '0') as String,
+      items: [
+        for (var t in (map['items'] ?? []) as List)
+          UserToken.fromMap(t as Map<String, dynamic>)
+      ],
+    );
+  }
+
+  /// Has prev
+  late bool hasPrev;
+
+  /// PageNo
+  late int pageNo;
+
+  /// Total page
+  late int totalPage;
+
+  /// Page size
+  late int pageSize;
+
+  /// Has next
+  late bool hasNext;
+
+  /// Total count
+  late String totalCount;
+
+  /// Items
+  late List<UserToken> items;
+}
+
+/// User Token
+class UserToken {
+  /// User Token
+  UserToken({
+    required this.userTokenID,
+    required this.userTokenUserID,
+    required this.userTokenTokenID,
+    required this.userTokenName,
+    required this.network,
+    required this.address,
+    required this.symbol,
+    required this.tokenType,
+    required this.iconUrl,
+    required this.amount,
+    required this.decimals,
+  });
+
+  /// TokenInfo from map
+  factory UserToken.fromMap(Map<String, dynamic> map) {
+    return UserToken(
+      userTokenID: (map['userTokenID'] ?? '') as String,
+      userTokenUserID: (map['userTokenUserID'] ?? '') as String,
+      userTokenTokenID: (map['userTokenTokenID'] ?? '') as String,
+      userTokenName: (map['userTokenName'] ?? '') as String,
+      network: (map['network'] ?? '') as String,
+      address: (map['address'] ?? '') as String,
+      symbol: (map['symbol'] ?? '') as String,
+      tokenType: (map['tokenType'] ?? '') as String,
+      iconUrl: (map['iconUrl'] ?? '') as String,
+      amount: (map['amount'] ?? '') as String,
+      decimals: (map['decimals'] ?? 0) as int,
+    );
+  }
+
+  /// Id
+  String? userTokenID;
+
+  /// User id
+  String? userTokenUserID;
+
+  /// Token id
+  String? userTokenTokenID;
+
+  /// Name
+  String? userTokenName;
+
+  /// Network
+  String? network;
+
+  /// Address
+  String? address;
+
+  /// Symbol
+  String? symbol;
+
+  /// Token Type
+  String? tokenType;
+
+  /// IconUrl
+  String? iconUrl;
+
+  /// Amount
+  String? amount;
+
+  /// Decimals
+  int? decimals;
+
+  /// to json
+  String toJson() => json.encode(toMap());
+
+  /// to map
+  Map<String, dynamic> toMap() {
+    return {
+      'userTokenID': userTokenID,
+      'userTokenUserID': userTokenUserID,
+      'userTokenTokenID': userTokenTokenID,
+      'userTokenName': userTokenName,
+      'network': network,
+      'address': address,
+      'symbol': symbol,
+      'tokenType': tokenType,
+      'iconUrl': iconUrl,
+      'amount': amount,
+      'decimals': decimals,
+    };
+  }
+}

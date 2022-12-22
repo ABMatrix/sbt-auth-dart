@@ -87,8 +87,6 @@ class SbtAuth {
 
   EventSource? _eventSource;
 
-  /// hasNext
-  bool hasNext = false;
 
   /// Token list
   List<TokenInfo> tokenList = [];
@@ -616,15 +614,14 @@ class SbtAuth {
   }
 
   /// Get token list
-  Future<void> getTokenList(
+  Future<List<TokenInfo>> getTokenList(
     int pageNo,
     int pageSize,
     String network,
     String condition,
   ) async {
     final res = await api.getTokenList(pageNo, pageSize, network, condition);
-    tokenList = res.items;
-    hasNext = res.hasNext;
+    return res.items;
   }
 
   /// Import token
