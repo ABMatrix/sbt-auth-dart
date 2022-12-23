@@ -500,7 +500,7 @@ class SbtAuthApi {
   Future<void> importToken(String network, String address) async {
     final data = {'network': network, 'address': address};
     final response = await http.post(
-      Uri.parse('$_baseUrl/user-token/token:import'),
+      Uri.parse('$_baseUrl/user-token/import:token'),
       headers: _headers,
       body: jsonEncode(data),
     );
