@@ -500,12 +500,25 @@ class SbtAuthApi {
   Future<void> importToken(String network, String address) async {
     final data = {'network': network, 'address': address};
     final response = await http.post(
-      Uri.parse('$_baseUrl/token-info/token:import'),
+      Uri.parse('$_baseUrl/user-token/token:import'),
       headers: _headers,
       body: jsonEncode(data),
     );
     _checkResponse(response);
   }
+
+  /// Import token info
+  Future<String> importTokenInfo(String network, String address) async {
+    final data = {'network': network, 'address': address};
+    final response = await http.post(
+      Uri.parse('$_baseUrl/token-info/token:import'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    final res=_checkResponse(response) as String;
+    return res;
+  }
+
 
   /// Get user token list
   Future<List<UserToken>> getUserTokenList(
