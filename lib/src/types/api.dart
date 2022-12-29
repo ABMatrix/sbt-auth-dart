@@ -467,3 +467,51 @@ class UserToken {
     };
   }
 }
+
+/// ERC20TokenInfo
+class ERC20TokenInfo {
+  /// ERC20TokenInfo
+  ERC20TokenInfo({
+    required this.tokenInfoName,
+    required this.tokenInfoID,
+    required this.tokenInfoSymbol,
+    required this.tokenInfoIconUrl,
+    required this.tokenInfoNetwork,
+    required this.tokenInfoAddress,
+    required this.tokenInfoTokenType,
+  });
+
+  /// from map
+  factory ERC20TokenInfo.fromMap(Map<String, dynamic> map) {
+    return ERC20TokenInfo(
+      tokenInfoName: (map['tokenInfoName'] ?? '') as String,
+      tokenInfoID: (map['tokenInfoID'] ?? '') as String,
+      tokenInfoSymbol: (map['tokenInfoSymbol'] ?? '') as String,
+      tokenInfoIconUrl: (map['tokenInfoIconUrl'] ?? '') as String,
+      tokenInfoNetwork: (map['tokenInfoNetwork'] ?? '') as String,
+      tokenInfoAddress: (map['tokenInfoAddress'] ?? '') as String,
+      tokenInfoTokenType: (map['tokenInfoTokenType'] ?? '') as String,
+    );
+  }
+
+  /// Token Info Name
+  String tokenInfoName;
+
+  /// Token Info ID
+  String tokenInfoID;
+
+  /// Token Info Symbol
+  String tokenInfoSymbol;
+
+  /// Token Info IconUrl
+  String tokenInfoIconUrl;
+
+  /// Token Info Network
+  String tokenInfoNetwork;
+
+  /// Token Info Address
+  String tokenInfoAddress;
+
+  /// Token Info TokenType
+  String tokenInfoTokenType;
+}

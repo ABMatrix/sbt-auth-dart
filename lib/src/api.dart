@@ -515,10 +515,21 @@ class SbtAuthApi {
       headers: _headers,
       body: jsonEncode(data),
     );
-    final res=_checkResponse(response) as String;
+    final res = _checkResponse(response) as String;
     return res;
   }
 
+  /// Get token info
+  Future<ERC20TokenInfo> getTokenInfo(String id) async {
+    final response = await http.get(
+      Uri.parse(
+        '$_baseUrl/token-info?tokenInfoID=$id',
+      ),
+      headers: _headers,
+    );
+    final data = _checkResponse(response) as Map<String, dynamic>;
+    return ERC20TokenInfo.fromMap(data);
+  }
 
   /// Get user token list
   Future<List<UserToken>> getUserTokenList(
