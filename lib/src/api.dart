@@ -261,8 +261,9 @@ class SbtAuthApi {
   }
 
   /// Send auth request
-  Future<void> sendAuthRequest(String deviceName) async {
-    final params = {'oldDeviceName': deviceName};
+  Future<void> sendAuthRequest(String deviceName,
+      {String keyType = 'EVM'}) async {
+    final params = {'oldDeviceName': deviceName, 'keyType': keyType};
     final response = await http.post(
       Uri.parse('$_baseUrl/user/apply:auth'),
       headers: _headers,
