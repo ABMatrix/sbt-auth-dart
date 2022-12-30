@@ -218,6 +218,7 @@ class AuthCore {
       }),
       'rawMsg': rawMessage,
       'chainID': chainID,
+      'keyType': 'EVM'
     };
     final res = await http.post(
       Uri.parse(signUrl),
