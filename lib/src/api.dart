@@ -49,7 +49,7 @@ class SbtAuthApi {
         'Accept-Language': localLan
       },
     );
-    return _checkResponse(response) as bool;
+    return (_checkResponse(response) ?? false) as bool;
   }
 
   /// Send email verification code
