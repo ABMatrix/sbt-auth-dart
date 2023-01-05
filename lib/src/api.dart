@@ -509,15 +509,15 @@ class SbtAuthApi {
   }
 
   /// Import token info
-  Future<String> importTokenInfo(String network, String address) async {
+  Future<TokenInfo> importTokenInfo(String network, String address) async {
     final data = {'network': network, 'address': address};
     final response = await http.post(
       Uri.parse('$_baseUrl/token-info/token:import'),
       headers: _headers,
       body: jsonEncode(data),
     );
-    final res = _checkResponse(response) as String;
-    return res;
+    final res = _checkResponse(response) as Map<String, dynamic>;
+    return TokenInfo.fromMap(res);
   }
 
   /// Get token info

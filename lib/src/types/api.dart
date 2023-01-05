@@ -261,13 +261,14 @@ class TokenInfo {
   /// TokenInfo from map
   factory TokenInfo.fromMap(Map<String, dynamic> map) {
     return TokenInfo(
-      name: (map['name'] ?? '') as String,
-      tokenID: (map['tokenID'] ?? '') as String,
-      symbol: (map['symbol'] ?? '') as String,
-      iconUrl: (map['iconUrl'] ?? '') as String,
-      network: (map['network'] ?? '') as String,
-      address: (map['address'] ?? '') as String,
-      tokenType: (map['tokenType'] ?? '') as String,
+      name: (map['name'] ?? map['tokenInfoName'] ?? '') as String,
+      tokenID: (map['tokenID'] ?? map['tokenInfoID'] ?? '') as String,
+      symbol: (map['symbol'] ?? map['tokenInfoSymbol'] ?? '') as String,
+      iconUrl: (map['iconUrl'] ?? map['tokenInfoIconUrl'] ?? '') as String,
+      network: (map['network'] ?? map['tokenInfoNetwork'] ?? '') as String,
+      address: (map['address'] ?? map['tokenInfoAddress'] ?? '') as String,
+      tokenType:
+          (map['tokenType'] ?? map['tokenInfoTokenType'] ?? '') as String,
       decimals: (map['decimals'] ?? 0) as int,
       description: (map['description'] ?? '') as String,
       additionalInfo: (map['additionalInfo'] ?? '') as String,
