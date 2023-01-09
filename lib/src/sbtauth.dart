@@ -558,7 +558,8 @@ class SbtAuth {
     String name,
     String network,
   ) async {
-    await api.createUserWhiteList(userEmail, authCode, address, name, network);
+    await api.createUserWhiteList(
+        userEmail, authCode, address.toLowerCase(), name, network);
   }
 
   /// Delete white list
@@ -581,7 +582,7 @@ class SbtAuth {
     await api.editUserWhiteList(
       userEmail,
       authCode,
-      address,
+      address.toLowerCase(),
       name,
       userWhitelistID,
       userId,
