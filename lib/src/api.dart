@@ -498,10 +498,21 @@ class SbtAuthApi {
   }
 
   /// Import token
-  Future<void> importToken(String network, String address) async {
-    final data = {'network': network, 'address': address};
+  Future<void> importToken(String tokenID) async {
+    final data = {'tokenID': tokenID};
     final response = await http.post(
-      Uri.parse('$_baseUrl/user-token/import:token'),
+      Uri.parse('$_baseUrl/user-token/user-token'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
+  /// Remove token
+  Future<void> removeToken(String userTokenID) async {
+    final data = {'userTokenID': userTokenID};
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/user-token/user-token'),
       headers: _headers,
       body: jsonEncode(data),
     );
