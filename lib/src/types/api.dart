@@ -32,6 +32,7 @@ class UserInfo {
     required this.userLoginType,
     required this.publicKeyAddress,
     required this.userWhitelist,
+    required this.tokenTime,
   });
 
   /// User from map
@@ -45,6 +46,7 @@ class UserInfo {
       userLoginType: map['userLoginType'] as String,
       publicKeyAddress: map['publicKeyAddress'] as Map<String, dynamic>,
       userWhitelist: (map['userWhitelist'] ?? false) as bool,
+      tokenTime: (map['tokenTime'] ?? '0') as String,
     );
   }
 
@@ -74,6 +76,9 @@ class UserInfo {
 
   /// White list switch
   bool userWhitelist;
+
+  /// Token time
+  String? tokenTime;
 }
 
 /// Login QrCode status

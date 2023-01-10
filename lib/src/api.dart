@@ -540,11 +540,24 @@ class SbtAuthApi {
     String keyType,
   ) async {
     final response = await http.get(
-        Uri.parse(
-            '$_baseUrl/user-token/user-tokens?pageNo=$pageNo&pageSize=$pageSize&network=$network&keyType=$keyType'),
-        headers: _headers);
+      Uri.parse(
+        '$_baseUrl/user-token/user-tokens?pageNo=$pageNo&pageSize=$pageSize&network=$network&keyType=$keyType',
+      ),
+      headers: _headers,
+    );
     final data = _checkResponse(response) as Map<String, dynamic>;
     return UserTokenList.fromMap(data).items;
+  }
+
+  ///Set user token time
+  Future<void> setUserToken(String tokenTime) async {
+    final data = {'tokenTime': tokenTime};
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/reset:token-time'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
   }
 
   static dynamic _checkResponse(Response response) {
