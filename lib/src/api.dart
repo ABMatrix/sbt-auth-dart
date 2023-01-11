@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
-import 'package:sbt_auth_dart/src/types/api.dart';
 import 'package:web3dart/crypto.dart';
 
 /// Develop mode base url
@@ -156,7 +155,11 @@ class SbtAuthApi {
   }
 
   /// Set user password.
-  Future<void> setPassword(String password) async {
+  Future<void> setPassword(
+    String password, {
+    String paymentPassword = '',
+    bool paymentSwitch = false,
+  }) async {
     final data = {'password': password};
     final response = await http.put(
       Uri.parse('$_baseUrl/user/user'),
@@ -164,6 +167,39 @@ class SbtAuthApi {
       body: jsonEncode(data),
     );
     _checkResponse(response);
+  }
+
+  /// Reset Payment password
+  Future<void> resetPaymentPassword(
+    String paymentPassword,
+    String emailAddress,
+    String authCode, {
+    bool? paymentSwitch,
+  }) async {
+    final data = {
+      'paymentPassword': paymentPassword,
+      'paymentSwitch': paymentSwitch,
+      'emailAddress': emailAddress,
+      'authCode': authCode
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/reset:payment-password'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
+  /// Check Payment password
+  Future<bool> checkPaymentPassword(String paymentPassword) async {
+    final data = {'paymentPassword': paymentPassword};
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/verify:payment-password'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    final res = _checkResponse(response) as bool;
+    return res;
   }
 
   /// Reset password
