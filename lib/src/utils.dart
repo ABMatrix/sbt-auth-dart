@@ -171,7 +171,7 @@ Future<String> getDeviceName() async {
   final packageInfo = await PackageInfo.fromPlatform();
   final appName = packageInfo.appName;
   final packageName = packageInfo.packageName;
-  final random = Random().nextInt(6).toString();
+  final random = math.Random().nextInt(6).toString();
   return '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName-$random''';
 }
 
