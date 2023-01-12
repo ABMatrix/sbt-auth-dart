@@ -160,7 +160,11 @@ class SbtAuthApi {
     String paymentPassword = '',
     bool paymentSwitch = false,
   }) async {
-    final data = {'password': password};
+    final data = {
+      'password': password,
+      'paymentPassword': paymentPassword,
+      'paymentSwitch': paymentSwitch,
+    };
     final response = await http.put(
       Uri.parse('$_baseUrl/user/user'),
       headers: _headers,
