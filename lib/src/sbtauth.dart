@@ -391,7 +391,7 @@ class SbtAuth {
     _core = core;
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();
-    await api.verifyIdentity(core.localShare!);
+    await api.verifyIdentity(localShare);
   }
 
   /// Recover with privateKey
@@ -433,7 +433,7 @@ class SbtAuth {
     _core = core;
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();
-    await api.verifyIdentity(core.localShare!);
+    await api.verifyIdentity(backShare);
   }
 
   /// Backup with one drive
