@@ -433,7 +433,7 @@ class SbtAuth {
     _core = core;
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();
-    await api.verifyIdentity(backShare);
+    await api.verifyIdentity(core.localShare!);
   }
 
   /// Backup with one drive
