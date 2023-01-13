@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:app_links/app_links.dart';
+import 'package:eth_sig_util/util/utils.dart';
 import 'package:eventsource/eventsource.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
@@ -430,6 +431,13 @@ class SbtAuth {
       backup: backShare,
       backupAux: remoteShareInfo.localAux,
     );
+    final hash = bytesToHex(
+      hashMessage(ascii.encode(jsonEncode(core.localShare!.toJson()))),
+      include0x: true,
+    );
+    if (hash != remoteShareInfo.localHash) {
+      throw SbtAuthException('Recover failed');
+    }
     _core = core;
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();

@@ -5,7 +5,14 @@ import 'package:sbt_auth_dart/src/types/account.dart';
 /// Remote share info
 class RemoteShareInfo {
   /// Remote share info stored on server.
-  RemoteShareInfo(this.address, this.remote, this.localAux, this.backupAux);
+  RemoteShareInfo(
+    this.address,
+    this.remote,
+    this.localAux,
+    this.backupAux,
+    this.localHash,
+    this.backupHash,
+  );
 
   /// Wallet address.
   final String address;
@@ -18,6 +25,12 @@ class RemoteShareInfo {
 
   /// Back up aux
   final String backupAux;
+
+  /// local hash
+  final String localHash;
+
+  /// backup hash
+  final String backupHash;
 }
 
 /// User info

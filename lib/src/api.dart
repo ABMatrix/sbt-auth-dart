@@ -268,8 +268,19 @@ class SbtAuthApi {
         (result['privateKeyFragmentInfoPrivateKey1Fragment'] ?? '') as String;
     final backupAux =
         (result['privateKeyFragmentInfoPrivateKey3Fragment'] ?? '') as String;
+    final localHash =
+        (result['privateKeyFragmentInfoPrivateKey1FragmentHash'] ?? '') as String;
+    final backupHash =
+        (result['privateKeyFragmentInfoPrivateKey3FragmentHash'] ?? '') as String;
     final remote = Share.fromMap(jsonDecode(share) as Map<String, dynamic>);
-    return RemoteShareInfo(address, remote, localAux, backupAux);
+    return RemoteShareInfo(
+      address,
+      remote,
+      localAux,
+      backupAux,
+      localHash,
+      backupHash,
+    );
   }
 
   /// Backup share via email
