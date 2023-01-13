@@ -7,6 +7,7 @@ import 'package:decimal/decimal.dart';
 import 'package:mpc_dart/mpc_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
+import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
 import 'package:sbt_encrypt/sbt_encrypt.dart';
 import 'package:web3dart/crypto.dart';
@@ -167,12 +168,28 @@ String bigIntToHex(BigInt input) {
 }
 
 /// Get device name
-Future<String> getDeviceName() async {
+Future<String> getDeviceName({bool useRandomName = true}) async {
   final packageInfo = await PackageInfo.fromPlatform();
   final appName = packageInfo.appName;
   final packageName = packageInfo.packageName;
-  final random = math.Random().nextInt(6).toString();
-  return '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName-$random''';
+  final device = DBUtil.tokenBox.get(DEVICE_NAME_KEY) ?? '';
+  if (device != '') {
+    return device;
+  }
+  if (useRandomName) {
+    final random = math.Random().nextInt(6).toString();
+    await DBUtil.tokenBox.put(
+      DEVICE_NAME_KEY,
+      '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName-$random''',
+    );
+    return '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName-$random''';
+  } else {
+    await DBUtil.tokenBox.put(
+      DEVICE_NAME_KEY,
+      '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName''',
+    );
+    return '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName''';
+  }
 }
 
 /// Encrypt

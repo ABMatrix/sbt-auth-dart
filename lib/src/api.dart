@@ -19,15 +19,18 @@ class SbtAuthApi {
     required String baseUrl,
     required String token,
     required String local,
+    bool useRandomName = true,
   }) {
     _baseUrl = baseUrl;
     _token = token;
     _local = local;
+    _useRandomName = useRandomName;
   }
 
   late String _baseUrl;
   late String _token;
   late String _local;
+  late bool _useRandomName;
 
   Map<String, String> get _headers => {
         'Content-Type': 'application/json; charset=UTF-8',
