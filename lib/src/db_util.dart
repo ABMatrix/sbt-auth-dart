@@ -7,9 +7,6 @@ import 'package:sbt_auth_dart/src/types/adapter.dart';
 /// Hive token box key
 const TOKEN_KEY = 'token_key';
 
-/// Hive device name box key
-const DEVICE_NAME_KEY = 'device_name_key';
-
 /// Hive cache box key
 const CACHE_KEY = 'local_cache_key';
 
@@ -17,10 +14,6 @@ const CACHE_KEY = 'local_cache_key';
 class DBUtil {
   /// user token box
   static late Box<String> tokenBox;
-
-
-  /// device box
-  static late Box<String> deviceBox;
 
   /// share box
   static late Box<Share?>? shareBox;
@@ -33,7 +26,6 @@ class DBUtil {
       Hive.registerAdapter(ShareAdapter());
     }
     tokenBox = await Hive.openBox(TOKEN_KEY);
-    deviceBox = await Hive.openBox(DEVICE_NAME_KEY);
     shareBox = await Hive.openBox(CACHE_KEY);
   }
 }

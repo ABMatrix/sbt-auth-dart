@@ -49,14 +49,13 @@ enum LocaleType {
 /// SbtAuth class
 class SbtAuth {
   /// SBTAuth, you need to set your own custom scheme.
-  SbtAuth(
-      {required this.developMode,
-      required String clientId,
-      required String scheme,
-      bool useRandomName = true}) {
+  SbtAuth({
+    required this.developMode,
+    required String clientId,
+    required String scheme,
+  }) {
     _clientId = clientId;
     _scheme = scheme;
-    _useRandomName = useRandomName;
   }
 
   /// If you set developMode true, the use registered is on test site, can only
@@ -65,7 +64,6 @@ class SbtAuth {
 
   late String _clientId;
   late String _scheme;
-  late bool _useRandomName;
   LocaleType _locale = LocaleType.en_US;
 
   /// Loading stream
@@ -108,7 +106,6 @@ class SbtAuth {
       baseUrl: _baseUrl,
       token: token,
       local: _getLocale(_locale),
-      useRandomName: _useRandomName,
     );
   }
 
@@ -227,7 +224,7 @@ class SbtAuth {
         localLan: _getLocale(_locale),
       );
     } else {
-      final deviceName = await getDeviceName(useRandomName: _useRandomName);
+      final deviceName = await getDeviceName();
       final appUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
       final loginUrl =
           '$appUrl/login?loginType=${loginType.name}&scheme=$_scheme&deviceName=$deviceName&clientId=$_clientId';

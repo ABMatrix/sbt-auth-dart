@@ -168,28 +168,11 @@ String bigIntToHex(BigInt input) {
 }
 
 /// Get device name
-Future<String> getDeviceName({bool useRandomName = true}) async {
+Future<String> getDeviceName() async {
   final packageInfo = await PackageInfo.fromPlatform();
   final appName = packageInfo.appName;
   final packageName = packageInfo.packageName;
-  final device = DBUtil.tokenBox.get(DEVICE_NAME_KEY) ?? '';
-  if (device != '') {
-    return device;
-  }
-  if (useRandomName) {
-    final random = math.Random().nextInt(6).toString();
-    await DBUtil.tokenBox.put(
-      DEVICE_NAME_KEY,
-      '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName-$random''',
-    );
-    return '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName-$random''';
-  } else {
-    await DBUtil.tokenBox.put(
-      DEVICE_NAME_KEY,
-      '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName''',
-    );
-    return '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName''';
-  }
+  return '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName''';
 }
 
 /// Encrypt
