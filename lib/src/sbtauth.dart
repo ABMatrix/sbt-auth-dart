@@ -176,8 +176,12 @@ class SbtAuth {
         address: remoteLocalShareInfo.address,
         remote: remoteLocalShareInfo.remote,
       );
-      if (core.getAddress() != _user!.publicKeyAddress['EVM']) {
-        throw SbtAuthException('Init error');
+      final hash = bytesToHex(
+        hashMessage(ascii.encode(jsonEncode(core.localShare!.toJson()))),
+        include0x: true,
+      );
+      if (hash != remoteLocalShareInfo.localHash) {
+        throw SbtAuthException('Recover failed');
       }
       if (inited) {
         _core = core;
