@@ -176,6 +176,9 @@ class SbtAuth {
         address: remoteLocalShareInfo.address,
         remote: remoteLocalShareInfo.remote,
       );
+      if (core.getAddress() != _user!.publicKeyAddress['EVM']) {
+        throw SbtAuthException('Init error');
+      }
       if (inited) {
         _core = core;
       }

@@ -246,6 +246,9 @@ class AuthCore {
       [localKey, remoteKey],
       jsonDecode(aux) as Map<String, dynamic>,
     );
+    if (backup.sk.startsWith('0x')) {
+      return backup.sk;
+    }
     return '0x${backup.sk}';
   }
 
