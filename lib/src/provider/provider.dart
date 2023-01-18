@@ -77,13 +77,13 @@ class SbtAuthProvider {
       case 'personal_sign':
       case 'eth_sign':
         final message = arguments.params[0] as String;
-        return await signer.personalSign(message);
+        return signer.personalSign(message);
       default:
         break;
     }
     if (methods.contains(arguments.method)) {
       final typedData = arguments.params[0] as Map<String, dynamic>;
-      return await signer.signTypedData(typedData);
+      return signer.signTypedData(typedData);
     }
     try {
       return await jsonRpcClient!.call(arguments.method, arguments.params);
@@ -142,9 +142,9 @@ class SbtAuthProvider {
     final transaction = argument.params[0] as Map<String, dynamic>;
     await _checkTransaction(transaction);
     final res = await signer.signTransaction(
-            UnsignedTransaction.fromMap(transaction),
-            int.parse(chainId),
-          );
+      UnsignedTransaction.fromMap(transaction),
+      int.parse(chainId),
+    );
     return res;
   }
 
@@ -179,13 +179,16 @@ class SbtAuthProvider {
       transaction['nonce'] = response.result;
     }
     if (transaction['gasLimit'] == null) {
+      final data = transaction['data'] as String?;
       final request = {
         'from': accounts[0],
         'to': transaction['to'],
         'value': transaction['value'],
-        'data': (transaction['data'] == null || transaction['data'] == '0x')
+        'data': (data == null || data == '0x')
             ? null
-            : transaction['data'],
+            : data.startsWith('0x')
+                ? data
+                : '0x$data',
       };
       final response = await jsonRpcClient!.call('eth_estimateGas', [request]);
       transaction['gasLimit'] = response.result;
