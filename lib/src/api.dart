@@ -288,11 +288,17 @@ class SbtAuthApi {
   }
 
   /// Backup share via email
-  Future<void> backupShare(String privateKey, String email, String code) async {
+  Future<void> backupShare(
+    String privateKey,
+    String email,
+    String code, {
+    String keyType = 'EVM',
+  }) async {
     final params = {
       'emailAddress': email,
       'privateKey3Fragment': privateKey,
-      'authCode': code
+      'authCode': code,
+      'keyType': keyType
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user:back-up'),
@@ -316,8 +322,10 @@ class SbtAuthApi {
   }
 
   /// Send auth request
-  Future<void> sendAuthRequest(String deviceName,
-      {String keyType = 'EVM'}) async {
+  Future<void> sendAuthRequest(
+    String deviceName, {
+    String keyType = 'EVM',
+  }) async {
     final params = {'oldDeviceName': deviceName, 'keyType': keyType};
     final response = await http.post(
       Uri.parse('$_baseUrl/user/apply:auth'),
@@ -329,7 +337,10 @@ class SbtAuthApi {
 
   /// Approve auth request
   Future<void> approveAuthRequest(
-      String deviceName, String encrypted, String keyType) async {
+    String deviceName,
+    String encrypted,
+    String keyType,
+  ) async {
     final params = {
       'newDeviceName': deviceName,
       'encryptedFragment': encrypted,
