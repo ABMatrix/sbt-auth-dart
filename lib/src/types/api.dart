@@ -36,17 +36,17 @@ class RemoteShareInfo {
 /// User info
 class UserInfo {
   /// User info
-  UserInfo({
-    required this.userLoginName,
-    required this.userID,
-    required this.username,
-    required this.avatar,
-    required this.userLoginParams,
-    required this.userLoginType,
-    required this.publicKeyAddress,
-    required this.userWhitelist,
-    required this.tokenTime,
-  });
+  UserInfo(
+      {required this.userLoginName,
+      required this.userID,
+      required this.username,
+      required this.avatar,
+      required this.userLoginParams,
+      required this.userLoginType,
+      required this.publicKeyAddress,
+      required this.userWhitelist,
+      required this.tokenTime,
+      required this.paymentPwd});
 
   /// User from map
   factory UserInfo.fromMap(Map<String, dynamic> map) {
@@ -60,6 +60,7 @@ class UserInfo {
       publicKeyAddress: map['publicKeyAddress'] as Map<String, dynamic>,
       userWhitelist: (map['userWhitelist'] ?? false) as bool,
       tokenTime: (map['tokenTime'] ?? '0') as String,
+      paymentPwd: (map['paymentPwd'] ?? false) as bool,
     );
   }
 
@@ -92,6 +93,9 @@ class UserInfo {
 
   /// Token time
   String? tokenTime;
+
+  /// Use payment password
+  bool paymentPwd;
 }
 
 /// Login QrCode status

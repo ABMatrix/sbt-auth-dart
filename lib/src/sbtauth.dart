@@ -197,7 +197,13 @@ class SbtAuth {
     String authCode,
     String password,
   ) async {
-    await SbtAuthApi.resetPassword(emailAddress, authCode, password, _baseUrl);
+    await SbtAuthApi.resetPassword(
+      emailAddress,
+      authCode,
+      password,
+      _baseUrl,
+      localLan: _getLocale(_locale),
+    );
   }
 
   /// Login
@@ -425,19 +431,19 @@ class SbtAuth {
       publicKey: remoteShareInfo.remote.publicKey,
       extraData: remoteShareInfo.backupAux,
     );
+    final hash = bytesToHex(
+      hashMessage(ascii.encode(jsonEncode(backShare.toJson()))),
+      include0x: true,
+    );
+    if (hash != remoteShareInfo.backupHash) {
+      throw SbtAuthException('Recover failed');
+    }
     final inited = await core.init(
       address: remoteShareInfo.address,
       remote: remoteShareInfo.remote,
       backup: backShare,
       backupAux: remoteShareInfo.localAux,
     );
-    final hash = bytesToHex(
-      hashMessage(ascii.encode(jsonEncode(core.localShare!.toJson()))),
-      include0x: true,
-    );
-    if (hash != remoteShareInfo.localHash) {
-      throw SbtAuthException('Recover failed');
-    }
     _core = core;
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();

@@ -211,8 +211,9 @@ class SbtAuthApi {
     String emailAddress,
     String authCode,
     String password,
-    String baseUrl,
-  ) async {
+    String baseUrl, {
+    String localLan = 'en-US',
+  }) async {
     final data = {
       'emailAddress': emailAddress,
       'authCode': authCode,
@@ -221,7 +222,8 @@ class SbtAuthApi {
     final response = await http.post(
       Uri.parse('$baseUrl/user/reset:password'),
       headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8'
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Accept-Language': localLan
       },
       body: jsonEncode(data),
     );
@@ -269,9 +271,11 @@ class SbtAuthApi {
     final backupAux =
         (result['privateKeyFragmentInfoPrivateKey3Fragment'] ?? '') as String;
     final localHash =
-        (result['privateKeyFragmentInfoPrivateKey1FragmentHash'] ?? '') as String;
+        (result['privateKeyFragmentInfoPrivateKey1FragmentHash'] ?? '')
+            as String;
     final backupHash =
-        (result['privateKeyFragmentInfoPrivateKey3FragmentHash'] ?? '') as String;
+        (result['privateKeyFragmentInfoPrivateKey3FragmentHash'] ?? '')
+            as String;
     final remote = Share.fromMap(jsonDecode(share) as Map<String, dynamic>);
     return RemoteShareInfo(
       address,
