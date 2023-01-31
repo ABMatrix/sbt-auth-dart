@@ -309,9 +309,12 @@ class SbtAuthApi {
   }
 
   /// Get userDevice list
-  Future<List<Device>> getUserDeviceList() async {
+  Future<List<Device>> getUserDeviceList(String clientID) async {
+    final deviceName = await getDeviceName();
     final response = await http.get(
-      Uri.parse('$_baseUrl/user/devices?pageNo=1&pageSize=9999'),
+      Uri.parse(
+        '$_baseUrl/user/devices?pageNo=1&pageSize=9999&clientID=$clientID&deviceName=$deviceName',
+      ),
       headers: _headers,
     );
     final data = _checkResponse(response) as Map<String, dynamic>;

@@ -33,7 +33,7 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
           ? Column(
               children: [
                 FutureBuilder(
-                    future: widget.auth.api.getUserDeviceList(),
+                    future: widget.auth.getDeviceList(),
                     builder: (BuildContext context, AsyncSnapshot snapshot) {
                       // finish
                       if (snapshot.connectionState == ConnectionState.done) {

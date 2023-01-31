@@ -206,6 +206,12 @@ class SbtAuth {
     );
   }
 
+  /// Get device list
+  Future<List<Device>> getDeviceList() async {
+    final deviceList = await api.getUserDeviceList(_clientId);
+    return deviceList;
+  }
+
   /// Login
   Future<void> login(
     LoginType loginType, {
