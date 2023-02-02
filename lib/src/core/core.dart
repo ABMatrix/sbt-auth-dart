@@ -16,7 +16,7 @@ import 'package:web3dart/crypto.dart';
 enum Chain { EVM, SOLANA }
 
 /// chain info
-extension ChainInfo on Chain {
+extension SbtChainInfo on Chain {
   /// engine
   Engine get engine {
     switch (this) {
