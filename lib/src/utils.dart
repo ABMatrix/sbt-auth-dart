@@ -7,7 +7,6 @@ import 'package:decimal/decimal.dart';
 import 'package:mpc_dart/mpc_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
-import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
 import 'package:sbt_encrypt/sbt_encrypt.dart';
 import 'package:web3dart/crypto.dart';

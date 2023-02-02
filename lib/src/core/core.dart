@@ -8,8 +8,35 @@ import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/core/signer.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
+import 'package:solana/base58.dart';
 
 import 'package:web3dart/crypto.dart';
+
+/// chain
+enum Chain { EVM, SOLANA }
+
+/// chain info
+extension ChainInfo on Chain {
+  /// engine
+  Engine get engine {
+    switch (this) {
+      case Chain.EVM:
+        return Engine.ECDSA;
+      case Chain.SOLANA:
+        return Engine.EDDSA;
+    }
+  }
+
+  /// cache key
+  String get cacheKey {
+    switch (this) {
+      case Chain.EVM:
+        return CACHE_KEY;
+      case Chain.SOLANA:
+        return SOLANA_CACHE_KEY;
+    }
+  }
+}
 
 /// Mpc url
 class MpcUrl {
@@ -33,6 +60,7 @@ class AuthCore {
     required this.mpcUrl,
     required this.signUrl,
     required this.token,
+    this.chain = Chain.EVM,
   });
 
   /// Local share, saved on user device
@@ -42,6 +70,7 @@ class AuthCore {
   late Share? _remote;
 
   /// Signer
+  ///
   Signer get signer => Signer(this);
 
   /// Mpc url
@@ -52,6 +81,9 @@ class AuthCore {
 
   /// token
   late String token;
+
+  /// chain
+  late Chain chain;
 
   /// Remote sign
   bool remoteSign = false;
@@ -81,10 +113,10 @@ class AuthCore {
 
   /// Generate shares
   Future<MpcAccount> generatePubKey() async {
-    final keys = await MultiMpc.generate(1, 3);
-    final address = MultiMpc.address(keys[0]);
+    final keys = await MultiMpc.generate(1, 3, engine: chain.engine);
     _local = keyToShare(keys[0]);
     _remote = keyToShare(keys[1]);
+    final address = getAddress();
     unawaited(_saveShare(_local!, address));
     return MpcAccount(
       address: address,
@@ -98,19 +130,22 @@ class AuthCore {
   /// Get wallet address
   String getAddress() {
     if (_local == null) throw SbtAuthException('Please init auth core');
-    return MultiMpc.address(shareToKey(_local!));
+    if (chain == Chain.EVM) {
+      return MultiMpc.address(shareToKey(_local!));
+    } else {
+      return base58encode(hexToBytes(_local!.publicKey));
+    }
   }
 
   /// Sign method
   Future<String> signDigest(
     Uint8List message, {
-    int? chainId,
-    bool isEIP1559 = false,
+    String? network,
   }) async {
     final hashMessage = keccak256(message);
     var result = '';
     if (remoteSign) {
-      final uid = await _setTaskId(listToHex(message), chainId ?? 0);
+      final uid = await _setTaskId(listToHex(message), network ?? '');
       result = await MultiMpc.sign(
         MultiSignParams(
           keypair: shareToKey(_local!),
@@ -139,13 +174,14 @@ class AuthCore {
   /// Sign method
   Future<Signature> signTransaction(
     Uint8List message, {
+    required String network,
     required int chainId,
     bool isEIP1559 = false,
   }) async {
     final hashMessage = keccak256(message);
     var result = '';
     if (remoteSign) {
-      final uid = await _setTaskId(listToHex(message), chainId);
+      final uid = await _setTaskId(listToHex(message), network);
       result = await MultiMpc.sign(
         MultiSignParams(
           keypair: shareToKey(_local!),
@@ -208,7 +244,7 @@ class AuthCore {
     return keyToShare(MultiKeypair.fromJson(MultiMpc.auxToKeypair(key)));
   }
 
-  Future<String> _setTaskId(String rawMessage, int chainID) async {
+  Future<String> _setTaskId(String rawMessage, String network) async {
     final uid = MultiMpc.uuid();
     final data = {
       'metadata': jsonEncode({
@@ -217,7 +253,7 @@ class AuthCore {
         'engine': 'ECDSA',
       }),
       'rawMsg': rawMessage,
-      'chainID': chainID,
+      'network': network,
       'keyType': 'EVM'
     };
     final res = await http.post(

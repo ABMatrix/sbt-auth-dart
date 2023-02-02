@@ -86,6 +86,11 @@ class SbtAuth {
 
   AuthCore? _core;
 
+  /// solana core
+  AuthCore? get solanaCore => _solanaCore;
+
+  AuthCore? _solanaCore;
+
   EventSource? _eventSource;
 
   /// Grant authorization listen controller
@@ -144,6 +149,7 @@ class SbtAuth {
     }
     var inited = false;
     if (_user!.publicKeyAddress.isEmpty) {
+      /// init evm
       final core = AuthCore(
         mpcUrl: MpcUrl(
           url: _baseUrl,
@@ -161,6 +167,26 @@ class SbtAuth {
       );
       _core = core;
       user!.backupPrivateKey = '0x${account.shares[2].privateKey}';
+
+      /// init solana
+      // final solanaCore = AuthCore(
+      //   mpcUrl: MpcUrl(
+      //     url: _baseUrl,
+      //     get: 'user/forward:query:data',
+      //     set: 'user/forward:data',
+      //   ),
+      //   signUrl: '$_baseUrl/user:sign',
+      //   token: token,
+      //   chain: Chain.SOLANA,
+      // );
+      // final solanaAccount = await solanaCore.generatePubKey();
+      // await api.uploadShares(
+      //   solanaAccount.shares,
+      //   solanaAccount.address,
+      //   jsonEncode(AuthCore.getRemoteKeypair(solanaAccount.shares[1]).toJson()),
+      //   keyType: 'SOLANA',
+      // );
+      // _solanaCore = solanaCore;
     } else {
       final remoteLocalShareInfo = await api.fetchRemoteShare();
       final core = AuthCore(

@@ -10,6 +10,9 @@ const TOKEN_KEY = 'token_key';
 /// Hive cache box key
 const CACHE_KEY = 'local_cache_key';
 
+/// Hive cache box key
+const SOLANA_CACHE_KEY = 'local_solana_cache_key';
+
 /// Hive Util
 class DBUtil {
   /// user token box
@@ -17,6 +20,9 @@ class DBUtil {
 
   /// share box
   static late Box<Share?>? shareBox;
+
+  /// solana share box
+  static late Box<Share?>? solanaShareBox;
 
   /// init Box
   static Future<void> init() async {
@@ -27,5 +33,6 @@ class DBUtil {
     }
     tokenBox = await Hive.openBox(TOKEN_KEY);
     shareBox = await Hive.openBox(CACHE_KEY);
+    solanaShareBox = await Hive.openBox(SOLANA_CACHE_KEY);
   }
 }

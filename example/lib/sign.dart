@@ -6,9 +6,14 @@ import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
 class SignPage extends StatefulWidget {
   final String address;
+  final String solanaAddress;
   final SbtAuth sbtauth;
 
-  const SignPage({required this.address, required this.sbtauth, super.key});
+  const SignPage(
+      {required this.address,
+      this.solanaAddress = '**',
+      required this.sbtauth,
+      super.key});
 
   @override
   State<SignPage> createState() => _SignPageState();
@@ -23,6 +28,7 @@ class _SignPageState extends State<SignPage> {
   @override
   void initState() {
     print(widget.address);
+    print(widget.solanaAddress);
     super.initState();
   }
 
@@ -74,6 +80,8 @@ class _SignPageState extends State<SignPage> {
               child: const Text('send')),
           const SizedBox(height: 40),
           Text(widget.address),
+          const SizedBox(height: 20),
+          Text(widget.solanaAddress),
           TextButton(
             onPressed: _signMessage,
             child: const Text('Sign message'),

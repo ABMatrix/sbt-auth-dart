@@ -52,6 +52,9 @@ class SbtAuthProvider {
   /// Chain id for the provider, default 0x1
   String chainId = '0x5';
 
+  /// network
+  String network = 'eth';
+
   /// Methods supported
   final methods = _ethSignerMethods;
 
@@ -125,9 +128,33 @@ class SbtAuthProvider {
     final supported = _ethRpc.keys.contains(chainId);
     if (supported) {
       chainId = chainid;
+      _getNetwork();
       _setupJsonRpcClient();
     } else {
       throw SbtAuthException('ChainId not supported');
+    }
+  }
+
+  void _getNetwork() {
+    switch (chainId) {
+      case '0x1':
+        network = 'eth';
+        break;
+      case '0x38':
+        network = 'bsc';
+        break;
+      case '0x89':
+        network = 'polygon';
+        break;
+      case '0x5':
+        network = 'eth_goerli';
+        break;
+      case '0x61':
+        network = 'bsc_chapel';
+        break;
+      case '0x13881':
+        network = 'polygon_mumbai';
+        break;
     }
   }
 
@@ -144,6 +171,7 @@ class SbtAuthProvider {
     final res = await signer.signTransaction(
       UnsignedTransaction.fromMap(transaction),
       int.parse(chainId),
+      network,
     );
     return res;
   }

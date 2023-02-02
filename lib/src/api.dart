@@ -195,15 +195,14 @@ class SbtAuthApi {
   }
 
   /// Check Payment password
-  Future<bool> checkPaymentPassword(String paymentPassword) async {
+  Future<void> checkPaymentPassword(String paymentPassword) async {
     final data = {'paymentPassword': paymentPassword};
     final response = await http.post(
       Uri.parse('$_baseUrl/user/verify:payment-password'),
       headers: _headers,
       body: jsonEncode(data),
     );
-    final res = _checkResponse(response) as bool;
-    return res;
+    _checkResponse(response);
   }
 
   /// Reset password
@@ -638,6 +637,73 @@ class SbtAuthApi {
       body: jsonEncode(data),
     );
     _checkResponse(response);
+  }
+
+  /// Get Recent Block hash
+  static Future<String> getRecentBlockhash() async {
+    final slot = await getSlot();
+    final data = {
+      'jsonrpc': '2.0',
+      'id': 1,
+      'method': 'getBlock',
+      'params': [
+        slot,
+        {
+          'encoding': 'json',
+          'maxSupportedTransactionVersion': 0,
+          'transactionDetails': 'full',
+          'rewards': false
+        }
+      ]
+    };
+    final res = await http.post(
+      Uri.parse(''),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode(data),
+    );
+    final body = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+    final recentBlockhash = (body['result'] as Map)['blockhash'] as Map;
+    return recentBlockhash as String;
+  }
+
+  /// Get slot
+  static Future<int> getSlot() async {
+    final data = {
+      'jsonrpc': '2.0',
+      'id': 1,
+      'method': 'getSlot',
+    };
+    final res = await http.post(
+      Uri.parse(''),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode(data),
+    );
+    final body = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+    final slot = body['result'];
+    return slot as int;
+  }
+
+  /// Send solana transaction
+  static Future<String> sendSolanaTransaction(String tx) async {
+    final data = {
+      'jsonrpc': '2.0',
+      'id': 1,
+      'method': 'sendTransaction',
+      'params': [tx],
+    };
+    final res = await http.post(
+      Uri.parse(''),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode(data),
+    );
+    final body = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+    return body['result'] as String;
   }
 
   static dynamic _checkResponse(Response response) {

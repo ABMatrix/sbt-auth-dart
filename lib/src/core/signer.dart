@@ -46,6 +46,7 @@ class Signer {
   Future<String> signTransaction(
     UnsignedTransaction transaction,
     int chainId,
+    String network,
   ) async {
     if (transaction.maxFeePerGas != null ||
         transaction.maxPriorityFeePerGas != null) {
@@ -56,6 +57,7 @@ class Signer {
       final signature = await _core.signTransaction(
         encodedTx.asBytes(),
         chainId: chainId,
+        network: network,
         isEIP1559: true,
       );
       final result = [0x02] +
@@ -76,8 +78,11 @@ class Signer {
           ),
         ),
       );
-      final signature =
-          await _core.signTransaction(encodedTx, chainId: chainId);
+      final signature = await _core.signTransaction(
+        encodedTx,
+        chainId: chainId,
+        network: network,
+      );
       final result = uint8ListFromList(
         rlp.encode(
           encodeToRlp(transaction, signature),
