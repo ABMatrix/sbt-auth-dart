@@ -22,6 +22,7 @@ class SignPage extends StatefulWidget {
 class _SignPageState extends State<SignPage> {
   String _signature = '';
   String _result = '';
+  String hash = '';
 
   final TextEditingController _emailController = TextEditingController();
 
@@ -83,6 +84,12 @@ class _SignPageState extends State<SignPage> {
           const SizedBox(height: 20),
           Text(widget.solanaAddress),
           TextButton(
+            onPressed: _sendSol,
+            child: const Text('Send sol'),
+          ),
+          const SizedBox(height: 10),
+          Text(hash),
+          TextButton(
             onPressed: _signMessage,
             child: const Text('Sign message'),
           ),
@@ -138,9 +145,9 @@ class _SignPageState extends State<SignPage> {
     });
   }
 
-// _getPrivateKey() {
-//   setState(() {
-//     _privateKey = widget.sbtauth.exportPrivateKey();
-//   });
-// }
+  _sendSol() async {
+    final singer = widget.sbtauth.solanaSinger;
+    hash = await singer!
+        .sendTransaction(widget.solanaAddress, widget.solanaAddress, 0);
+  }
 }

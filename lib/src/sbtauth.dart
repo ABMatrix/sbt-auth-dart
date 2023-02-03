@@ -11,6 +11,7 @@ import 'package:eventsource/eventsource.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
+import 'package:sbt_auth_dart/src/core/solana_signer.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -93,11 +94,16 @@ class SbtAuth {
 
   EventSource? _eventSource;
 
+  SolanaSinger? get solanaSinger =>
+      _solanaCore == null ? null : SolanaSinger(_solanaCore!,_solanaUrl);
+
   /// Grant authorization listen controller
   StreamController<String> authRequestStreamController =
       StreamController.broadcast();
 
   String get _baseUrl => developMode ? DEVELOP_BASE_URL : PRODUCTION_BASE_URL;
+
+  String get _solanaUrl => developMode ? DEVELOP_SOLANA_URL : PRODUCTION_SOLANA_URL;
 
   Timer? _timer;
 

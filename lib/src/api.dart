@@ -12,6 +12,12 @@ const DEVELOP_BASE_URL = 'https://test-api.sbtauth.io/sbt-auth';
 /// Production mode base url
 const PRODUCTION_BASE_URL = 'https://api.sbtauth.io/sbt-auth';
 
+/// Develop mode solana url
+const DEVELOP_SOLANA_URL = 'https://test-rpc-solana.abmatrix.cn';
+
+/// Production mode solana url
+const PRODUCTION_SOLANA_URL = 'https://rpc-solana.abmatrix.cn';
+
 /// SBTAuth apis
 class SbtAuthApi {
   /// SBTAuth apis used inside project.
@@ -309,10 +315,9 @@ class SbtAuthApi {
 
   /// Get userDevice list
   Future<List<Device>> getUserDeviceList(String clientID) async {
-    final deviceName = await getDeviceName();
     final response = await http.get(
       Uri.parse(
-        '$_baseUrl/user/devices?pageNo=1&pageSize=9999&clientID=$clientID&deviceName=$deviceName',
+        '$_baseUrl/user/devices?pageNo=1&pageSize=9999&clientID=$clientID',
       ),
       headers: _headers,
     );
@@ -640,8 +645,8 @@ class SbtAuthApi {
   }
 
   /// Get Recent Block hash
-  static Future<String> getRecentBlockhash() async {
-    final slot = await getSlot();
+  static Future<String> getRecentBlockhash(String url) async {
+    final slot = await getSlot(url);
     final data = {
       'jsonrpc': '2.0',
       'id': 1,
@@ -657,26 +662,26 @@ class SbtAuthApi {
       ]
     };
     final res = await http.post(
-      Uri.parse(''),
+      Uri.parse(url),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8'
       },
       body: jsonEncode(data),
     );
     final body = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
-    final recentBlockhash = (body['result'] as Map)['blockhash'] as Map;
+    final recentBlockhash = (body['result'] as Map)['blockhash'] as String;
     return recentBlockhash as String;
   }
 
   /// Get slot
-  static Future<int> getSlot() async {
+  static Future<int> getSlot(String url) async {
     final data = {
       'jsonrpc': '2.0',
       'id': 1,
       'method': 'getSlot',
     };
     final res = await http.post(
-      Uri.parse(''),
+      Uri.parse(url),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8'
       },
@@ -688,7 +693,7 @@ class SbtAuthApi {
   }
 
   /// Send solana transaction
-  static Future<String> sendSolanaTransaction(String tx) async {
+  static Future<String> sendSolanaTransaction(String url, String tx) async {
     final data = {
       'jsonrpc': '2.0',
       'id': 1,
@@ -696,7 +701,7 @@ class SbtAuthApi {
       'params': [tx],
     };
     final res = await http.post(
-      Uri.parse(''),
+      Uri.parse(url),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8'
       },

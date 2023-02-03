@@ -10,9 +10,11 @@ import 'package:solana/solana.dart';
 /// Solana Signer
 class SolanaSinger {
   /// Solana Signer
-  SolanaSinger(this._core);
+  SolanaSinger(this._core,this._solanaUrl);
 
   final AuthCore _core;
+
+  final String _solanaUrl;
 
   /// Send transaction
   Future<String> sendTransaction(
@@ -30,7 +32,7 @@ class SolanaSinger {
       ),
     ];
     final message = Message(instructions: instructions);
-    final recentBlockhash = await SbtAuthApi.getRecentBlockhash();
+    final recentBlockhash = await SbtAuthApi.getRecentBlockhash(_solanaUrl);
     final compiledMessage = message.compile(
       recentBlockhash: recentBlockhash,
       feePayer: fromAddress,
@@ -48,7 +50,7 @@ class SolanaSinger {
       tx.messageBytes,
     ]);
     final hash =
-        await SbtAuthApi.sendSolanaTransaction(base58encode(data.toList()));
+        await SbtAuthApi.sendSolanaTransaction(_solanaUrl,base58encode(data.toList()));
     // final hash = await SbtAuthApi.sendSolanaTransaction(signature);
     return hash;
   }
