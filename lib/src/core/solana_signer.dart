@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:eth_sig_util/util/utils.dart';
+import 'package:mpc_dart/multi_mpc_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
 import 'package:sbt_auth_dart/src/core/core.dart';
 import 'package:solana/base58.dart';
@@ -10,7 +11,7 @@ import 'package:solana/solana.dart';
 /// Solana Signer
 class SolanaSinger {
   /// Solana Signer
-  SolanaSinger(this._core,this._solanaUrl);
+  SolanaSinger(this._core, this._solanaUrl);
 
   final AuthCore _core;
 
@@ -39,6 +40,7 @@ class SolanaSinger {
     );
     final signature = await _core.signDigest(
       Uint8List.fromList(compiledMessage.data.toList()),
+      engine: Engine.EDDSA,
     );
     final tx = SignedTx(
       messageBytes: compiledMessage.data,
@@ -49,8 +51,10 @@ class SolanaSinger {
           .toByteArray(),
       tx.messageBytes,
     ]);
-    final hash =
-        await SbtAuthApi.sendSolanaTransaction(_solanaUrl,base58encode(data.toList()));
+    final hash = await SbtAuthApi.sendSolanaTransaction(
+      _solanaUrl,
+      base58encode(data.toList()),
+    );
     // final hash = await SbtAuthApi.sendSolanaTransaction(signature);
     return hash;
   }

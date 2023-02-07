@@ -124,44 +124,48 @@ class SbtAuthProvider {
 
   /// Change privider chainId
   /// @params chainId '0x5'
-  void setChainId(String chainid) {
+  void setChainId(String chainid, {String network = '',}) {
     final supported = _ethRpc.keys.contains(chainId);
     if (supported) {
       chainId = chainid;
-      _getNetwork();
+      _getNetwork(network);
       _setupJsonRpcClient();
     } else {
       throw SbtAuthException('ChainId not supported');
     }
   }
 
-  void _getNetwork() {
-    switch (chainId) {
-      case '0x1':
-        network = 'eth';
-        break;
-      case '0x38':
-        network = 'bsc';
-        break;
-      case '0x89':
-        network = 'polygon';
-        break;
-      case '0x5':
-        network = 'eth_goerli';
-        break;
-      case '0x61':
-        network = 'bsc_chapel';
-        break;
-      case '0x13881':
-        network = 'polygon_mumbai';
-        break;
+  void _getNetwork(String chainNetwork) {
+    if (chainNetwork != '') {
+      network = chainNetwork;
+    } else {
+      switch (chainId) {
+        case '0x1':
+          network = 'eth';
+          break;
+        case '0x38':
+          network = 'bsc';
+          break;
+        case '0x89':
+          network = 'polygon';
+          break;
+        case '0x5':
+          network = 'eth_goerli';
+          break;
+        case '0x61':
+          network = 'bsc_chapel';
+          break;
+        case '0x13881':
+          network = 'polygon_mumbai';
+          break;
+      }
     }
   }
 
   Future<void> _sendTransaction(RequestArgument argument) async {
     final transaction = await _signTransaction(argument);
     final response =
-        await jsonRpcClient!.call('eth_sendRawTransaction', [transaction]);
+    await jsonRpcClient!.call('eth_sendRawTransaction', [transaction]);
     return response.result;
   }
 
@@ -215,8 +219,8 @@ class SbtAuthProvider {
         'data': (data == null || data == '0x')
             ? null
             : data.startsWith('0x')
-                ? data
-                : '0x$data',
+            ? data
+            : '0x$data',
       };
       final response = await jsonRpcClient!.call('eth_estimateGas', [request]);
       transaction['gasLimit'] = response.result;

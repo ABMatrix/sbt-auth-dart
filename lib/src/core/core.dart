@@ -138,10 +138,8 @@ class AuthCore {
   }
 
   /// Sign method
-  Future<String> signDigest(
-    Uint8List message, {
-    String? network,
-  }) async {
+  Future<String> signDigest(Uint8List message,
+      {String? network, Engine engine = Engine.ECDSA}) async {
     final hashMessage = keccak256(message);
     var result = '';
     if (remoteSign) {
@@ -165,10 +163,11 @@ class AuthCore {
           1,
           [shareToKey(_local!), shareToKey(_remote!, index: 2)],
         ),
+        engine: engine,
       );
     }
-    final signature = Signature.from(hexToBytes(result));
-    return bytesToHex(signature.join(), include0x: true);
+    // final signature = Signature.from(hexToBytes(result));
+    return result;
   }
 
   /// Sign method

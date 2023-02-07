@@ -29,7 +29,7 @@ Uint8List uint8ListFromList(List<int> data) {
 Share keyToLocalShare(KeyPair key) {
   return Share(
     privateKey: key.x_i,
-    extraData: key.y.toJson(),
+    extraData: jsonEncode(key.y),
   );
 }
 
@@ -46,7 +46,7 @@ Share keyToShare(MultiKeypair key) {
 KeyPair localShareToKey(Share share, [int index = 1]) {
   return KeyPair(
     share.privateKey,
-    Coordinate.fromMap(jsonDecode(share.extraData) as Map<String, dynamic>),
+    jsonDecode(share.extraData) as Map<String, dynamic>,
     index,
     1,
     3,
