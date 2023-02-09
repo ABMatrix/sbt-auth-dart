@@ -1,6 +1,6 @@
 name: sbt_auth_dart
 description: SBTAuth flutter sdk
-version: 0.4.78
+version: 0.4.79
 repository: https://github.com/ABMatrix/sbt-auth-dart
 publish_to: none
 
@@ -23,8 +23,7 @@ dependencies:
   package_info_plus: ^2.0.0
   path_provider: ^2.0.11
   sbt_encrypt: ^0.1.3
-  solana:
-    git: https://github.com/SBTAuth/solana-dart
+  solana: ^0.27.0
   url_launcher: ^6.1.6
   web3dart: ^2.3.5
 

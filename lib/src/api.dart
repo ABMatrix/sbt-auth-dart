@@ -669,8 +669,12 @@ class SbtAuthApi {
       body: jsonEncode(data),
     );
     final body = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
-    final recentBlockhash = (body['result'] as Map)['blockhash'] as String;
-    return recentBlockhash as String;
+    if (body['result'] != null) {
+      final recentBlockhash = (body['result'] as Map)['blockhash'] as String;
+      return recentBlockhash;
+    } else {
+      throw SbtAuthException((body['error'] ?? 'Network') as String);
+    }
   }
 
   /// Get slot
@@ -688,8 +692,12 @@ class SbtAuthApi {
       body: jsonEncode(data),
     );
     final body = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
-    final slot = body['result'];
-    return slot as int;
+    if (body['result'] != null) {
+      final slot = body['result'];
+      return slot as int;
+    } else {
+      throw SbtAuthException((body['error'] ?? 'Network') as String);
+    }
   }
 
   /// Send solana transaction
@@ -708,7 +716,11 @@ class SbtAuthApi {
       body: jsonEncode(data),
     );
     final body = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
-    return body['result'] as String;
+    if (body['result'] != null) {
+      return body['result'] as String;
+    } else {
+      throw SbtAuthException((body['error'] ?? 'Network') as String);
+    }
   }
 
   static dynamic _checkResponse(Response response) {

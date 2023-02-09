@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:eth_sig_util/util/utils.dart';
-import 'package:mpc_dart/multi_mpc_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
 import 'package:sbt_auth_dart/src/core/core.dart';
 import 'package:solana/base58.dart';
@@ -11,40 +10,32 @@ import 'package:solana/solana.dart';
 /// Solana Signer
 class SolanaSinger {
   /// Solana Signer
-  SolanaSinger(this._core, this._solanaUrl);
+  SolanaSinger(this._core, this._solanaUrl, this._solanaNetwork);
 
   final AuthCore _core;
 
   final String _solanaUrl;
 
+  final String _solanaNetwork;
+
   /// Send transaction
   Future<String> sendTransaction(
-    String from,
-    String to,
-    int lamports,
+    Instruction instruction,
+    Ed25519HDPublicKey from,
   ) async {
-    final fromAddress = Ed25519HDPublicKey.fromBase58(from);
-    final toAddress = Ed25519HDPublicKey.fromBase58(to);
-    final instructions = [
-      SystemInstruction.transfer(
-        fundingAccount: fromAddress,
-        recipientAccount: toAddress,
-        lamports: lamports,
-      ),
-    ];
-    final message = Message(instructions: instructions);
+    final message = Message(instructions: [instruction]);
     final recentBlockhash = await SbtAuthApi.getRecentBlockhash(_solanaUrl);
     final compiledMessage = message.compile(
       recentBlockhash: recentBlockhash,
-      feePayer: fromAddress,
+      feePayer: from,
     );
     final signature = await _core.signDigest(
       Uint8List.fromList(compiledMessage.data.toList()),
-      engine: Engine.EDDSA,
+      network: _solanaNetwork,
     );
     final tx = SignedTx(
       messageBytes: compiledMessage.data,
-      signatures: [Signature(hexToBytes(signature), publicKey: fromAddress)],
+      signatures: [Signature(hexToBytes(signature), publicKey: from)],
     );
     final data = ByteArray.merge([
       CompactArray.fromIterable(tx.signatures.map((e) => ByteArray(e.bytes)))
@@ -55,7 +46,6 @@ class SolanaSinger {
       _solanaUrl,
       base58encode(data.toList()),
     );
-    // final hash = await SbtAuthApi.sendSolanaTransaction(signature);
     return hash;
   }
 }
@@ -100,12 +90,15 @@ class CompactU16 {
     return CompactU16.raw(data);
   }
 
+  /// raw
   const CompactU16.raw(this._data);
 
+  /// zero
   static const zero = CompactU16.raw([0]);
 
   final List<int> _data;
 
+  /// value
   int get value {
     var len = 0;
     var size = 0;
@@ -120,7 +113,9 @@ class CompactU16 {
     return len;
   }
 
+  /// size
   int get size => toByteArray().length;
 
+  /// to byte array
   ByteArray toByteArray() => ByteArray(CompactU16(value)._data);
 }

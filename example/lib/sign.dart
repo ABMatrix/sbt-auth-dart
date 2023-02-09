@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
+import 'package:solana/solana.dart';
 
 class SignPage extends StatefulWidget {
   final String address;
@@ -147,7 +148,16 @@ class _SignPageState extends State<SignPage> {
 
   _sendSol() async {
     final singer = widget.sbtauth.solanaSinger;
-    hash = await singer!
-        .sendTransaction(widget.solanaAddress, widget.solanaAddress, 0);
+    final fromAddress = Ed25519HDPublicKey.fromBase58(widget.solanaAddress);
+    final toAddress = Ed25519HDPublicKey.fromBase58(widget.solanaAddress);
+    final instruction = SystemInstruction.transfer(
+      fundingAccount: fromAddress,
+      recipientAccount: toAddress,
+      lamports: 0,
+    );
+    final res = await singer!.sendTransaction(instruction, fromAddress);
+    setState(() {
+      hash = res;
+    });
   }
 }

@@ -41,7 +41,11 @@ extension SbtChainInfo on Chain {
 /// Mpc url
 class MpcUrl {
   /// Mpc url
-  MpcUrl({required this.url, required this.get, required this.set});
+  MpcUrl({
+    required this.url,
+    required this.get,
+    required this.set,
+  });
 
   /// url
   late String url;
@@ -138,16 +142,21 @@ class AuthCore {
   }
 
   /// Sign method
-  Future<String> signDigest(Uint8List message,
-      {String? network, Engine engine = Engine.ECDSA}) async {
-    final hashMessage = keccak256(message);
+  Future<String> signDigest(
+    Uint8List message, {
+    String? network,
+  }) async {
+    var msgs = message;
+    if (chain == Chain.EVM) {
+      msgs = keccak256(message);
+    }
     var result = '';
     if (remoteSign) {
       final uid = await _setTaskId(listToHex(message), network ?? '');
       result = await MultiMpc.sign(
         MultiSignParams(
           keypair: shareToKey(_local!),
-          msgs: [hashMessage],
+          msgs: [msgs],
           rawMsg: '',
           url: mpcUrl.url,
           get: mpcUrl.get,
@@ -159,14 +168,13 @@ class AuthCore {
     } else {
       result = await MultiMpc.localSign(
         MultiSignLocalParams(
-          [hashMessage],
+          [msgs],
           1,
           [shareToKey(_local!), shareToKey(_remote!, index: 2)],
         ),
-        engine: engine,
+        engine: chain.engine,
       );
     }
-    // final signature = Signature.from(hexToBytes(result));
     return result;
   }
 
@@ -243,17 +251,20 @@ class AuthCore {
     return keyToShare(MultiKeypair.fromJson(MultiMpc.auxToKeypair(key)));
   }
 
-  Future<String> _setTaskId(String rawMessage, String network) async {
+  Future<String> _setTaskId(
+    String rawMessage,
+    String network,
+  ) async {
     final uid = MultiMpc.uuid();
     final data = {
       'metadata': jsonEncode({
         'uid': uid,
         'party_ind': 2,
-        'engine': 'ECDSA',
+        'engine': chain.engine.name,
       }),
       'rawMsg': rawMessage,
       'network': network,
-      'keyType': 'EVM'
+      'keyType': chain.name
     };
     final res = await http.post(
       Uri.parse(signUrl),

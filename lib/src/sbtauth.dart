@@ -94,8 +94,13 @@ class SbtAuth {
 
   EventSource? _eventSource;
 
-  SolanaSinger? get solanaSinger =>
-      _solanaCore == null ? null : SolanaSinger(_solanaCore!,_solanaUrl);
+  SolanaSinger? get solanaSinger => _solanaCore == null
+      ? null
+      : SolanaSinger(
+          _solanaCore!,
+          _solanaUrl,
+          _solanaNetwork,
+        );
 
   /// Grant authorization listen controller
   StreamController<String> authRequestStreamController =
@@ -103,7 +108,10 @@ class SbtAuth {
 
   String get _baseUrl => developMode ? DEVELOP_BASE_URL : PRODUCTION_BASE_URL;
 
-  String get _solanaUrl => developMode ? DEVELOP_SOLANA_URL : PRODUCTION_SOLANA_URL;
+  String get _solanaUrl =>
+      developMode ? DEVELOP_SOLANA_URL : PRODUCTION_SOLANA_URL;
+
+  String get _solanaNetwork => developMode ? 'solana_devnet' : 'solana';
 
   Timer? _timer;
 
@@ -154,6 +162,7 @@ class SbtAuth {
           (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
     }
     var inited = false;
+    var solanaInited = false;
     if (_user!.publicKeyAddress.isEmpty) {
       /// init evm
       final core = AuthCore(
@@ -172,9 +181,9 @@ class SbtAuth {
         jsonEncode(AuthCore.getRemoteKeypair(account.shares[1]).toJson()),
       );
       _core = core;
-      user!.backupPrivateKey = '0x${account.shares[2].privateKey}';
+      user!.backupPrivateKey = account.shares[2].privateKey;
 
-      /// init solana
+      // /// init solana
       // final solanaCore = AuthCore(
       //   mpcUrl: MpcUrl(
       //     url: _baseUrl,
@@ -194,6 +203,7 @@ class SbtAuth {
       // );
       // _solanaCore = solanaCore;
     } else {
+      /// init evm
       final remoteLocalShareInfo = await api.fetchRemoteShare();
       final core = AuthCore(
         mpcUrl: MpcUrl(
@@ -211,6 +221,27 @@ class SbtAuth {
       if (inited) {
         _core = core;
       }
+
+      // /// init solana
+      // final solanaRemoteLocalShareInfo =
+      //     await api.fetchRemoteShare(keyType: 'SOLANA');
+      // final solanaCore = AuthCore(
+      //   mpcUrl: MpcUrl(
+      //     url: _baseUrl,
+      //     get: 'user/forward:query:data',
+      //     set: 'user/forward:data',
+      //   ),
+      //   chain: Chain.SOLANA,
+      //   signUrl: '$_baseUrl/user:sign',
+      //   token: token,
+      // );
+      // solanaInited = await solanaCore.init(
+      //   address: solanaRemoteLocalShareInfo.address,
+      //   remote: solanaRemoteLocalShareInfo.remote,
+      // );
+      // if (solanaInited) {
+      //   _solanaCore = solanaCore;
+      // }
     }
     if (!isLogin) {
       if (!inited) throw SbtAuthException('Init error');
@@ -317,7 +348,7 @@ class SbtAuth {
     if (backupPrivateKey == null) {
       final remoteShareInfo = await api.fetchRemoteShare();
       backupPrivateKey =
-          await _core!.getBackupPrivateKey(remoteShareInfo.localAux);
+          await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     await api.backupShare(privateKey, email, code);
@@ -428,6 +459,13 @@ class SbtAuth {
       signUrl: '$_baseUrl/user:sign',
       token: token!,
     );
+    final hash = bytesToHex(
+      hashMessage(ascii.encode(jsonEncode(localShare.toJson()))),
+      include0x: true,
+    );
+    if (hash != remoteShareInfo.localHash) {
+      throw SbtAuthException('Recover failed');
+    }
     final inited = await core.init(
       address: remoteShareInfo.address,
       remote: remoteShareInfo.remote,
@@ -451,9 +489,6 @@ class SbtAuth {
       backup = backupPrivateKey;
     } else {
       backup = await decryptMsg(backupPrivateKey, password);
-    }
-    if (backup.startsWith('0x')) {
-      backup = backup.substring(2);
     }
     final core = AuthCore(
       mpcUrl: MpcUrl(
@@ -494,7 +529,7 @@ class SbtAuth {
     if (backupPrivateKey == null) {
       final remoteShareInfo = await api.fetchRemoteShare();
       backupPrivateKey =
-          await _core!.getBackupPrivateKey(remoteShareInfo.localAux);
+          await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
