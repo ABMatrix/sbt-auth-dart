@@ -232,8 +232,15 @@ class AuthCore {
   Future<void> _recover(Share remote, Share backup, String aux) async {
     final backupKey = shareToKey(backup, index: 3);
     final remoteKey = shareToKey(remote, index: 2);
-    final backupAddress = MultiMpc.address(backupKey);
-    final address = MultiMpc.address(remoteKey);
+    var backupAddress = '';
+    var address = '';
+    if (chain == Chain.EVM) {
+      backupAddress = MultiMpc.address(backupKey);
+      address = MultiMpc.address(remoteKey);
+    } else {
+      backupAddress = base58encode(hexToBytes(backupKey.pk));
+      address = base58encode(hexToBytes(remoteKey.pk));
+    }
     if (backupAddress != address) {
       throw SbtAuthException('Wrong backup private key');
     }

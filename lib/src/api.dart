@@ -237,8 +237,11 @@ class SbtAuthApi {
 
   /// Upload shares.
   Future<void> uploadShares(
-      List<Share> shares, String address, String privateKey2Fragment,
-      {String keyType = 'EVM'}) async {
+    List<Share> shares,
+    String address,
+    String privateKey2Fragment, {
+    String keyType = 'EVM',
+  }) async {
     final params = {
       'privateKey1Fragment': shares[0].extraData,
       'privateKey2Fragment': privateKey2Fragment,

@@ -4,8 +4,14 @@ import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 class ConfirmAuthPage extends StatefulWidget {
   SbtAuth auth;
   final String deviceName;
+  final String keyType;
 
-  ConfirmAuthPage({super.key, required this.deviceName, required this.auth});
+  ConfirmAuthPage({
+    super.key,
+    required this.deviceName,
+    required this.auth,
+    required this.keyType,
+  });
 
   @override
   State<StatefulWidget> createState() => ConfirmAuthPageState();
@@ -35,8 +41,9 @@ class ConfirmAuthPageState extends State<ConfirmAuthPage> {
             children: [
               TextButton(
                   onPressed: () async {
-                    final authCode =
-                        await widget.auth.approveAuthRequest(widget.deviceName);
+                    final authCode = await widget.auth.approveAuthRequest(
+                        widget.deviceName,
+                        chain: Chain.values.byName(widget.keyType));
                     setState(() {
                       code = authCode;
                     });

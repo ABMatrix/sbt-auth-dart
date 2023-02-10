@@ -1,14 +1,17 @@
 import 'dart:async';
 
 import 'package:example/sign.dart';
+import 'package:example/solana_sign.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
 class GrantAuthorizationPage extends StatefulWidget {
-  SbtAuth auth;
+  final SbtAuth auth;
+  final Chain chain;
 
-  GrantAuthorizationPage({super.key, required this.auth});
+  const GrantAuthorizationPage(
+      {super.key, required this.auth, this.chain = Chain.EVM});
 
   @override
   State<StatefulWidget> createState() => GrantAuthorizationPageState();
@@ -51,7 +54,9 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
                                   return GestureDetector(
                                     onTap: () async {
                                       await widget.auth.api.sendAuthRequest(
-                                          snapshot.data[i].deviceName!);
+                                        snapshot.data[i].deviceName!,
+                                        keyType: widget.chain.name,
+                                      );
                                     },
                                     child: Container(
                                       width: 800,
@@ -139,21 +144,39 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
       bottomNavigationBar: TextButton(
         onPressed: () async {
           if (emailConfirm) {
-            await widget.auth.recoverWithDevice(currentText);
+            await widget.auth.recoverWithDevice(
+              currentText,
+              chain: widget.chain,
+            );
           } else {
-            await widget.auth
-                .recoverWidthBackup(privateKeyController.text.trim(), '123');
+            await widget.auth.recoverWidthBackup(
+              privateKeyController.text.trim(),
+              '123',
+              chain: widget.chain,
+            );
           }
 
           if (mounted) {
-            Navigator.push(
+            if (widget.chain == Chain.EVM) {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SignPage(
+                            address: widget.auth.user!.publicKeyAddress['EVM']
+                                    ['address'] ??
+                                '',
+                            sbtauth: widget.auth,
+                          )));
+            } else {
+              Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SignPage(
-                          address:
-                              widget.auth.user!.publicKeyAddress['EVM']['address'] ?? '',
-                          sbtauth: widget.auth,
-                        )));
+                  builder: (context) => SolanaSignPage(
+                    sbtauth: widget.auth,
+                  ),
+                ),
+              );
+            }
           }
         },
         child: const Text('finish'),

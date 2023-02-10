@@ -53,12 +53,14 @@ class _MyHomePageState extends State<MyHomePage> {
     sbtAuth.authRequestStreamController.stream.listen((event) {
       if (event.contains('deviceName')) {
         final deviceName = jsonDecode(event)['deviceName'];
+        final keyType = jsonDecode(event)['keyType'];
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => ConfirmAuthPage(
                       deviceName: deviceName,
                       auth: sbtAuth,
+                      keyType: keyType,
                     )));
       }
     });
@@ -70,8 +72,6 @@ class _MyHomePageState extends State<MyHomePage> {
             builder: (context) => SignPage(
               address: sbtAuth.user!.publicKeyAddress['EVM'] ??
                   sbtAuth.core!.getAddress(),
-              solanaAddress: sbtAuth.user!.publicKeyAddress['SOLANA'] ??
-                  sbtAuth.solanaCore!.getAddress(),
               sbtauth: sbtAuth,
             ),
           ),
@@ -168,9 +168,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 address: sbtAuth.user!.publicKeyAddress['EVM'] == null
                     ? sbtAuth.core!.getAddress()
                     : sbtAuth.user!.publicKeyAddress['EVM']['address'],
-                solanaAddress: sbtAuth.user!.publicKeyAddress['SOLANA'] == null
-                    ? sbtAuth.solanaCore!.getAddress()
-                    : sbtAuth.user!.publicKeyAddress['SOLANA']['address'],
                 sbtauth: sbtAuth,
               ),
             ),

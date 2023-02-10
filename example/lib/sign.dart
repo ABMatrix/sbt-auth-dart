@@ -1,3 +1,4 @@
+import 'package:example/solana_sign.dart';
 import 'package:example/white_list.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
@@ -7,14 +8,9 @@ import 'package:solana/solana.dart';
 
 class SignPage extends StatefulWidget {
   final String address;
-  final String solanaAddress;
   final SbtAuth sbtauth;
 
-  const SignPage(
-      {required this.address,
-      this.solanaAddress = '**',
-      required this.sbtauth,
-      super.key});
+  const SignPage({required this.address, required this.sbtauth, super.key});
 
   @override
   State<SignPage> createState() => _SignPageState();
@@ -30,7 +26,6 @@ class _SignPageState extends State<SignPage> {
   @override
   void initState() {
     print(widget.address);
-    print(widget.solanaAddress);
     super.initState();
   }
 
@@ -83,10 +78,9 @@ class _SignPageState extends State<SignPage> {
           const SizedBox(height: 40),
           Text(widget.address),
           const SizedBox(height: 20),
-          Text(widget.solanaAddress),
           TextButton(
-            onPressed: _sendSol,
-            child: const Text('Send sol'),
+            onPressed: _initSolana,
+            child: const Text('Init solana'),
           ),
           const SizedBox(height: 10),
           Text(hash),
@@ -146,18 +140,14 @@ class _SignPageState extends State<SignPage> {
     });
   }
 
-  _sendSol() async {
-    final singer = widget.sbtauth.solanaSinger;
-    final fromAddress = Ed25519HDPublicKey.fromBase58(widget.solanaAddress);
-    final toAddress = Ed25519HDPublicKey.fromBase58(widget.solanaAddress);
-    final instruction = SystemInstruction.transfer(
-      fundingAccount: fromAddress,
-      recipientAccount: toAddress,
-      lamports: 0,
+  _initSolana() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SolanaSignPage(
+          sbtauth: widget.sbtauth,
+        ),
+      ),
     );
-    final res = await singer!.sendTransaction(instruction, fromAddress);
-    setState(() {
-      hash = res;
-    });
   }
 }

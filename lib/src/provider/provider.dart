@@ -124,7 +124,10 @@ class SbtAuthProvider {
 
   /// Change privider chainId
   /// @params chainId '0x5'
-  void setChainId(String chainid, {String network = '',}) {
+  void setChainId(
+    String chainid, {
+    String network = '',
+  }) {
     final supported = _ethRpc.keys.contains(chainId);
     if (supported) {
       chainId = chainid;
@@ -165,7 +168,7 @@ class SbtAuthProvider {
   Future<void> _sendTransaction(RequestArgument argument) async {
     final transaction = await _signTransaction(argument);
     final response =
-    await jsonRpcClient!.call('eth_sendRawTransaction', [transaction]);
+        await jsonRpcClient!.call('eth_sendRawTransaction', [transaction]);
     return response.result;
   }
 
@@ -219,8 +222,8 @@ class SbtAuthProvider {
         'data': (data == null || data == '0x')
             ? null
             : data.startsWith('0x')
-            ? data
-            : '0x$data',
+                ? data
+                : '0x$data',
       };
       final response = await jsonRpcClient!.call('eth_estimateGas', [request]);
       transaction['gasLimit'] = response.result;

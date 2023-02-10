@@ -94,6 +94,7 @@ class SbtAuth {
 
   EventSource? _eventSource;
 
+  /// solana singer
   SolanaSinger? get solanaSinger => _solanaCore == null
       ? null
       : SolanaSinger(
@@ -120,8 +121,7 @@ class SbtAuth {
 
   /// SBTAuth api
   SbtAuthApi get api {
-    final token = DBUtil.tokenBox.get(TOKEN_KEY);
-    if (token == null) throw SbtAuthException('User not logined');
+    if (token == '') throw SbtAuthException('User not logined');
     return SbtAuthApi(
       baseUrl: _baseUrl,
       token: token,
@@ -153,100 +153,61 @@ class SbtAuth {
   }
 
   /// Init sbtauth
-  Future<void> init({bool isLogin = false}) async {
-    final token = DBUtil.tokenBox.get(TOKEN_KEY);
+  Future<void> init({bool isLogin = false, Chain chain = Chain.EVM}) async {
     _user = await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
     if (_user!.userLoginParams.contains('email')) {
       userEmail =
           (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
     }
-    var inited = false;
-    var solanaInited = false;
-    if (_user!.publicKeyAddress.isEmpty) {
-      /// init evm
-      final core = AuthCore(
-        mpcUrl: MpcUrl(
-          url: _baseUrl,
-          get: 'user/forward:query:data',
-          set: 'user/forward:data',
-        ),
-        signUrl: '$_baseUrl/user:sign',
-        token: token!,
-      );
+    if (_user!.publicKeyAddress[chain.name] == null) {
+      final core = getCore(chain);
       final account = await core.generatePubKey();
       await api.uploadShares(
         account.shares,
         account.address,
         jsonEncode(AuthCore.getRemoteKeypair(account.shares[1]).toJson()),
+        keyType: chain.name,
       );
-      _core = core;
-      user!.backupPrivateKey = account.shares[2].privateKey;
-
-      // /// init solana
-      // final solanaCore = AuthCore(
-      //   mpcUrl: MpcUrl(
-      //     url: _baseUrl,
-      //     get: 'user/forward:query:data',
-      //     set: 'user/forward:data',
-      //   ),
-      //   signUrl: '$_baseUrl/user:sign',
-      //   token: token,
-      //   chain: Chain.SOLANA,
-      // );
-      // final solanaAccount = await solanaCore.generatePubKey();
-      // await api.uploadShares(
-      //   solanaAccount.shares,
-      //   solanaAccount.address,
-      //   jsonEncode(AuthCore.getRemoteKeypair(solanaAccount.shares[1]).toJson()),
-      //   keyType: 'SOLANA',
-      // );
-      // _solanaCore = solanaCore;
+      if (chain == Chain.EVM) {
+        _core = core;
+      } else {
+        _solanaCore = core;
+      }
     } else {
-      /// init evm
-      final remoteLocalShareInfo = await api.fetchRemoteShare();
-      final core = AuthCore(
-        mpcUrl: MpcUrl(
-          url: _baseUrl,
-          get: 'user/forward:query:data',
-          set: 'user/forward:data',
-        ),
-        signUrl: '$_baseUrl/user:sign',
-        token: token!,
-      );
-      inited = await core.init(
+      final remoteLocalShareInfo =
+          await api.fetchRemoteShare(keyType: chain.name);
+      final core = getCore(chain);
+      final inited = await core.init(
         address: remoteLocalShareInfo.address,
         remote: remoteLocalShareInfo.remote,
       );
       if (inited) {
-        _core = core;
+        if (chain == Chain.EVM) {
+          _core = core;
+        } else {
+          _solanaCore = core;
+        }
       }
-
-      // /// init solana
-      // final solanaRemoteLocalShareInfo =
-      //     await api.fetchRemoteShare(keyType: 'SOLANA');
-      // final solanaCore = AuthCore(
-      //   mpcUrl: MpcUrl(
-      //     url: _baseUrl,
-      //     get: 'user/forward:query:data',
-      //     set: 'user/forward:data',
-      //   ),
-      //   chain: Chain.SOLANA,
-      //   signUrl: '$_baseUrl/user:sign',
-      //   token: token,
-      // );
-      // solanaInited = await solanaCore.init(
-      //   address: solanaRemoteLocalShareInfo.address,
-      //   remote: solanaRemoteLocalShareInfo.remote,
-      // );
-      // if (solanaInited) {
-      //   _solanaCore = solanaCore;
-      // }
-    }
-    if (!isLogin) {
-      if (!inited) throw SbtAuthException('Init error');
+      if (!isLogin) {
+        if (!inited) throw SbtAuthException('Init error');
+      }
     }
     await _authRequestListener();
+  }
+
+  /// Get core
+  AuthCore getCore(Chain chain) {
+    return AuthCore(
+      mpcUrl: MpcUrl(
+        url: _baseUrl,
+        get: 'user/forward:query:data',
+        set: 'user/forward:data',
+      ),
+      signUrl: '$_baseUrl/user:sign',
+      token: token,
+      chain: chain,
+    );
   }
 
   /// Timer cancel
@@ -342,16 +303,25 @@ class SbtAuth {
   Future<void> sendBackupPrivateKey(
     String password,
     String email,
-    String code,
-  ) async {
-    var backupPrivateKey = user?.backupPrivateKey;
-    if (backupPrivateKey == null) {
-      final remoteShareInfo = await api.fetchRemoteShare();
+    String code, {
+    Chain chain = Chain.EVM,
+  }) async {
+    final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
+    var backupPrivateKey = '';
+    if (chain == Chain.EVM) {
       backupPrivateKey =
           await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
+    } else {
+      backupPrivateKey =
+          await _solanaCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
-    await api.backupShare(privateKey, email, code);
+    await api.backupShare(
+      privateKey,
+      email,
+      code,
+      keyType: chain.name,
+    );
     userEmail = email;
   }
 
@@ -367,16 +337,22 @@ class SbtAuth {
   /// Approve auth request
   Future<String> approveAuthRequest(
     String deviceName, {
-    String keyType = 'EVM',
+    Chain chain = Chain.EVM,
   }) async {
-    if (core == null) throw SbtAuthException('Auth not inited');
-    final local = core!.localShare!.privateKey;
+    var local = '';
+    if (chain == Chain.EVM) {
+      if (core == null) throw SbtAuthException('Auth not inited');
+      local = core!.localShare!.privateKey;
+    } else {
+      if (solanaCore == null) throw SbtAuthException('Solana auth not inited');
+      local = solanaCore!.localShare!.privateKey;
+    }
     final password = StringBuffer();
     for (var i = 0; i < 6; i++) {
       password.write(Random().nextInt(9).toString());
     }
     final encrypted = await encryptMsg(local, password.toString());
-    await api.approveAuthRequest(deviceName, encrypted, keyType);
+    await api.approveAuthRequest(deviceName, encrypted, chain.name);
     return password.toString();
   }
 
@@ -427,8 +403,10 @@ class SbtAuth {
   }
 
   /// Init local share
-  Future<void> recoverWithDevice(String code) async {
-    final token = DBUtil.tokenBox.get(TOKEN_KEY);
+  Future<void> recoverWithDevice(
+    String code, {
+    Chain chain = Chain.EVM,
+  }) async {
     final eventSource =
         await EventSource.connect('$_baseUrl/sse:connect?access_token=$token');
     final completer = Completer<String>();
@@ -440,7 +418,7 @@ class SbtAuth {
       }
     });
     final data = await completer.future;
-    final remoteShareInfo = await api.fetchRemoteShare();
+    final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
     final shareString = await decryptMsg(
       (jsonDecode(data) as Map)['encryptedFragment'].toString(),
       code,
@@ -450,15 +428,7 @@ class SbtAuth {
       publicKey: remoteShareInfo.remote.publicKey,
       extraData: remoteShareInfo.localAux,
     );
-    final core = AuthCore(
-      mpcUrl: MpcUrl(
-        url: _baseUrl,
-        get: 'user/forward:query:data',
-        set: 'user/forward:data',
-      ),
-      signUrl: '$_baseUrl/user:sign',
-      token: token!,
-    );
+    final core = getCore(chain);
     final hash = bytesToHex(
       hashMessage(ascii.encode(jsonEncode(localShare.toJson()))),
       include0x: true,
@@ -471,34 +441,30 @@ class SbtAuth {
       remote: remoteShareInfo.remote,
       local: localShare,
     );
-    _core = core;
+    if (chain == Chain.EVM) {
+      _core = core;
+    } else {
+      _solanaCore = core;
+    }
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();
-    await api.verifyIdentity(localShare);
+    await api.verifyIdentity(localShare, keyType: chain.name);
   }
 
   /// Recover with privateKey
   Future<void> recoverWidthBackup(
     String backupPrivateKey,
-    String password,
-  ) async {
-    final remoteShareInfo = await api.fetchRemoteShare();
-    final token = DBUtil.tokenBox.get(TOKEN_KEY);
+    String password, {
+    Chain chain = Chain.EVM,
+  }) async {
+    final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
     var backup = '';
     if (backupPrivateKey.startsWith('0x')) {
       backup = backupPrivateKey;
     } else {
       backup = await decryptMsg(backupPrivateKey, password);
     }
-    final core = AuthCore(
-      mpcUrl: MpcUrl(
-        url: _baseUrl,
-        get: 'user/forward:query:data',
-        set: 'user/forward:data',
-      ),
-      signUrl: '$_baseUrl/user:sign',
-      token: token!,
-    );
+    final core = getCore(chain);
     final backShare = Share(
       privateKey: backup,
       publicKey: remoteShareInfo.remote.publicKey,
@@ -517,19 +483,29 @@ class SbtAuth {
       backup: backShare,
       backupAux: remoteShareInfo.localAux,
     );
-    _core = core;
+    if (chain == Chain.EVM) {
+      _core = core;
+    } else {
+      _solanaCore = core;
+    }
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();
-    await api.verifyIdentity(core.localShare!);
+    await api.verifyIdentity(core.localShare!, keyType: chain.name);
   }
 
   /// Backup with one drive
-  Future<void> backupWithOneDrive(String password) async {
-    var backupPrivateKey = user?.backupPrivateKey;
-    if (backupPrivateKey == null) {
-      final remoteShareInfo = await api.fetchRemoteShare();
+  Future<void> backupWithOneDrive(
+    String password, {
+    Chain chain = Chain.EVM,
+  }) async {
+    final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
+    var backupPrivateKey = '';
+    if (chain == Chain.EVM) {
       backupPrivateKey =
           await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
+    } else {
+      backupPrivateKey =
+          await _solanaCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
@@ -556,7 +532,11 @@ class SbtAuth {
     loadingStreamController.add(true);
     try {
       await api.backupByOneDrive(
-          code, state == 'undefined' ? 'state' : state, privateKey);
+        code,
+        state == 'undefined' ? 'state' : state,
+        privateKey,
+        keyType: chain.name,
+      );
       if (Platform.isIOS) {
         await closeInAppWebView();
       }
@@ -569,7 +549,10 @@ class SbtAuth {
   }
 
   /// Recover by one drive
-  Future<void> recoverByOneDrive(String password) async {
+  Future<void> recoverByOneDrive(
+    String password, {
+    Chain chain = Chain.EVM,
+  }) async {
     final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
     unawaited(
@@ -596,6 +579,7 @@ class SbtAuth {
       final privateKey = await api.recoverByOneDrive(
         code,
         state == 'undefined' ? 'state' : state,
+        keyType: chain.name,
       );
       if (Platform.isIOS) {
         await closeInAppWebView();
@@ -611,7 +595,6 @@ class SbtAuth {
 
   /// Auth request listener
   Future<void> _authRequestListener() async {
-    final token = DBUtil.tokenBox.get(TOKEN_KEY);
     _eventSource =
         await EventSource.connect('$_baseUrl/sse:connect?access_token=$token');
     _eventSource!.listen((Event event) {
@@ -646,7 +629,12 @@ class SbtAuth {
     String network,
   ) async {
     await api.createUserWhiteList(
-        userEmail, authCode, address.toLowerCase(), name, network);
+      userEmail,
+      authCode,
+      address.toLowerCase(),
+      name,
+      network,
+    );
   }
 
   /// Delete white list
@@ -707,8 +695,6 @@ class SbtAuth {
     final res = await api.getTokenList(pageNo, pageSize, network, condition);
     return res.items;
   }
-
-  /// Import token
 
   // login success
   Stream<StreamResponse> _queryWhetherSuccess(

@@ -1,11 +1,9 @@
-
-
 /// Share for mpc
 class Share {
   /// Share
   Share({
     required this.privateKey,
-    this.publicKey='',
+    this.publicKey = '',
     required this.extraData,
   });
 
@@ -13,7 +11,7 @@ class Share {
   factory Share.fromMap(Map<dynamic, dynamic> map) {
     return Share(
       privateKey: map['privateKey'] as String,
-      publicKey:( map['publicKey']??'') as String,
+      publicKey: (map['publicKey'] ?? '') as String,
       extraData: map['extraData'] as String,
     );
   }

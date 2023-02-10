@@ -85,9 +85,6 @@ class UserInfo {
   /// User wallet address
   Map<String, dynamic> publicKeyAddress;
 
-  /// Backup private key
-  String? backupPrivateKey;
-
   /// White list switch
   bool userWhitelist;
 
