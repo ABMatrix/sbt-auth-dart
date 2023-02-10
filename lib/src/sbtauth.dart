@@ -153,7 +153,8 @@ class SbtAuth {
   }
 
   /// Init sbtauth
-  Future<void> init({bool isLogin = false, Chain chain = Chain.EVM}) async {
+  Future<void> init(
+      {bool isLogin = false, SbtChain chain = SbtChain.EVM}) async {
     _user = await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
     if (_user!.userLoginParams.contains('email')) {
@@ -169,7 +170,7 @@ class SbtAuth {
         jsonEncode(AuthCore.getRemoteKeypair(account.shares[1]).toJson()),
         keyType: chain.name,
       );
-      if (chain == Chain.EVM) {
+      if (chain == SbtChain.EVM) {
         _core = core;
         user!.backupPrivateKey = account.shares[2].privateKey;
       } else {
@@ -184,7 +185,7 @@ class SbtAuth {
         remote: remoteLocalShareInfo.remote,
       );
       if (inited) {
-        if (chain == Chain.EVM) {
+        if (chain == SbtChain.EVM) {
           _core = core;
         } else {
           _solanaCore = core;
@@ -198,7 +199,7 @@ class SbtAuth {
   }
 
   /// Get core
-  AuthCore getCore(Chain chain) {
+  AuthCore getCore(SbtChain chain) {
     return AuthCore(
       mpcUrl: MpcUrl(
         url: _baseUrl,
@@ -305,11 +306,11 @@ class SbtAuth {
     String password,
     String email,
     String code, {
-    Chain chain = Chain.EVM,
+    SbtChain chain = SbtChain.EVM,
   }) async {
     final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
     var backupPrivateKey = '';
-    if (chain == Chain.EVM) {
+    if (chain == SbtChain.EVM) {
       backupPrivateKey =
           await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
     } else {
@@ -338,10 +339,10 @@ class SbtAuth {
   /// Approve auth request
   Future<String> approveAuthRequest(
     String deviceName, {
-    Chain chain = Chain.EVM,
+    SbtChain chain = SbtChain.EVM,
   }) async {
     var local = '';
-    if (chain == Chain.EVM) {
+    if (chain == SbtChain.EVM) {
       if (core == null) throw SbtAuthException('Auth not inited');
       local = core!.localShare!.privateKey;
     } else {
@@ -406,7 +407,7 @@ class SbtAuth {
   /// Init local share
   Future<void> recoverWithDevice(
     String code, {
-    Chain chain = Chain.EVM,
+    SbtChain chain = SbtChain.EVM,
   }) async {
     final eventSource =
         await EventSource.connect('$_baseUrl/sse:connect?access_token=$token');
@@ -442,7 +443,7 @@ class SbtAuth {
       remote: remoteShareInfo.remote,
       local: localShare,
     );
-    if (chain == Chain.EVM) {
+    if (chain == SbtChain.EVM) {
       _core = core;
     } else {
       _solanaCore = core;
@@ -456,7 +457,7 @@ class SbtAuth {
   Future<void> recoverWidthBackup(
     String backupPrivateKey,
     String password, {
-    Chain chain = Chain.EVM,
+    SbtChain chain = SbtChain.EVM,
   }) async {
     final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
     var backup = '';
@@ -484,7 +485,7 @@ class SbtAuth {
       backup: backShare,
       backupAux: remoteShareInfo.localAux,
     );
-    if (chain == Chain.EVM) {
+    if (chain == SbtChain.EVM) {
       _core = core;
     } else {
       _solanaCore = core;
@@ -497,11 +498,11 @@ class SbtAuth {
   /// Backup with one drive
   Future<void> backupWithOneDrive(
     String password, {
-    Chain chain = Chain.EVM,
+    SbtChain chain = SbtChain.EVM,
   }) async {
     final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
     var backupPrivateKey = '';
-    if (chain == Chain.EVM) {
+    if (chain == SbtChain.EVM) {
       backupPrivateKey =
           await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
     } else {
@@ -552,7 +553,7 @@ class SbtAuth {
   /// Recover by one drive
   Future<void> recoverByOneDrive(
     String password, {
-    Chain chain = Chain.EVM,
+    SbtChain chain = SbtChain.EVM,
   }) async {
     final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';

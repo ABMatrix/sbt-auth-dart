@@ -43,7 +43,7 @@ class ConfirmAuthPageState extends State<ConfirmAuthPage> {
                   onPressed: () async {
                     final authCode = await widget.auth.approveAuthRequest(
                         widget.deviceName,
-                        chain: Chain.values.byName(widget.keyType));
+                        chain: SbtChain.values.byName(widget.keyType));
                     setState(() {
                       code = authCode;
                     });

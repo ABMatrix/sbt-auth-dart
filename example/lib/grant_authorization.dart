@@ -8,10 +8,10 @@ import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
 class GrantAuthorizationPage extends StatefulWidget {
   final SbtAuth auth;
-  final Chain chain;
+  final SbtChain chain;
 
   const GrantAuthorizationPage(
-      {super.key, required this.auth, this.chain = Chain.EVM});
+      {super.key, required this.auth, this.chain = SbtChain.EVM});
 
   @override
   State<StatefulWidget> createState() => GrantAuthorizationPageState();
@@ -157,7 +157,7 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
           }
 
           if (mounted) {
-            if (widget.chain == Chain.EVM) {
+            if (widget.chain == SbtChain.EVM) {
               Navigator.push(
                   context,
                   MaterialPageRoute(

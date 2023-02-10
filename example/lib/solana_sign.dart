@@ -30,7 +30,7 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
 
   initSolana() async {
     try {
-      await widget.sbtauth.init(chain: Chain.SOLANA);
+      await widget.sbtauth.init(chain: SbtChain.SOLANA);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -51,7 +51,7 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
         MaterialPageRoute(
             builder: (context) => GrantAuthorizationPage(
                   auth: widget.sbtauth,
-                  chain: Chain.SOLANA,
+                  chain: SbtChain.SOLANA,
                 )));
   }
 
@@ -67,13 +67,13 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
         children: [
           TextButton(
               onPressed: () {
-                widget.sbtauth.backupWithOneDrive('123', chain: Chain.SOLANA);
+                widget.sbtauth.backupWithOneDrive('123', chain: SbtChain.SOLANA);
               },
               child: const Text('Backup by one drive')),
           const SizedBox(height: 40),
           TextButton(
               onPressed: () {
-                widget.sbtauth.recoverByOneDrive('123', chain: Chain.SOLANA);
+                widget.sbtauth.recoverByOneDrive('123', chain: SbtChain.SOLANA);
               },
               child: const Text('Recover by one drive')),
           const SizedBox(height: 40),
@@ -86,7 +86,7 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
                   '123',
                   _emailController.text.trim(),
                   'code',
-                  chain: Chain.SOLANA,
+                  chain: SbtChain.SOLANA,
                 );
               },
               child: const Text('send')),

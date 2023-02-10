@@ -13,16 +13,16 @@ import 'package:solana/base58.dart';
 import 'package:web3dart/crypto.dart';
 
 /// chain
-enum Chain { EVM, SOLANA }
+enum SbtChain { EVM, SOLANA }
 
 /// chain info
-extension SbtChainInfo on Chain {
+extension SbtChainInfo on SbtChain {
   /// engine
   Engine get engine {
     switch (this) {
-      case Chain.EVM:
+      case SbtChain.EVM:
         return Engine.ECDSA;
-      case Chain.SOLANA:
+      case SbtChain.SOLANA:
         return Engine.EDDSA;
     }
   }
@@ -30,9 +30,9 @@ extension SbtChainInfo on Chain {
   /// cache key
   String get cacheKey {
     switch (this) {
-      case Chain.EVM:
+      case SbtChain.EVM:
         return CACHE_KEY;
-      case Chain.SOLANA:
+      case SbtChain.SOLANA:
         return SOLANA_CACHE_KEY;
     }
   }
@@ -64,7 +64,7 @@ class AuthCore {
     required this.mpcUrl,
     required this.signUrl,
     required this.token,
-    this.chain = Chain.EVM,
+    this.chain = SbtChain.EVM,
   });
 
   /// Local share, saved on user device
@@ -87,7 +87,7 @@ class AuthCore {
   late String token;
 
   /// chain
-  late Chain chain;
+  late SbtChain chain;
 
   /// Remote sign
   bool remoteSign = false;
@@ -134,7 +134,7 @@ class AuthCore {
   /// Get wallet address
   String getAddress() {
     if (_local == null) throw SbtAuthException('Please init auth core');
-    if (chain == Chain.EVM) {
+    if (chain == SbtChain.EVM) {
       return MultiMpc.address(shareToKey(_local!));
     } else {
       return base58encode(hexToBytes(_local!.publicKey));
@@ -147,7 +147,7 @@ class AuthCore {
     String? network,
   }) async {
     var msgs = message;
-    if (chain == Chain.EVM) {
+    if (chain == SbtChain.EVM) {
       msgs = keccak256(message);
     }
     var result = '';
@@ -234,7 +234,7 @@ class AuthCore {
     final remoteKey = shareToKey(remote, index: 2);
     var backupAddress = '';
     var address = '';
-    if (chain == Chain.EVM) {
+    if (chain == SbtChain.EVM) {
       backupAddress = MultiMpc.address(backupKey);
       address = MultiMpc.address(remoteKey);
     } else {
