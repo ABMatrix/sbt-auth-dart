@@ -171,6 +171,7 @@ class SbtAuth {
       );
       if (chain == Chain.EVM) {
         _core = core;
+        user!.backupPrivateKey = account.shares[2].privateKey;
       } else {
         _solanaCore = core;
       }

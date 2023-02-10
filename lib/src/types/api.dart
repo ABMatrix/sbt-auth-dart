@@ -93,6 +93,9 @@ class UserInfo {
 
   /// Use payment password
   bool paymentPwd;
+
+  /// Backup private key
+  String? backupPrivateKey;
 }
 
 /// Login QrCode status
