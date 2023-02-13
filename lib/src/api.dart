@@ -722,7 +722,9 @@ class SbtAuthApi {
     if (body['result'] != null) {
       return body['result'] as String;
     } else {
-      throw SbtAuthException((body['error'] ?? 'Network') as String);
+      throw SbtAuthException(
+        ((body['error'] as Map)['message'] ?? 'Network') as String,
+      );
     }
   }
 

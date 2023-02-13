@@ -48,6 +48,27 @@ class SolanaSinger {
     );
     return hash;
   }
+
+  /// Create Associated TokenAccount
+  Future<String> createAssociatedTokenAccount(
+    Ed25519HDPublicKey from,
+    Ed25519HDPublicKey to,
+    Ed25519HDPublicKey tokenAddress,
+  ) async {
+    final effectiveOwner = to;
+    final derivedAddress = await findAssociatedTokenAddress(
+      owner: effectiveOwner,
+      mint: tokenAddress,
+    );
+    final instruction = AssociatedTokenAccountInstruction.createAccount(
+      mint: tokenAddress,
+      address: derivedAddress,
+      owner: effectiveOwner,
+      funder: from,
+    );
+    final res = await sendTransaction(instruction, from);
+    return res;
+  }
 }
 
 /// compact Array
