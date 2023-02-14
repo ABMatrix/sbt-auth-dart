@@ -332,6 +332,7 @@ class SbtAuth {
     DBUtil.tokenBox.delete(TOKEN_KEY);
     _user = null;
     _core = null;
+    _solanaCore = null;
     _eventSource?.client.close();
     userEmail = '';
   }
