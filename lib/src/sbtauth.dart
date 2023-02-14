@@ -184,15 +184,15 @@ class SbtAuth {
         address: remoteLocalShareInfo.address,
         remote: remoteLocalShareInfo.remote,
       );
+      if (!isLogin) {
+        if (!inited) throw SbtAuthException('Init error');
+      }
       if (inited) {
         if (chain == SbtChain.EVM) {
           _core = core;
         } else {
           _solanaCore = core;
         }
-      }
-      if (!isLogin) {
-        if (!inited) throw SbtAuthException('Init error');
       }
     }
     await _authRequestListener();

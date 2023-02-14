@@ -125,7 +125,7 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
     final instruction = SystemInstruction.transfer(
       fundingAccount: fromAddress,
       recipientAccount: toAddress,
-      lamports: 0,
+      lamports: 100000,
     );
     final res = await singer!.sendTransaction(instruction, fromAddress);
     setState(() {
