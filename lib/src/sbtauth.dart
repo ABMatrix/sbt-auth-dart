@@ -629,12 +629,13 @@ class SbtAuth {
     String authCode,
     String address,
     String name,
-    String network,
-  ) async {
+    String network, {
+    bool toLowerCase = true,
+  }) async {
     await api.createUserWhiteList(
       userEmail,
       authCode,
-      address.toLowerCase(),
+      toLowerCase ? address.toLowerCase() : address,
       name,
       network,
     );
@@ -655,12 +656,13 @@ class SbtAuth {
     String name,
     String userWhitelistID,
     String userId,
-    String network,
-  ) async {
+    String network, {
+    bool toLowerCase = true,
+  }) async {
     await api.editUserWhiteList(
       userEmail,
       authCode,
-      address.toLowerCase(),
+      toLowerCase ? address.toLowerCase() : address,
       name,
       userWhitelistID,
       userId,
