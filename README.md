@@ -58,7 +58,7 @@ void main() async {
 }
 
 // init sbtAuth
-SbtAuth auth = SbtAuth(developMode: true, clientId: 'Demo', scheme: 'custom scheme');
+SbtAuth auth = SbtAuth(developMode: true, clientId: 'Demo', scheme: 'Custom scheme');
 ```
 
 ## 登录 SBTAuth 账户
@@ -182,16 +182,16 @@ fianl whiteList = await sbtauth.api.getUserWhiteList(page, pageSize,network:netw
 final whiteListItem = await sbtAuth.api.getUserWhiteListItem(userWhitelistID);
 
 // 新增白名单
-// 输入邮箱验证码 authCode，白名单地址 address，白名单名称 name，白名单网络 network 新增白名单地址
-await sbtauth.createWhiteList(authCode,address,name,network)；
+// 输入邮箱验证码 authCode，白名单地址 address，白名单名称 name，白名单网络 network 新增白名单地址, tolowerCase 表示是否需要小写, EVM 系需小写
+await sbtauth.createWhiteList(authCode,address,name,network,tolowerCase:false);
 
 // 删除白名单
 // 输入邮箱验证码 authCode，白名单 id userWhitelistID 来删除白名单
-await sbtauth.deleteWhiteList(authCode,userWhitelistID)；
+await sbtauth.deleteWhiteList(authCode,userWhitelistID);
 
 // 修改白名单
-// 输入邮箱验证码 authCode,白名单地址 address，白名单名称 name，白名单 id userWhitelistID，用户 id userId 和白名单网络 network 来修改白名单
-await sbtAuth.editWhiteList(authCode,address,name,userWhitelistID,userId,network);
+// 输入邮箱验证码 authCode,白名单地址 address，白名单名称 name，白名单 id userWhitelistID，用户 id userId 和白名单网络 network 来修改白名单, tolowerCase 表示是否需要小写, EVM 系需小写
+await sbtAuth.editWhiteList(authCode,address,name,userWhitelistID,userId,network,tolowerCase:true);
 ```
 
 ### 目前支持的网络以及网络名称 network
@@ -199,22 +199,28 @@ await sbtAuth.editWhiteList(authCode,address,name,userWhitelistID,userId,network
 ```
 
 //以太坊
-ETH("Ethereum", 1),
+ETH("eth", 1),
 
 //币安链
-BSC("BNB Smart Chain", 56),
+BSC("bsc", 56),
 
 //Polygon
-Polygon("Polygon", 137),
+Polygon("polygon", 137),
+
+///Solana
+Solana("solana")
 
 //以太坊测试网 Goerli
-Goerli("Goerli", 5),
+Goerli("eth_goerli", 5),
 
 //币安链测试网
-BSC_test("BSC testnet", 97),
+BSC_test("bsc_chapel", 97),
 
 //Polygon testnet
-Polygon_test("Polygon testnet", 80001),
+Polygon_test("polygon_mumbai", 80001),
+
+//Solana devnet
+Solana_devnet("solana_devnet")
 ```
 
 [flutter_install_link]: https://docs.flutter.dev/get-started/install

@@ -588,7 +588,7 @@ class SbtAuth {
         await closeInAppWebView();
       }
       await linkSubscription.cancel();
-      await recoverWidthBackup(privateKey, password);
+      await recoverWidthBackup(privateKey, password, chain: chain);
     } catch (e) {
       rethrow;
     } finally {
