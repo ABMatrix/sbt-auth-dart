@@ -1,3 +1,4 @@
+import 'package:example/bitcoin_sign.dart';
 import 'package:example/solana_sign.dart';
 import 'package:example/white_list.dart';
 import 'package:flutter/material.dart';
@@ -82,6 +83,11 @@ class _SignPageState extends State<SignPage> {
             onPressed: _initSolana,
             child: const Text('Init solana'),
           ),
+          const SizedBox(height: 20),
+          TextButton(
+            onPressed: _initBitcoin,
+            child: const Text('Init bitcoin'),
+          ),
           const SizedBox(height: 10),
           Text(hash),
           TextButton(
@@ -145,6 +151,17 @@ class _SignPageState extends State<SignPage> {
       context,
       MaterialPageRoute(
         builder: (context) => SolanaSignPage(
+          sbtauth: widget.sbtauth,
+        ),
+      ),
+    );
+  }
+
+  _initBitcoin() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BitcoinSignPage(
           sbtauth: widget.sbtauth,
         ),
       ),

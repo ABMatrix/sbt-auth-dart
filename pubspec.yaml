@@ -1,6 +1,6 @@
 name: sbt_auth_dart
 description: SBTAuth flutter sdk
-version: 0.4.87
+version: 0.4.88
 repository: https://github.com/ABMatrix/sbt-auth-dart
 publish_to: none
 
@@ -16,6 +16,7 @@ dependencies:
   eventsource: ^0.4.0
   flutter:
     sdk: flutter
+  flutter_bitcoin: ^1.0.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   http: ^0.13.5

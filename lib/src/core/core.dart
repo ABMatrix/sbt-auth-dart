@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_bitcoin/flutter_bitcoin.dart';
 import 'package:http/http.dart' as http;
 import 'package:mpc_dart/multi_mpc_dart.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
@@ -13,7 +14,7 @@ import 'package:solana/base58.dart';
 import 'package:web3dart/crypto.dart';
 
 /// chain
-enum SbtChain { EVM, SOLANA }
+enum SbtChain { EVM, SOLANA, BITCOIN }
 
 /// chain info
 extension SbtChainInfo on SbtChain {
@@ -21,6 +22,7 @@ extension SbtChainInfo on SbtChain {
   Engine get engine {
     switch (this) {
       case SbtChain.EVM:
+      case SbtChain.BITCOIN:
         return Engine.ECDSA;
       case SbtChain.SOLANA:
         return Engine.EDDSA;
@@ -34,6 +36,8 @@ extension SbtChainInfo on SbtChain {
         return CACHE_KEY;
       case SbtChain.SOLANA:
         return SOLANA_CACHE_KEY;
+      case SbtChain.BITCOIN:
+        return BITCOIN_CACHE_KEY;
     }
   }
 }
@@ -116,11 +120,11 @@ class AuthCore {
   }
 
   /// Generate shares
-  Future<MpcAccount> generatePubKey() async {
+  Future<MpcAccount> generatePubKey({bool testnet = true}) async {
     final keys = await MultiMpc.generate(1, 3, engine: chain.engine);
     _local = keyToShare(keys[0]);
     _remote = keyToShare(keys[1]);
-    final address = getAddress();
+    final address = getAddress(isTestnet: testnet);
     unawaited(_saveShare(_local!, address));
     return MpcAccount(
       address: address,
@@ -132,13 +136,24 @@ class AuthCore {
   Share? get localShare => _local;
 
   /// Get wallet address
-  String getAddress() {
+  String getAddress({bool isTestnet = true}) {
     if (_local == null) throw SbtAuthException('Please init auth core');
-    if (chain == SbtChain.EVM) {
-      return MultiMpc.address(shareToKey(_local!));
-    } else {
-      return base58encode(hexToBytes(_local!.publicKey));
+    switch (chain) {
+      case SbtChain.EVM:
+        return MultiMpc.address(shareToKey(_local!));
+      case SbtChain.SOLANA:
+        return base58encode(hexToBytes(_local!.publicKey));
+      case SbtChain.BITCOIN:
+        return P2WPKH(
+          data: PaymentData(pubkey: hexToBytes(_local!.publicKey)),
+          network: isTestnet ? testnet : bitcoin,
+        ).data.address!;
     }
+  }
+
+  /// Get pubkey
+  Uint8List getPubkey() {
+    return hexToBytes(_local!.publicKey);
   }
 
   /// Sign method

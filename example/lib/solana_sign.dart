@@ -40,7 +40,8 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
     }
     setState(() {
       solanaAddress = widget.sbtauth.user!.publicKeyAddress['SOLANA'] == null
-          ? widget.sbtauth.solanaCore!.getAddress()
+          ? widget.sbtauth.solanaCore!
+              .getAddress(isTestnet: widget.sbtauth.developMode)
           : widget.sbtauth.user!.publicKeyAddress['SOLANA']['address'];
     });
     debugPrint(solanaAddress);

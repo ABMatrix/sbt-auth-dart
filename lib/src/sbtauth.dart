@@ -11,6 +11,7 @@ import 'package:eventsource/eventsource.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
+import 'package:sbt_auth_dart/src/core/bitcoin_signer.dart';
 import 'package:sbt_auth_dart/src/core/solana_signer.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -92,6 +93,11 @@ class SbtAuth {
 
   AuthCore? _solanaCore;
 
+  /// bitcoin core
+  AuthCore? get bitcoinCore => _bitcoinCore;
+
+  AuthCore? _bitcoinCore;
+
   EventSource? _eventSource;
 
   /// solana singer
@@ -101,6 +107,14 @@ class SbtAuth {
           _solanaCore!,
           _solanaUrl,
           _solanaNetwork,
+        );
+
+  /// bitcoin singer
+  BitcoinSinger? get bitcoinSinger => _bitcoinCore == null
+      ? null
+      : BitcoinSinger(
+          _bitcoinCore!,
+          developMode,
         );
 
   /// Grant authorization listen controller
@@ -153,8 +167,10 @@ class SbtAuth {
   }
 
   /// Init sbtauth
-  Future<void> init(
-      {bool isLogin = false, SbtChain chain = SbtChain.EVM}) async {
+  Future<void> init({
+    bool isLogin = false,
+    SbtChain chain = SbtChain.EVM,
+  }) async {
     _user = await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
     if (_user!.userLoginParams.contains('email')) {
@@ -163,18 +179,24 @@ class SbtAuth {
     }
     if (_user!.publicKeyAddress[chain.name] == null) {
       final core = getCore(chain);
-      final account = await core.generatePubKey();
+      final account = await core.generatePubKey(testnet: developMode);
       await api.uploadShares(
         account.shares,
         account.address,
         jsonEncode(AuthCore.getRemoteKeypair(account.shares[1]).toJson()),
         keyType: chain.name,
       );
-      if (chain == SbtChain.EVM) {
-        _core = core;
-        user!.backupPrivateKey = account.shares[2].privateKey;
-      } else {
-        _solanaCore = core;
+      switch (chain) {
+        case SbtChain.EVM:
+          _core = core;
+          user!.backupPrivateKey = account.shares[2].privateKey;
+          break;
+        case SbtChain.SOLANA:
+          _solanaCore = core;
+          break;
+        case SbtChain.BITCOIN:
+          _bitcoinCore = core;
+          break;
       }
     } else {
       final remoteLocalShareInfo =
@@ -188,10 +210,16 @@ class SbtAuth {
         if (!inited) throw SbtAuthException('Init error');
       }
       if (inited) {
-        if (chain == SbtChain.EVM) {
-          _core = core;
-        } else {
-          _solanaCore = core;
+        switch (chain) {
+          case SbtChain.EVM:
+            _core = core;
+            break;
+          case SbtChain.SOLANA:
+            _solanaCore = core;
+            break;
+          case SbtChain.BITCOIN:
+            _bitcoinCore = core;
+            break;
         }
       }
     }
@@ -310,12 +338,19 @@ class SbtAuth {
   }) async {
     final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
     var backupPrivateKey = '';
-    if (chain == SbtChain.EVM) {
-      backupPrivateKey =
-          await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
-    } else {
-      backupPrivateKey =
-          await _solanaCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
+    switch (chain) {
+      case SbtChain.EVM:
+        backupPrivateKey =
+            await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
+      case SbtChain.SOLANA:
+        backupPrivateKey =
+            await _solanaCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
+      case SbtChain.BITCOIN:
+        backupPrivateKey =
+            await _bitcoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     await api.backupShare(
@@ -333,6 +368,7 @@ class SbtAuth {
     _user = null;
     _core = null;
     _solanaCore = null;
+    _bitcoinCore = null;
     _eventSource?.client.close();
     userEmail = '';
   }
@@ -343,12 +379,25 @@ class SbtAuth {
     SbtChain chain = SbtChain.EVM,
   }) async {
     var local = '';
-    if (chain == SbtChain.EVM) {
-      if (core == null) throw SbtAuthException('Auth not inited');
-      local = core!.localShare!.privateKey;
-    } else {
-      if (solanaCore == null) throw SbtAuthException('Solana auth not inited');
-      local = solanaCore!.localShare!.privateKey;
+    switch (chain) {
+      case SbtChain.EVM:
+        if (core == null) {
+          throw SbtAuthException('Auth not inited');
+        }
+        local = core!.localShare!.privateKey;
+        break;
+      case SbtChain.SOLANA:
+        if (solanaCore == null) {
+          throw SbtAuthException('Solana auth not inited');
+        }
+        local = solanaCore!.localShare!.privateKey;
+        break;
+      case SbtChain.BITCOIN:
+        if (bitcoinCore == null) {
+          throw SbtAuthException('Solana auth not inited');
+        }
+        local = bitcoinCore!.localShare!.privateKey;
+        break;
     }
     final password = StringBuffer();
     for (var i = 0; i < 6; i++) {
@@ -444,10 +493,16 @@ class SbtAuth {
       remote: remoteShareInfo.remote,
       local: localShare,
     );
-    if (chain == SbtChain.EVM) {
-      _core = core;
-    } else {
-      _solanaCore = core;
+    switch (chain) {
+      case SbtChain.EVM:
+        _core = core;
+        break;
+      case SbtChain.SOLANA:
+        _solanaCore = core;
+        break;
+      case SbtChain.BITCOIN:
+        _bitcoinCore = core;
+        break;
     }
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();
@@ -486,10 +541,16 @@ class SbtAuth {
       backup: backShare,
       backupAux: remoteShareInfo.localAux,
     );
-    if (chain == SbtChain.EVM) {
-      _core = core;
-    } else {
-      _solanaCore = core;
+    switch (chain) {
+      case SbtChain.EVM:
+        _core = core;
+        break;
+      case SbtChain.SOLANA:
+        _solanaCore = core;
+        break;
+      case SbtChain.BITCOIN:
+        _bitcoinCore = core;
+        break;
     }
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();
@@ -503,12 +564,19 @@ class SbtAuth {
   }) async {
     final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
     var backupPrivateKey = '';
-    if (chain == SbtChain.EVM) {
-      backupPrivateKey =
-          await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
-    } else {
-      backupPrivateKey =
-          await _solanaCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
+    switch (chain) {
+      case SbtChain.EVM:
+        backupPrivateKey =
+            await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
+      case SbtChain.SOLANA:
+        backupPrivateKey =
+            await _solanaCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
+      case SbtChain.BITCOIN:
+        backupPrivateKey =
+            await _bitcoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
