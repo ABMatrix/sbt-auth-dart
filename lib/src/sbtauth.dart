@@ -394,7 +394,7 @@ class SbtAuth {
         break;
       case SbtChain.BITCOIN:
         if (bitcoinCore == null) {
-          throw SbtAuthException('Solana auth not inited');
+          throw SbtAuthException('Bitcoin auth not inited');
         }
         local = bitcoinCore!.localShare!.privateKey;
         break;
