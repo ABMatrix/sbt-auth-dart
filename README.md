@@ -179,6 +179,13 @@ if(auth.user?.backupPrivateKey != null){
   final hash =  await singer!.createAssociatedTokenAccount(from, to, tokenAddress);
   // * 注意 创建关联账户 hash 需要上链成功之后才可以进行代币转账
 
+
+  /// BITCOIN
+  final btcSign = sbtauth.bitcoinSinger!;
+  
+  // Bitcoin 转账只需要传入交易发送方 from ,交易接收方 to 以及交易数量 amount 即可
+  // amount 不得小于 1000
+  final hash = await btcSign.sendBtcTransaction(from, to, amount);
 ```
 
 ## 白名单相关功能
@@ -241,8 +248,11 @@ if(auth.user?.backupPrivateKey != null){
     //Polygon
     Polygon("polygon", 137),
 
-    ///Solana
+    //Solana
     Solana("solana")
+    
+    ///Bitcoin
+    Bitcoin("bitcoin")
 
     //以太坊测试网 Goerli
     Goerli("eth_goerli", 5),
@@ -255,6 +265,9 @@ if(auth.user?.backupPrivateKey != null){
 
     //Solana devnet
     Solana_devnet("solana_devnet")
+    
+    //Bitcoin testnet
+    Bitcoin_testnet("btc_testnet")
 ```
 
 [flutter_install_link]: https://docs.flutter.dev/get-started/install
