@@ -41,7 +41,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late TextEditingController _controller;
   final sbtAuth =
-      SbtAuth(developMode: true, clientId: 'Demo', scheme: 'sbtauth');
+      SbtAuth(developMode: false, clientId: 'Demo', scheme: 'sbtauth');
   String code = '';
 
   @override
@@ -151,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
   _login(LoginType loginType, {String? email, String? password}) async {
     try {
       await sbtAuth.login(loginType,
-          email: email, code: 'verityCode', password: password);
+          email: email, code: '203687', password: password);
       if (mounted) {
         if (sbtAuth.provider == null) {
           Navigator.push(

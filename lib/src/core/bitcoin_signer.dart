@@ -136,7 +136,7 @@ class BtcApi {
   /// get utxo
   Future<List<Utxo>> getUtxo(String address) async {
     final url = isTestnet ? BITCOIN_TEST_URL : BITCOIN_URL;
-    final network = isTestnet ? 'btc_testnet' : 'bitcoin';
+    final network = isTestnet ? 'btc_testnet' : 'btc';
     final response = await get(
       Uri.parse(
         '$url/unspent?address=$address&network=$network',
@@ -150,7 +150,7 @@ class BtcApi {
   /// send transaction
   Future<String> sendTransaction(String singedData) async {
     final url = isTestnet ? BITCOIN_TEST_URL : BITCOIN_URL;
-    final network = isTestnet ? 'btc_testnet' : 'bitcoin';
+    final network = isTestnet ? 'btc_testnet' : 'btc';
     final data = {'singedData': singedData, 'network': network};
     final response = await post(
       Uri.parse('$url/transfer'),
