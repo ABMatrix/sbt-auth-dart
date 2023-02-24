@@ -7,6 +7,8 @@ import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:solana/solana.dart';
 
+import 'main.dart';
+
 class SignPage extends StatefulWidget {
   final String address;
   final SbtAuth sbtauth;
@@ -51,7 +53,7 @@ class _SignPageState extends State<SignPage> {
               ))
         ],
       ),
-      body: Center(
+      body: SingleChildScrollView(
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -117,6 +119,11 @@ class _SignPageState extends State<SignPage> {
             },
             child: const Text('Scan'),
           ),
+          const SizedBox(height: 10),
+          TextButton(
+            onPressed: _logout,
+            child: const Text('Logout'),
+          ),
         ],
       )),
     );
@@ -166,5 +173,14 @@ class _SignPageState extends State<SignPage> {
         ),
       ),
     );
+  }
+
+  _logout() {
+    widget.sbtauth.logout();
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => const MyApp(),
+        ));
   }
 }

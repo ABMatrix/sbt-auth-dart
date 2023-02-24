@@ -205,6 +205,7 @@ class SbtAuth {
       final inited = await core.init(
         address: remoteLocalShareInfo.address,
         remote: remoteLocalShareInfo.remote,
+        isTestnet: developMode,
       );
       if (!isLogin) {
         if (!inited) throw SbtAuthException('Init error');
@@ -492,6 +493,7 @@ class SbtAuth {
       address: remoteShareInfo.address,
       remote: remoteShareInfo.remote,
       local: localShare,
+      isTestnet: developMode,
     );
     switch (chain) {
       case SbtChain.EVM:
@@ -540,6 +542,7 @@ class SbtAuth {
       remote: remoteShareInfo.remote,
       backup: backShare,
       backupAux: remoteShareInfo.localAux,
+      isTestnet: developMode,
     );
     switch (chain) {
       case SbtChain.EVM:
@@ -822,6 +825,7 @@ class SbtAuth {
           address: remoteShareInfo.address,
           remote: remoteShareInfo.remote,
           local: localShare,
+          isTestnet: developMode,
         );
         _core = core;
         if (!inited) throw SbtAuthException('Init error');

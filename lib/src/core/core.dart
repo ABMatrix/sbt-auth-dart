@@ -105,6 +105,7 @@ class AuthCore {
     Share? backup,
     String? backupAux,
     Share? local,
+    bool isTestnet = true,
   }) async {
     if (address != null) {
       _local = await _getSavedShare(address) ?? local;
@@ -114,7 +115,7 @@ class AuthCore {
     }
     _remote = remote;
     if (_local == null && _remote != null && backup != null) {
-      await _recover(_remote!, backup, backupAux!);
+      await _recover(_remote!, backup, backupAux!, isTestnet: isTestnet);
     }
     return _local != null;
   }
@@ -244,17 +245,35 @@ class AuthCore {
     return DBUtil.shareBox!.put(address, share);
   }
 
-  Future<void> _recover(Share remote, Share backup, String aux) async {
+  Future<void> _recover(
+    Share remote,
+    Share backup,
+    String aux, {
+    bool isTestnet = true,
+  }) async {
     final backupKey = shareToKey(backup, index: 3);
     final remoteKey = shareToKey(remote, index: 2);
     var backupAddress = '';
     var address = '';
-    if (chain == SbtChain.EVM) {
-      backupAddress = MultiMpc.address(backupKey);
-      address = MultiMpc.address(remoteKey);
-    } else {
-      backupAddress = base58encode(hexToBytes(backupKey.pk));
-      address = base58encode(hexToBytes(remoteKey.pk));
+    switch (chain) {
+      case SbtChain.EVM:
+        backupAddress = MultiMpc.address(backupKey);
+        address = MultiMpc.address(remoteKey);
+        break;
+      case SbtChain.SOLANA:
+        backupAddress = base58encode(hexToBytes(backupKey.pk));
+        address = base58encode(hexToBytes(remoteKey.pk));
+        break;
+      case SbtChain.BITCOIN:
+        backupAddress = P2WPKH(
+          data: PaymentData(pubkey: hexToBytes(backupKey.pk)),
+          network: isTestnet ? testnet : bitcoin,
+        ).data.address!;
+        address = P2WPKH(
+          data: PaymentData(pubkey: hexToBytes(remoteKey.pk)),
+          network: isTestnet ? testnet : bitcoin,
+        ).data.address!;
+        break;
     }
     if (backupAddress != address) {
       throw SbtAuthException('Wrong backup private key');

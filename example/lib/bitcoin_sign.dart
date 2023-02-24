@@ -59,7 +59,7 @@ class _BitcoinSignPageState extends State<BitcoinSignPage> {
       appBar: AppBar(
         title: const Text('Bitcoin Sign'),
       ),
-      body: Center(
+      body: SingleChildScrollView(
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

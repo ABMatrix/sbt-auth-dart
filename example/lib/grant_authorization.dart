@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:example/bitcoin_sign.dart';
 import 'package:example/sign.dart';
 import 'package:example/solana_sign.dart';
 import 'package:flutter/material.dart';
@@ -167,11 +168,20 @@ class GrantAuthorizationPageState extends State<GrantAuthorizationPage> {
                                 '',
                             sbtauth: widget.auth,
                           )));
-            } else {
+            } else if (widget.chain == SbtChain.SOLANA) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => SolanaSignPage(
+                    sbtauth: widget.auth,
+                  ),
+                ),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BitcoinSignPage(
                     sbtauth: widget.auth,
                   ),
                 ),

@@ -63,7 +63,7 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
       appBar: AppBar(
         title: const Text('Solana Sign'),
       ),
-      body: Center(
+      body: SingleChildScrollView(
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
