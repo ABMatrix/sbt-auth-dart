@@ -22,7 +22,10 @@ class SolanaSinger {
   Future<String> sendTransaction(
     Instruction instruction,
     Ed25519HDPublicKey from,
-  ) async {
+    String to,
+    String amount, {
+    String? contractAddress,
+  }) async {
     final message = Message(instructions: [instruction]);
     final recentBlockhash = await SbtAuthApi.getRecentBlockhash(_solanaUrl);
     final compiledMessage = message.compile(
@@ -31,6 +34,9 @@ class SolanaSinger {
     );
     final signature = await _core.signDigest(
       Uint8List.fromList(compiledMessage.data.toList()),
+      [to],
+      amount,
+      contractAddress: contractAddress,
       network: _solanaNetwork,
     );
     final tx = SignedTx(
@@ -66,7 +72,7 @@ class SolanaSinger {
       owner: effectiveOwner,
       funder: from,
     );
-    final res = await sendTransaction(instruction, from);
+    final res = await sendTransaction(instruction, from, to.toBase58(), '0');
     return res;
   }
 }

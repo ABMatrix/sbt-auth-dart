@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:decimal/decimal.dart';
+import 'package:flutter_bitcoin/flutter_bitcoin.dart';
 import 'package:mpc_dart/mpc_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
@@ -201,3 +202,23 @@ String listToHex(List<int> bytes) {
   }
   return '0x$buffer';
 }
+
+/// dogecoin testnet
+final dogecoinTestnet = NetworkType(
+  messagePrefix: '\u0019DOgecoin Signed Message:\n',
+  bech32: 'doge',
+  bip32: Bip32Type(public: 0x043587CF, private: 0x04358394),
+  pubKeyHash: 0x71,
+  scriptHash: 0xC4,
+  wif: 0xF1,
+);
+
+/// dogecoin mainnet
+final dogecoinMainnet = NetworkType(
+  messagePrefix: '\u0019Dogecoin Signed Message:\n',
+  bech32: 'doge',
+  bip32: Bip32Type(public: 0x02FACAFD, private: 0x02FAC398),
+  pubKeyHash: 0xE1,
+  scriptHash: 0x16,
+  wif: 0x9E,
+);

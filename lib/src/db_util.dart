@@ -16,6 +16,9 @@ const SOLANA_CACHE_KEY = 'local_solana_cache_key';
 /// Hive cache box key
 const BITCOIN_CACHE_KEY = 'local_bitcoin_cache_key';
 
+/// Hive cache box key
+const DOGECOIN_CACHE_KEY = 'local_dogecoin_cache_key';
+
 /// Hive Util
 class DBUtil {
   /// user token box

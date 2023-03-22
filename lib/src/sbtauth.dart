@@ -98,6 +98,11 @@ class SbtAuth {
 
   AuthCore? _bitcoinCore;
 
+  /// bitcoin core
+  AuthCore? get dogecoinCore => _dogecoinCore;
+
+  AuthCore? _dogecoinCore;
+
   EventSource? _eventSource;
 
   /// solana singer
@@ -115,6 +120,16 @@ class SbtAuth {
       : BitcoinSinger(
           _bitcoinCore!,
           developMode,
+          true,
+        );
+
+  /// bitcoin singer
+  BitcoinSinger? get dogecoinSinger => _dogecoinCore == null
+      ? null
+      : BitcoinSinger(
+          _dogecoinCore!,
+          developMode,
+          false,
         );
 
   /// Grant authorization listen controller
@@ -197,6 +212,9 @@ class SbtAuth {
         case SbtChain.BITCOIN:
           _bitcoinCore = core;
           break;
+        case SbtChain.DOGECOIN:
+          _dogecoinCore = core;
+          break;
       }
     } else {
       final remoteLocalShareInfo =
@@ -220,6 +238,9 @@ class SbtAuth {
             break;
           case SbtChain.BITCOIN:
             _bitcoinCore = core;
+            break;
+          case SbtChain.DOGECOIN:
+            _dogecoinCore = core;
             break;
         }
       }
@@ -352,6 +373,10 @@ class SbtAuth {
         backupPrivateKey =
             await _bitcoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
         break;
+      case SbtChain.DOGECOIN:
+        backupPrivateKey =
+            await _dogecoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     await api.backupShare(
@@ -370,6 +395,7 @@ class SbtAuth {
     _core = null;
     _solanaCore = null;
     _bitcoinCore = null;
+    _dogecoinCore = null;
     _eventSource?.client.close();
     userEmail = '';
   }
@@ -398,6 +424,12 @@ class SbtAuth {
           throw SbtAuthException('Bitcoin auth not inited');
         }
         local = bitcoinCore!.localShare!.privateKey;
+        break;
+      case SbtChain.DOGECOIN:
+        if (dogecoinCore == null) {
+          throw SbtAuthException('Bitcoin auth not inited');
+        }
+        local = dogecoinCore!.localShare!.privateKey;
         break;
     }
     final password = StringBuffer();
@@ -505,6 +537,9 @@ class SbtAuth {
       case SbtChain.BITCOIN:
         _bitcoinCore = core;
         break;
+      case SbtChain.DOGECOIN:
+        _dogecoinCore = core;
+        break;
     }
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();
@@ -554,6 +589,9 @@ class SbtAuth {
       case SbtChain.BITCOIN:
         _bitcoinCore = core;
         break;
+      case SbtChain.DOGECOIN:
+        _dogecoinCore = core;
+        break;
     }
     if (!inited) throw SbtAuthException('Init error');
     await _authRequestListener();
@@ -579,6 +617,10 @@ class SbtAuth {
       case SbtChain.BITCOIN:
         backupPrivateKey =
             await _bitcoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
+      case SbtChain.DOGECOIN:
+        backupPrivateKey =
+            await _dogecoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
         break;
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
@@ -772,7 +814,43 @@ class SbtAuth {
     return res.items;
   }
 
-  // login success
+  /// Create strategy
+  Future<void> createStrategy(
+    String network,
+    String strategyInfo,
+    String type,
+  ) async {
+    await api.createStrategy(network, strategyInfo, type);
+  }
+
+  /// Edit strategy
+  Future<void> editStrategy(
+    String strategyID,
+    String network,
+    String strategyInfo,
+    String type,
+  ) async {
+    await api.editStrategy(strategyID, network, strategyInfo, type);
+  }
+
+  /// Get strategy list
+  Future<List<SbtStrategy>> getStrategyList(
+    int pageNo,
+    int pageSize, {
+    String network = '',
+    String type = '',
+    String contractAddress = '',
+  }) async {
+    final res = await api.getStrategyList(
+      pageNo,
+      pageSize,
+      network: network,
+      type: type,
+      contractAddress: contractAddress,
+    );
+    return res;
+  }
+
   Stream<StreamResponse> _queryWhetherSuccess(
     String password,
     String qrcode,

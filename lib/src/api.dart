@@ -728,6 +728,67 @@ class SbtAuthApi {
     }
   }
 
+  /// Create strategy
+  Future<void> createStrategy(
+    String network,
+    String strategyInfo,
+    String type,
+  ) async {
+    final data = {
+      'network': network,
+      'strategyInfo': strategyInfo,
+      'type': type,
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/strategy'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
+  /// Edit strategy
+  Future<void> editStrategy(
+    String strategyID,
+    String network,
+    String strategyInfo,
+    String type,
+  ) async {
+    final data = {
+      'strategyID': 'strategyID',
+      'network': network,
+      'strategyInfo': strategyInfo,
+      'type': type,
+    };
+    final response = await http.put(
+      Uri.parse('$_baseUrl/user/strategy'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
+  /// Get strategy list
+  Future<List<SbtStrategy>> getStrategyList(
+    int pageNo,
+    int pageSize, {
+    String network = '',
+    String type = '',
+    String contractAddress = '',
+  }) async {
+    final response = await http.get(
+      Uri.parse(
+        '$_baseUrl/user/strategys?pageNo=$pageNo&pageSize=$pageSize&network=$network&type=$type&contractAddress=$contractAddress',
+      ),
+      headers: _headers,
+    );
+    final data = _checkResponse(response) as Map<String, dynamic>;
+    final items = data['items'] as List?;
+    return [
+      for (var d in items ?? []) SbtStrategy.fromMap(d as Map<String, dynamic>)
+    ];
+  }
+
   static dynamic _checkResponse(Response response) {
     final body =
         jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;

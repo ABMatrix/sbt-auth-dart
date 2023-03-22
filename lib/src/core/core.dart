@@ -14,7 +14,7 @@ import 'package:solana/base58.dart';
 import 'package:web3dart/crypto.dart';
 
 /// chain
-enum SbtChain { EVM, SOLANA, BITCOIN }
+enum SbtChain { EVM, SOLANA, BITCOIN, DOGECOIN }
 
 /// chain info
 extension SbtChainInfo on SbtChain {
@@ -23,6 +23,7 @@ extension SbtChainInfo on SbtChain {
     switch (this) {
       case SbtChain.EVM:
       case SbtChain.BITCOIN:
+      case SbtChain.DOGECOIN:
         return Engine.ECDSA;
       case SbtChain.SOLANA:
         return Engine.EDDSA;
@@ -38,6 +39,8 @@ extension SbtChainInfo on SbtChain {
         return SOLANA_CACHE_KEY;
       case SbtChain.BITCOIN:
         return BITCOIN_CACHE_KEY;
+      case SbtChain.DOGECOIN:
+        return DOGECOIN_CACHE_KEY;
     }
   }
 }
@@ -78,7 +81,6 @@ class AuthCore {
   late Share? _remote;
 
   /// Signer
-  ///
   Signer get signer => Signer(this);
 
   /// Mpc url
@@ -149,6 +151,11 @@ class AuthCore {
           data: PaymentData(pubkey: hexToBytes(_local!.publicKey)),
           network: isTestnet ? testnet : bitcoin,
         ).data.address!;
+      case SbtChain.DOGECOIN:
+        return P2PKH(
+          data: PaymentData(pubkey: hexToBytes(_local!.publicKey)),
+          network: isTestnet ? dogecoinMainnet : dogecoinMainnet,
+        ).data.address!;
     }
   }
 
@@ -159,8 +166,11 @@ class AuthCore {
 
   /// Sign method
   Future<String> signDigest(
-    Uint8List message, {
-    String? network,
+    Uint8List message,
+    List<String> toList,
+    String amount, {
+    required String network,
+    String? contractAddress,
   }) async {
     var msgs = message;
     if (chain == SbtChain.EVM) {
@@ -168,7 +178,13 @@ class AuthCore {
     }
     var result = '';
     if (remoteSign) {
-      final uid = await _setTaskId(listToHex(message), network ?? '');
+      final uid = await _setTaskId(
+        listToHex(message),
+        network,
+        toList,
+        amount,
+        contractAddress: contractAddress,
+      );
       result = await MultiMpc.sign(
         MultiSignParams(
           keypair: shareToKey(_local!),
@@ -196,15 +212,26 @@ class AuthCore {
 
   /// Sign method
   Future<Signature> signTransaction(
-    Uint8List message, {
+    Uint8List message,
+    List<String> toList,
+    String amount, {
     required String network,
     required int chainId,
+    required int nonce,
     bool isEIP1559 = false,
+    String? contractAddress,
   }) async {
     final hashMessage = keccak256(message);
     var result = '';
     if (remoteSign) {
-      final uid = await _setTaskId(listToHex(message), network);
+      final uid = await _setTaskId(
+        listToHex(message),
+        network,
+        toList,
+        amount,
+        contractAddress: contractAddress,
+        nonce: nonce,
+      );
       result = await MultiMpc.sign(
         MultiSignParams(
           keypair: shareToKey(_local!),
@@ -274,6 +301,16 @@ class AuthCore {
           network: isTestnet ? testnet : bitcoin,
         ).data.address!;
         break;
+      case SbtChain.DOGECOIN:
+        backupAddress = P2PKH(
+          data: PaymentData(pubkey: hexToBytes(backupKey.pk)),
+          network: isTestnet ? dogecoinMainnet : dogecoinMainnet,
+        ).data.address!;
+        address = P2PKH(
+          data: PaymentData(pubkey: hexToBytes(remoteKey.pk)),
+          network: isTestnet ? dogecoinMainnet : dogecoinMainnet,
+        ).data.address!;
+        break;
     }
     if (backupAddress != address) {
       throw SbtAuthException('Wrong backup private key');
@@ -295,7 +332,11 @@ class AuthCore {
   Future<String> _setTaskId(
     String rawMessage,
     String network,
-  ) async {
+    List<String> toList,
+    String amount, {
+    String? contractAddress,
+    int? nonce,
+  }) async {
     final uid = MultiMpc.uuid();
     final data = {
       'metadata': jsonEncode({
@@ -305,7 +346,11 @@ class AuthCore {
       }),
       'rawMsg': rawMessage,
       'network': network,
-      'keyType': chain.name
+      'keyType': chain.name,
+      'toList': toList,
+      'amount': amount,
+      'contractAddress': contractAddress,
+      'nonce': nonce
     };
     final res = await http.post(
       Uri.parse(signUrl),
@@ -339,6 +384,7 @@ class AuthCore {
     return '0x${backup.sk}';
   }
 
+  /// set sign model
   void setSignModel(bool signModel) {
     remoteSign = signModel;
   }

@@ -1,4 +1,5 @@
 import 'package:example/bitcoin_sign.dart';
+import 'package:example/dogecoin_sign.dart';
 import 'package:example/solana_sign.dart';
 import 'package:example/white_list.dart';
 import 'package:flutter/material.dart';
@@ -90,6 +91,11 @@ class _SignPageState extends State<SignPage> {
             onPressed: _initBitcoin,
             child: const Text('Init bitcoin'),
           ),
+          const SizedBox(height: 20),
+          TextButton(
+            onPressed: _initDogecoin,
+            child: const Text('Init dogecoin'),
+          ),
           const SizedBox(height: 10),
           Text(hash),
           TextButton(
@@ -169,6 +175,17 @@ class _SignPageState extends State<SignPage> {
       context,
       MaterialPageRoute(
         builder: (context) => BitcoinSignPage(
+          sbtauth: widget.sbtauth,
+        ),
+      ),
+    );
+  }
+
+  _initDogecoin() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DogecoinSignPage(
           sbtauth: widget.sbtauth,
         ),
       ),

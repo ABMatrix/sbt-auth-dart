@@ -7,10 +7,10 @@ import 'package:http/http.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
 /// bitcoin url
-const BITCOIN_URL = 'https://api.abmatrix.cn/safff/wallet';
+const MAINNET_URL = 'https://api.abmatrix.cn/safff/wallet';
 
 /// bitcoin test url
-const BITCOIN_TEST_URL = 'https://test-api.abmatrix.cn/safff/wallet';
+const TESTNET_URL = 'https://test-api.abmatrix.cn/safff/wallet';
 
 /// input rate
 const INPUT_RATE = 68;
@@ -21,11 +21,30 @@ const OUTPUT_RATE = 31;
 /// Bitcoin Signer
 class BitcoinSinger {
   /// Bitcoin Signer
-  BitcoinSinger(this._core, this._isTestnet);
+  BitcoinSinger(this._core, this._isTestnet, this._isBtc);
 
   final AuthCore _core;
 
   final bool _isTestnet;
+
+  final bool _isBtc;
+
+  /// network
+  NetworkType get network {
+    if (_isTestnet) {
+      if (_isBtc) {
+        return testnet;
+      } else {
+        return dogecoinMainnet;
+      }
+    } else {
+      if (_isBtc) {
+        return bitcoin;
+      } else {
+        return dogecoinMainnet;
+      }
+    }
+  }
 
   /// send bitcoin transaction
   Future<String> sendBtcTransaction(
@@ -37,16 +56,15 @@ class BitcoinSinger {
     if (amount < 1000) {
       throw SbtAuthException('Amount too low');
     }
-    final txb = TransactionBuilder(network: _isTestnet ? testnet : bitcoin)
-      ..setVersion(1);
-    final btcApi = BtcApi(isTestnet: _isTestnet);
+    final txb = TransactionBuilder(network: network)..setVersion(1);
+    final btcApi = Api(isTestnet: _isTestnet, isBtc: _isBtc);
     final utxos = await btcApi.getUtxo(from);
     final result = getUsedUtxos(utxos, amount, feeRate: feeRate);
     final inputUtxos = result[0] as List<Utxo>;
     final left = result[1] as int;
     final p2wpkh = P2WPKH(
       data: PaymentData(pubkey: _core.getPubkey()),
-      network: _isTestnet ? testnet : bitcoin,
+      network: network,
     ).data;
     for (var i = 0; i < inputUtxos.length; i++) {
       txb.addInput(inputUtxos[i].txid, inputUtxos[i].vout, null, p2wpkh.output);
@@ -61,6 +79,8 @@ class BitcoinSinger {
         pubkey: _core.getPubkey(),
         core: _core,
         witnessValue: int.parse(inputUtxos[i].amount),
+        toList: [to],
+        amount: (amount / 1000000000).toString(),
       );
     }
     final hash = await btcApi.sendTransaction(txb.build().toHex());
@@ -126,17 +146,39 @@ class Utxo {
 }
 
 /// bitcoin api
-class BtcApi {
-  ///btc api
-  BtcApi({required this.isTestnet});
+class Api {
+  ///api
+  Api({
+    required this.isTestnet,
+    required this.isBtc,
+  });
 
-  /// url
+  /// is testnet
   final bool isTestnet;
+
+  /// is testnet
+  final bool isBtc;
+
+  String get _network {
+    if (isTestnet) {
+      if (isBtc) {
+        return 'btc_testnet';
+      } else {
+        return 'dogecoin_testnet';
+      }
+    } else {
+      if (isBtc) {
+        return 'btc';
+      } else {
+        return 'dogecoin';
+      }
+    }
+  }
 
   /// get utxo
   Future<List<Utxo>> getUtxo(String address) async {
-    final url = isTestnet ? BITCOIN_TEST_URL : BITCOIN_URL;
-    final network = isTestnet ? 'btc_testnet' : 'btc';
+    final url = isTestnet ? TESTNET_URL : MAINNET_URL;
+    final network = _network;
     final response = await get(
       Uri.parse(
         '$url/unspent?address=$address&network=$network',
@@ -149,8 +191,8 @@ class BtcApi {
 
   /// send transaction
   Future<String> sendTransaction(String singedData) async {
-    final url = isTestnet ? BITCOIN_TEST_URL : BITCOIN_URL;
-    final network = isTestnet ? 'btc_testnet' : 'btc';
+    final url = isTestnet ? TESTNET_URL : MAINNET_URL;
+    final network = _network;
     final data = {'singedData': singedData, 'network': network};
     final response = await post(
       Uri.parse('$url/transfer'),
@@ -214,6 +256,20 @@ class TransactionBuilder {
 
   /// network
   late NetworkType network;
+
+  String get _network {
+    if (network == bitcoin) {
+      return 'btc';
+    } else if (network == testnet) {
+      return 'btc_testnet';
+    } else if (network == dogecoinMainnet) {
+      return 'dogecoin';
+    } else if (network == dogecoinTestnet) {
+      return 'dogecoin_testnet';
+    } else {
+      return '';
+    }
+  }
 
   /// maximumFeeRate
   late int maximumFeeRate;
@@ -309,6 +365,8 @@ class TransactionBuilder {
     required int vin,
     required Uint8List pubkey,
     required AuthCore core,
+    required List<String> toList,
+    required String amount,
     int? witnessValue,
     int? hashType,
   }) async {
@@ -363,7 +421,12 @@ class TransactionBuilder {
         );
       }
 
-      final signature = await core.signDigest(signatureHash);
+      final signature = await core.signDigest(
+        signatureHash,
+        network: _network,
+        toList,
+        amount,
+      );
       final res = Uint8List.fromList(hexToList(signature)).sublist(0, 64);
       input.signatures?[i] = encodeSignature(res, hashType);
       signed = true;

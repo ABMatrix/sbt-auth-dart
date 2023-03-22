@@ -128,7 +128,8 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
       recipientAccount: toAddress,
       lamports: 100000,
     );
-    final res = await singer!.sendTransaction(instruction, fromAddress);
+    final res = await singer!
+        .sendTransaction(instruction, fromAddress, solanaAddress, '0.1');
     setState(() {
       hash = res;
     });
@@ -197,7 +198,13 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
       owner: fromAddress,
       amount: 1,
     );
-    final res = await singer!.sendTransaction(instruction, fromAddress);
+    final res = await singer!.sendTransaction(
+      instruction,
+      fromAddress,
+      solanaAddress,
+      '1',
+      contractAddress: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
+    );
     setState(() {
       tokenHash = res;
     });

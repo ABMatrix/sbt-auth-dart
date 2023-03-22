@@ -41,7 +41,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late TextEditingController _controller;
   final sbtAuth =
-      SbtAuth(developMode: false, clientId: 'Demo', scheme: 'sbtauth');
+      SbtAuth(developMode: true, clientId: 'Demo', scheme: 'sbtauth');
   String code = '';
 
   @override
@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
           MaterialPageRoute(
             builder: (context) => SignPage(
               address: sbtAuth.user!.publicKeyAddress['EVM'] ??
-                  sbtAuth.core!.getAddress(isTestnet:sbtAuth.developMode),
+                  sbtAuth.core!.getAddress(isTestnet: sbtAuth.developMode),
               sbtauth: sbtAuth,
             ),
           ),
@@ -166,7 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
             MaterialPageRoute(
               builder: (context) => SignPage(
                 address: sbtAuth.user!.publicKeyAddress['EVM'] == null
-                    ? sbtAuth.core!.getAddress(isTestnet:sbtAuth.developMode)
+                    ? sbtAuth.core!.getAddress(isTestnet: sbtAuth.developMode)
                     : sbtAuth.user!.publicKeyAddress['EVM']['address'],
                 sbtauth: sbtAuth,
               ),

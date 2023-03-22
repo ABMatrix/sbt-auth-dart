@@ -538,3 +538,41 @@ class ERC20TokenInfo {
   /// Token Info TokenType
   String tokenInfoTokenType;
 }
+
+/// Strategys
+class SbtStrategy {
+  ///Strategys
+  SbtStrategy({
+    required this.strategyUserID,
+    required this.strategyType,
+    required this.strategyStrategyInfo,
+    required this.strategyNetwork,
+    required this.strategyID,
+  });
+
+  /// Strategys from map
+  factory SbtStrategy.fromMap(Map<String, dynamic> map) {
+    return SbtStrategy(
+      strategyUserID: (map['strategyUserID'] ?? '') as String,
+      strategyType: (map['strategyType'] ?? '') as String,
+      strategyStrategyInfo: (map['strategyStrategyInfo'] ?? '') as String,
+      strategyNetwork: (map['strategyNetwork'] ?? '') as String,
+      strategyID: (map['strategyID'] ?? '') as String,
+    );
+  }
+
+  /// Strategy User ID
+  String strategyUserID;
+
+  /// Strategy Type
+  String strategyType;
+
+  /// Strategy Info
+  String strategyStrategyInfo;
+
+  /// Strategy Network
+  String strategyNetwork;
+
+  /// Strategy ID
+  String strategyID;
+}

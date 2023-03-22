@@ -27,7 +27,12 @@ class Signer {
   Future<String> personalSign(String message) async {
     final data =
         message.startsWith('0x') ? hexToBytes(message) : ascii.encode(message);
-    final res = await _core.signDigest(uit8Message(data));
+    final res = await _core.signDigest(
+      uit8Message(data),
+      [],
+      '',
+      network: '',
+    );
     return res;
   }
 
@@ -38,6 +43,9 @@ class Signer {
         jsonData: jsonEncode(data),
         version: TypedDataVersion.V4,
       ),
+      [],
+      '',
+      network: '',
     );
     return res;
   }
@@ -47,7 +55,11 @@ class Signer {
     UnsignedTransaction transaction,
     int chainId,
     String network,
-  ) async {
+    List<String> toList,
+    String amount,
+    int nonce, {
+    String? contractAddress,
+  }) async {
     if (transaction.maxFeePerGas != null ||
         transaction.maxPriorityFeePerGas != null) {
       final encodedTx = LengthTrackingByteSink()
@@ -56,9 +68,13 @@ class Signer {
         ..close();
       final signature = await _core.signTransaction(
         encodedTx.asBytes(),
+        toList,
+        amount,
+        contractAddress: contractAddress,
         chainId: chainId,
         network: network,
         isEIP1559: true,
+        nonce: nonce,
       );
       final result = [0x02] +
           uint8ListFromList(
@@ -80,8 +96,12 @@ class Signer {
       );
       final signature = await _core.signTransaction(
         encodedTx,
+        toList,
+        amount,
+        contractAddress: contractAddress,
         chainId: chainId,
         network: network,
+        nonce: nonce,
       );
       final result = uint8ListFromList(
         rlp.encode(
