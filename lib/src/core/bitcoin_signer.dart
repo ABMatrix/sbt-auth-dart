@@ -54,7 +54,7 @@ class BitcoinSinger {
     String from,
     String to,
     int amount, {
-    int feeRate = 2053,
+    int feeRate = 8,
   }) async {
     if (amount < 1000) {
       throw SbtAuthException('Amount too low');
@@ -71,7 +71,12 @@ class BitcoinSinger {
       network: network,
     ).data;
     for (var i = 0; i < inputUtxos.length; i++) {
-      txb.addInput(inputUtxos[i].txid, inputUtxos[i].vout, null, p2wpkh.output);
+      txb.addInput(
+        inputUtxos[i].txid,
+        inputUtxos[i].vout,
+        null,
+        network == dogecoinMainnet ? null : p2wpkh.output,
+      );
     }
     txb.addOutput(to, amount);
     if (left > 1000) {
@@ -82,7 +87,8 @@ class BitcoinSinger {
         vin: i,
         pubkey: _core.getPubkey(),
         core: _core,
-        witnessValue: int.parse(inputUtxos[i].amount),
+        witnessValue:
+            network == dogecoinMainnet ? null : int.parse(inputUtxos[i].amount),
         toList: [to],
         amount: (amount / 1000000000).toString(),
       );
@@ -120,6 +126,7 @@ class Utxo {
     required this.amount,
     required this.confirmations,
     required this.script,
+    required this.txHex,
   });
 
   /// Utxo from map
@@ -130,6 +137,7 @@ class Utxo {
       amount: (map['amount'] ?? '0') as String,
       confirmations: (map['confirmations'] ?? 0) as int,
       script: (map['script'] ?? '') as String,
+      txHex: (map['txHex']) as String?,
     );
   }
 
@@ -147,6 +155,9 @@ class Utxo {
 
   /// script
   final String script;
+
+  /// txHex
+  final String? txHex;
 }
 
 /// bitcoin api
@@ -387,15 +398,24 @@ class TransactionBuilder {
       if (witnessValue != null) {
         input.value = witnessValue;
       }
-      input
-        ..prevOutType = 'witnesspubkeyhash'
-        ..hasWitness = true
-        ..signatures = [null]
-        ..pubkeys = [pubkey]
-        ..signScript =
-            P2PKH(data: PaymentData(pubkey: pubkey), network: network)
-                .data
-                .output;
+      if (witnessValue != null) {
+        input
+          ..prevOutType = 'witnesspubkeyhash'
+          ..hasWitness = true
+          ..signatures = [null]
+          ..pubkeys = [pubkey]
+          ..signScript =
+              P2PKH(data: PaymentData(pubkey: pubkey), network: network)
+                  .data
+                  .output;
+      } else {
+        final prevOutScript = pubkeyToOutputScript(pubkey, network);
+        input
+          ..prevOutType = 'pubkeyhash'
+          ..signatures = [null]
+          ..pubkeys = [pubkey]
+          ..signScript = prevOutScript;
+      }
     }
     Uint8List signatureHash;
     if (input.hasWitness ?? false) {
@@ -413,17 +433,17 @@ class TransactionBuilder {
       //   tx,
       // );
     } else {
-      _tx.hashForSignature(
+      signatureHash = _tx.hashForSignature(
         vin,
         input.signScript!,
         hashType,
       ) as Uint8List;
-      signatureHash = _hashForSignature(
-        vin,
-        input.signScript!,
-        hashType,
-        tx,
-      );
+      // signatureHash = _hashForSignature(
+      //   vin,
+      //   input.signScript!,
+      //   hashType,
+      //   tx,
+      // );
     }
 
     // enforce in order signing of public keys
@@ -547,7 +567,7 @@ class TransactionBuilder {
 
     if ((hashType & 0x1f) != SIGHASH_SINGLE &&
         (hashType & 0x1f) != SIGHASH_NONE) {
-      var txOutsSize = tx.outs.fold(
+      final txOutsSize = tx.outs.fold(
           0, (sum, output) => (sum as int) + 8 + varSliceSize(output.script!));
       tbuffer = new Uint8List(txOutsSize);
       bytes = tbuffer.buffer.asByteData();
@@ -560,7 +580,7 @@ class TransactionBuilder {
     } else if ((hashType & 0x1f) == SIGHASH_SINGLE &&
         inIndex < tx.outs.length) {
       // SIGHASH_SINGLE only hash that according output
-      var output = tx.outs[inIndex];
+      final output = tx.outs[inIndex];
       tbuffer = Uint8List(8 + varSliceSize(output.script!));
       bytes = tbuffer.buffer.asByteData();
       toffset = 0;
@@ -678,16 +698,28 @@ class TransactionBuilder {
           _inputs[i].signatures != null &&
           _inputs[i].pubkeys!.isNotEmpty &&
           _inputs[i].signatures!.isNotEmpty) {
-        final payment = P2WPKH(
-          data: PaymentData(
-            pubkey: _inputs[i].pubkeys?[0],
-            signature: _inputs[i].signatures?[0],
-          ),
-          network: network,
-        );
-        tx
-          ..setInputScript(i, payment.data.input!)
-          ..setWitness(i, payment.data.witness);
+        if (_inputs[i].prevOutType == 'pubkeyhash') {
+          final payment = P2PKH(
+            data: PaymentData(
+                pubkey: _inputs[i].pubkeys?[0],
+                signature: _inputs[i].signatures?[0]),
+            network: network,
+          );
+          tx
+            ..setInputScript(i, payment.data.input!)
+            ..setWitness(i, payment.data.witness);
+        } else if (_inputs[i].prevOutType == 'witnesspubkeyhash') {
+          final payment = P2WPKH(
+            data: PaymentData(
+              pubkey: _inputs[i].pubkeys?[0],
+              signature: _inputs[i].signatures?[0],
+            ),
+            network: network,
+          );
+          tx
+            ..setInputScript(i, payment.data.input!)
+            ..setWitness(i, payment.data.witness);
+        }
       } else if (!allowIncomplete) {
         throw SbtAuthException('Transaction is not complete');
       }
@@ -773,7 +805,7 @@ class TransactionBuilder {
   }
 
   int _addInputUnsafe(Uint8List hash, int vout, Input options) {
-    var txHash = bytesToHex(hash);
+    final txHash = bytesToHex(hash);
     Input input;
     if (isCoinbaseHash(hash)) {
       throw SbtAuthException('coinbase inputs not supported');

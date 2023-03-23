@@ -106,7 +106,7 @@ class _DogecoinSignPageState extends State<DogecoinSignPage> {
 
   _sendDoge()async{
     final dogeSign = widget.sbtauth.dogecoinSinger!;
-    final res = await dogeSign.sendBtcTransaction(dogecoinAddress, 'DQnjTDX2CkJBBCjicNJMiFYk2W7cTojYFJ', 30000);
+    final res = await dogeSign.sendBtcTransaction(dogecoinAddress, 'DDzDZ8Wnb43rAuvRd3XuRd5Zsuc8eLeaLz', 300000);
     setState(() {
       hash = res;
     });
