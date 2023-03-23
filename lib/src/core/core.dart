@@ -176,6 +176,9 @@ class AuthCore {
     if (chain == SbtChain.EVM) {
       msgs = keccak256(message);
     }
+    // if (chain == SbtChain.BITCOIN && !remoteSign) {
+    //   msgs = keccak256(message);
+    // }
     var result = '';
     if (remoteSign) {
       final uid = await _setTaskId(

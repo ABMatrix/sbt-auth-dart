@@ -218,7 +218,7 @@ final dogecoinMainnet = NetworkType(
   messagePrefix: '\u0019Dogecoin Signed Message:\n',
   bech32: 'doge',
   bip32: Bip32Type(public: 0x02FACAFD, private: 0x02FAC398),
-  pubKeyHash: 0xE1,
+  pubKeyHash: 0x1E,
   scriptHash: 0x16,
   wif: 0x9E,
 );

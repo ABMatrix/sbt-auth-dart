@@ -3,6 +3,9 @@ import 'dart:typed_data';
 
 import 'package:eth_sig_util/util/utils.dart';
 import 'package:flutter_bitcoin/flutter_bitcoin.dart';
+import 'package:flutter_bitcoin/src/utils/script.dart' as bscript;
+import 'package:flutter_bitcoin/src/utils/varuint.dart' as varuint;
+import 'package:flutter_bitcoin/src/crypto.dart' as bcrypto;
 import 'package:http/http.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
@@ -51,11 +54,12 @@ class BitcoinSinger {
     String from,
     String to,
     int amount, {
-    int feeRate = 8,
+    int feeRate = 2053,
   }) async {
     if (amount < 1000) {
       throw SbtAuthException('Amount too low');
     }
+    _core.setSignModel(false);
     final txb = TransactionBuilder(network: network)..setVersion(1);
     final btcApi = Api(isTestnet: _isTestnet, isBtc: _isBtc);
     final utxos = await btcApi.getUtxo(from);
@@ -164,7 +168,7 @@ class Api {
       if (isBtc) {
         return 'btc_testnet';
       } else {
-        return 'dogecoin_testnet';
+        return 'dogecoin';
       }
     } else {
       if (isBtc) {
@@ -265,7 +269,7 @@ class TransactionBuilder {
     } else if (network == dogecoinMainnet) {
       return 'dogecoin';
     } else if (network == dogecoinTestnet) {
-      return 'dogecoin_testnet';
+      return 'dogecoin';
     } else {
       return '';
     }
@@ -322,7 +326,7 @@ class TransactionBuilder {
     if (!_canModifyOutputs()) {
       throw SbtAuthException('No, this would invalidate signatures');
     }
-    return _tx.addOutput(scriptPubKey as Uint8List, value);
+    return _tx.addOutput(scriptPubKey, value);
   }
 
   /// add input
@@ -401,12 +405,25 @@ class TransactionBuilder {
         input.value!,
         hashType,
       ) as Uint8List;
+      // signatureHash = _hashForWitnessV0(
+      //   vin,
+      //   input.signScript!,
+      //   input.value!,
+      //   hashType,
+      //   tx,
+      // );
     } else {
-      signatureHash = _tx.hashForSignature(
+      _tx.hashForSignature(
         vin,
         input.signScript!,
         hashType,
       ) as Uint8List;
+      signatureHash = _hashForSignature(
+        vin,
+        input.signScript!,
+        hashType,
+        tx,
+      );
     }
 
     // enforce in order signing of public keys
@@ -443,6 +460,191 @@ class TransactionBuilder {
       (i) => int.parse(input.substring(i * 2, i * 2 + 2), radix: 16),
     );
     return hash;
+  }
+
+  Uint8List _hashForWitnessV0(
+    int inIndex,
+    Uint8List prevOutScript,
+    int value,
+    int hashType,
+    Transaction tx,
+  ) {
+    var tbuffer = Uint8List.fromList([]);
+    var toffset = 0;
+    // Any changes made to the ByteData will also change the buffer, and vice versa.
+    // https://api.dart.dev/stable/2.7.1/dart-typed_data/ByteBuffer/asByteData.html
+    ByteData bytes = tbuffer.buffer.asByteData();
+    var hashOutputs = ZERO;
+    var hashPrevouts = ZERO;
+    var hashSequence = ZERO;
+
+    writeSlice(slice) {
+      tbuffer.setRange(
+          toffset, (toffset + (slice.length as int)), slice as Iterable<int>);
+      toffset += (slice.length as int);
+    }
+
+    writeUInt8(i) {
+      bytes.setUint8(toffset, i as int);
+      toffset++;
+    }
+
+    writeUInt32(i) {
+      bytes.setUint32(toffset, i as int, Endian.little);
+      toffset += 4;
+    }
+
+    writeInt32(i) {
+      bytes.setInt32(toffset, i as int, Endian.little);
+      toffset += 4;
+    }
+
+    writeUInt64(i) {
+      bytes.setUint64(toffset, i as int, Endian.little);
+      toffset += 8;
+    }
+
+    writeVarInt(i) {
+      varuint.encode(i as int, tbuffer, toffset);
+      toffset += varuint.encodingLength(i as int);
+    }
+
+    writeVarSlice(slice) {
+      writeVarInt(slice.length);
+      writeSlice(slice);
+    }
+
+    writeVector(vector) {
+      writeVarInt(vector.length);
+      vector.forEach((buf) {
+        writeVarSlice(buf);
+      });
+    }
+
+    if ((hashType & SIGHASH_ANYONECANPAY) == 0) {
+      tbuffer = Uint8List(36 * tx.ins.length);
+      bytes = tbuffer.buffer.asByteData();
+      toffset = 0;
+
+      tx.ins.forEach((txIn) {
+        writeSlice(txIn?.hash);
+        writeUInt32(txIn?.index);
+      });
+      hashPrevouts = bcrypto.hash256(tbuffer);
+    }
+
+    if ((hashType & SIGHASH_ANYONECANPAY) == 0 &&
+        (hashType & 0x1f) != SIGHASH_SINGLE &&
+        (hashType & 0x1f) != SIGHASH_NONE) {
+      tbuffer = Uint8List(4 * tx.ins.length as int);
+      bytes = tbuffer.buffer.asByteData();
+      toffset = 0;
+      tx.ins.forEach((txIn) {
+        writeUInt32(txIn?.sequence);
+      });
+      hashSequence = bcrypto.hash256(tbuffer);
+    }
+
+    if ((hashType & 0x1f) != SIGHASH_SINGLE &&
+        (hashType & 0x1f) != SIGHASH_NONE) {
+      var txOutsSize = tx.outs.fold(
+          0, (sum, output) => (sum as int) + 8 + varSliceSize(output.script!));
+      tbuffer = new Uint8List(txOutsSize);
+      bytes = tbuffer.buffer.asByteData();
+      toffset = 0;
+      tx.outs.forEach((txOut) {
+        writeUInt64(txOut.value);
+        writeVarSlice(txOut.script);
+      });
+      hashOutputs = bcrypto.hash256(tbuffer);
+    } else if ((hashType & 0x1f) == SIGHASH_SINGLE &&
+        inIndex < tx.outs.length) {
+      // SIGHASH_SINGLE only hash that according output
+      var output = tx.outs[inIndex];
+      tbuffer = Uint8List(8 + varSliceSize(output.script!));
+      bytes = tbuffer.buffer.asByteData();
+      toffset = 0;
+      writeUInt64(output.value);
+      writeVarSlice(output.script);
+      hashOutputs = bcrypto.hash256(tbuffer);
+    }
+
+    tbuffer = Uint8List(156 + varSliceSize(prevOutScript));
+    bytes = tbuffer.buffer.asByteData();
+    toffset = 0;
+    final input = tx.ins[inIndex];
+    writeUInt32(tx.version);
+    writeSlice(hashPrevouts);
+    writeSlice(hashSequence);
+    writeSlice(input?.hash);
+    writeUInt32(input?.index);
+    writeVarSlice(prevOutScript);
+    writeUInt64(value);
+    writeUInt32(input?.sequence);
+    writeSlice(hashOutputs);
+    writeUInt32(tx.locktime);
+    writeUInt32(hashType);
+
+    return tbuffer;
+  }
+
+  Uint8List _hashForSignature(
+      int inIndex, Uint8List prevOutScript, int hashType, Transaction tx) {
+    if (inIndex >= tx.ins.length) return Uint8List.fromList(ONE);
+    // ignore OP_CODESEPARATOR
+    final ourScript =
+        bscript.compile(bscript.decompile(prevOutScript)!.where((x) {
+      return x != 0xab;
+    }).toList());
+    final txTmp = Transaction.clone(tx);
+    // SIGHASH_NONE: ignore all outputs? (wildcard payee)
+    if ((hashType & 0x1f) == SIGHASH_NONE) {
+      txTmp.outs = [];
+      // ignore sequence numbers (except at inIndex)
+      for (var i = 0; i < txTmp.ins.length; i++) {
+        if (i != inIndex) {
+          txTmp.ins[i]?.sequence = 0;
+        }
+      }
+
+      // SIGHASH_SINGLE: ignore all outputs, except at the same index?
+    } else if ((hashType & 0x1f) == SIGHASH_SINGLE) {
+      // https://github.com/bitcoin/bitcoin/blob/master/src/test/sighash_tests.cpp#L60
+      if (inIndex >= tx.outs.length) return Uint8List.fromList(ONE);
+
+      // truncate outputs after
+      txTmp.outs.length = inIndex + 1;
+
+      // 'blank' outputs before
+      for (var i = 0; i < inIndex; i++) {
+        txTmp.outs[i] = BLANK_OUTPUT;
+      }
+      // ignore sequence numbers (except at inIndex)
+      for (var i = 0; i < txTmp.ins.length; i++) {
+        if (i != inIndex) {
+          txTmp.ins[i]?.sequence = 0;
+        }
+      }
+    }
+
+    // SIGHASH_ANYONECANPAY: ignore inputs entirely?
+    if (hashType & SIGHASH_ANYONECANPAY != 0) {
+      txTmp.ins = [txTmp.ins[inIndex]];
+      txTmp.ins[0]?.script = ourScript;
+      // SIGHASH_ALL: only ignore input scripts
+    } else {
+      // 'blank' others input scripts
+      txTmp.ins.forEach((input) {
+        input?.script = EMPTY_SCRIPT;
+      });
+      txTmp.ins[inIndex]?.script = ourScript;
+    }
+    // serialize and hash
+    final buffer = Uint8List(txTmp.virtualSize() + 4);
+    buffer.buffer
+        .asByteData()
+        .setUint32(buffer.length - 4, hashType, Endian.little);
+    return buffer;
   }
 
   /// build

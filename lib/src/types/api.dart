@@ -418,6 +418,9 @@ class UserToken {
     required this.iconUrl,
     required this.amount,
     required this.decimals,
+    required this.limitDay,
+    required this.limitSingle,
+    required this.strategyID,
   });
 
   /// TokenInfo from map
@@ -434,6 +437,9 @@ class UserToken {
       iconUrl: (map['iconUrl'] ?? '') as String,
       amount: (map['amount'] ?? '') as String,
       decimals: (map['decimals'] ?? 0) as int,
+      limitDay: (map['limitDay']) as String?,
+      limitSingle: (map['limitSingle']) as String?,
+      strategyID: (map['strategyID']) as String?,
     );
   }
 
@@ -470,6 +476,15 @@ class UserToken {
   /// Decimals
   int? decimals;
 
+  /// Limit Day
+  String? limitDay;
+
+  /// Limit Single
+  String? limitSingle;
+
+  /// Strategy id
+  String? strategyID;
+
   /// to json
   String toJson() => json.encode(toMap());
 
@@ -487,6 +502,9 @@ class UserToken {
       'iconUrl': iconUrl,
       'amount': amount,
       'decimals': decimals,
+      'limitDay': limitDay,
+      'limitSingle': limitSingle,
+      'strategyID': strategyID,
     };
   }
 }

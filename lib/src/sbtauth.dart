@@ -816,21 +816,17 @@ class SbtAuth {
 
   /// Create strategy
   Future<void> createStrategy(
-    String network,
-    String strategyInfo,
-    String type,
+    List<Map<String, dynamic>> commandList,
   ) async {
-    await api.createStrategy(network, strategyInfo, type);
+    await api.createStrategy(commandList);
   }
 
   /// Edit strategy
   Future<void> editStrategy(
-    String strategyID,
-    String network,
-    String strategyInfo,
-    String type,
+    List<Map<String, dynamic>> commandList,
+    String googleCode,
   ) async {
-    await api.editStrategy(strategyID, network, strategyInfo, type);
+    await api.editStrategy(commandList, googleCode);
   }
 
   /// Get strategy list

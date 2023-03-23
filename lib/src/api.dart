@@ -730,14 +730,10 @@ class SbtAuthApi {
 
   /// Create strategy
   Future<void> createStrategy(
-    String network,
-    String strategyInfo,
-    String type,
+    List<Map<String, dynamic>> commandList,
   ) async {
     final data = {
-      'network': network,
-      'strategyInfo': strategyInfo,
-      'type': type,
+      'commandList': commandList,
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/strategy'),
@@ -749,16 +745,12 @@ class SbtAuthApi {
 
   /// Edit strategy
   Future<void> editStrategy(
-    String strategyID,
-    String network,
-    String strategyInfo,
-    String type,
+    List<Map<String, dynamic>> commandList,
+    String googleCode,
   ) async {
     final data = {
-      'strategyID': 'strategyID',
-      'network': network,
-      'strategyInfo': strategyInfo,
-      'type': type,
+      'commandList': commandList,
+      'googleCode': googleCode,
     };
     final response = await http.put(
       Uri.parse('$_baseUrl/user/strategy'),
