@@ -401,12 +401,18 @@ class SbtAuth {
     String code,
   ) async {
     var backupInfo = <String, dynamic>{};
+    var coreList = <AuthCore>[
+      _core!,
+      _solanaCore!,
+      _bitcoinCore!,
+      _dogecoinCore!
+    ];
     for (var i = 0; i < SbtChain.values.length; i++) {
       final remoteShareInfo =
           await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
 
       final backupPrivateKey =
-          await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
+          await coreList[i].getBackupPrivateKey(remoteShareInfo.backupAux);
       final privateKey = await encryptMsg(backupPrivateKey, password);
       backupInfo[SbtChain.values[i].name] = privateKey;
     }
@@ -699,12 +705,18 @@ class SbtAuth {
   /// One drive batch backup
   Future<void> oneDriveBatchBackup(String password) async {
     var backupInfo = <String, dynamic>{};
+    var coreList = <AuthCore>[
+      _core!,
+      _solanaCore!,
+      _bitcoinCore!,
+      _dogecoinCore!
+    ];
     for (var i = 0; i < SbtChain.values.length; i++) {
       final remoteShareInfo =
           await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
 
       final backupPrivateKey =
-          await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
+          await coreList[i].getBackupPrivateKey(remoteShareInfo.backupAux);
       final privateKey = await encryptMsg(backupPrivateKey, password);
       backupInfo[SbtChain.values[i].name] = privateKey;
     }
