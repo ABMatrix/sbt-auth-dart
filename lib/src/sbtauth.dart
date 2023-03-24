@@ -388,6 +388,32 @@ class SbtAuth {
     userEmail = email;
   }
 
+  /// Batch backup
+  Future<void> batchBackup(
+    String password,
+    String email,
+    String code,
+  ) async {
+    var backupInfo = <String, dynamic>{};
+    for (var i = 0; i < SbtChain.values.length; i++) {
+      final remoteShareInfo =
+          await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
+
+      final backupPrivateKey =
+          await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
+      final privateKey = await encryptMsg(backupPrivateKey, password);
+      backupInfo[SbtChain.values[i].name] = privateKey;
+    }
+
+    await api.batchBackup(
+      code,
+      backupInfo,
+      email,
+      '',
+    );
+    userEmail = email;
+  }
+
   /// Logout
   void logout() {
     DBUtil.tokenBox.delete(TOKEN_KEY);

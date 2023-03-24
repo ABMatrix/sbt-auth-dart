@@ -781,6 +781,27 @@ class SbtAuthApi {
     ];
   }
 
+  /// Batch backup
+  Future<void> batchBackup(
+    String authCode,
+    Map<String, dynamic> backupInfo,
+    String emailAddress,
+    String googleCode,
+  ) async {
+    final data = {
+      'authCode': authCode,
+      'backupInfo': backupInfo,
+      'emailAddress': emailAddress,
+      'googleCode': googleCode,
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/back-up:batch'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
   static dynamic _checkResponse(Response response) {
     final body =
         jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;

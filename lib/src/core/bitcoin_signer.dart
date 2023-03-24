@@ -59,7 +59,6 @@ class BitcoinSinger {
     if (amount < 1000) {
       throw SbtAuthException('Amount too low');
     }
-    _core.setSignModel(false);
     final txb = TransactionBuilder(network: network)..setVersion(1);
     final btcApi = Api(isTestnet: _isTestnet, isBtc: _isBtc);
     final utxos = await btcApi.getUtxo(from);
