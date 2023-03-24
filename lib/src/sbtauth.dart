@@ -22,6 +22,12 @@ const DEVELOP_APP_URL = 'https://test-connect.sbtauth.io';
 /// Production app url
 const PRODUCTION_APP_URL = 'https://connect.sbtauth.io';
 
+/// Develop app url
+const DEVELOP_AUTH_URL = 'https://test-auth.safematrix.io';
+
+/// Production app url
+const PRODUCTION_AUTH_URL = 'https://auth.safematrix.io';
+
 /// Login types
 enum LoginType {
   /// Login with google account
@@ -314,7 +320,7 @@ class SbtAuth {
       );
     } else {
       final deviceName = await getDeviceName();
-      final appUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
+      final appUrl = developMode ? DEVELOP_AUTH_URL : PRODUCTION_AUTH_URL;
       final loginUrl =
           '$appUrl/login?loginType=${loginType.name}&scheme=$_scheme&deviceName=$deviceName&clientId=$_clientId';
       unawaited(
