@@ -184,7 +184,7 @@ class SbtAuthProvider {
       network,
       [transaction['to'] as String],
       transaction['value'] as String,
-      transaction['nonce'] as int,
+      int.parse((transaction['nonce'] ?? '0').toString()),
       contractAddress: transaction['contractAddress'] as String?,
     );
     return res;
