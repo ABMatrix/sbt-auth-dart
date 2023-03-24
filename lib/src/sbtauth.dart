@@ -322,7 +322,7 @@ class SbtAuth {
       final deviceName = await getDeviceName();
       final appUrl = developMode ? DEVELOP_AUTH_URL : PRODUCTION_AUTH_URL;
       final loginUrl =
-          '$appUrl/login?loginType=${loginType.name}&scheme=$_scheme&deviceName=$deviceName&clientId=$_clientId';
+          '$appUrl?loginType=${loginType.name}&scheme=$_scheme&deviceName=$deviceName&clientId=$_clientId';
       unawaited(
         launchUrl(
           Uri.parse(loginUrl),
