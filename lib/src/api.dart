@@ -301,12 +301,14 @@ class SbtAuthApi {
     String email,
     String code, {
     String keyType = 'EVM',
+    String googleCode = '',
   }) async {
     final params = {
       'emailAddress': email,
       'privateKey3Fragment': privateKey,
       'authCode': code,
-      'keyType': keyType
+      'keyType': keyType,
+      'googleCode': googleCode,
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user:back-up'),
@@ -404,14 +406,16 @@ class SbtAuthApi {
     String authCode,
     String address,
     String name,
-    String network,
-  ) async {
+    String network, {
+    String googleCode = '',
+  }) async {
     final data = {
       'email': email,
       'authCode': authCode,
       'address': address,
       'name': name,
-      'network': network
+      'network': network,
+      'googleCode': googleCode,
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user-whitelist/user-whitelist'),
@@ -429,8 +433,9 @@ class SbtAuthApi {
     String name,
     String userWhitelistID,
     String userId,
-    String network,
-  ) async {
+    String network, {
+    String googleCode = '',
+  }) async {
     final data = {
       'email': email,
       'authCode': authCode,
@@ -438,7 +443,8 @@ class SbtAuthApi {
       'name': name,
       'userWhitelistID': userWhitelistID,
       'userId': userId,
-      'network': network
+      'network': network,
+      'googleCode': googleCode,
     };
     final response = await http.put(
       Uri.parse('$_baseUrl/user-whitelist/user-whitelist'),
@@ -452,12 +458,14 @@ class SbtAuthApi {
   Future<void> deleteUserWhiteList(
     String email,
     String authCode,
-    String userWhitelistID,
-  ) async {
+    String userWhitelistID, {
+    String googleCode = '',
+  }) async {
     final data = {
       'email': email,
       'authCode': authCode,
-      'userWhitelistID': userWhitelistID
+      'userWhitelistID': userWhitelistID,
+      'googleCode': googleCode,
     };
     final response = await http.delete(
       Uri.parse('$_baseUrl/user-whitelist/user-whitelist'),
@@ -504,11 +512,13 @@ class SbtAuthApi {
     String email,
     String authCode, {
     required bool whitelistSwitch,
+    String googleCode = '',
   }) async {
     final data = {
       'email': email,
       'authCode': authCode,
       'whitelistSwitch': whitelistSwitch,
+      'googleCode': googleCode,
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/whitelist:switch'),
@@ -796,6 +806,25 @@ class SbtAuthApi {
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/back-up:batch'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
+  /// One drive batch backup
+  Future<void> oneDriveBatchBackup(
+    String code,
+    String state,
+    Map<String, dynamic> backupInfo,
+  ) async {
+    final data = {
+      'code': code,
+      'backupInfo': backupInfo,
+      'state': state,
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/microsoft:upload-file:batch'),
       headers: _headers,
       body: jsonEncode(data),
     );

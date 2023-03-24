@@ -690,6 +690,57 @@ class SbtAuth {
     }
   }
 
+  /// One drive batch backup
+  Future<void> oneDriveBatchBackup(String password) async {
+    var backupInfo = <String, dynamic>{};
+    for (var i = 0; i < SbtChain.values.length; i++) {
+      final remoteShareInfo =
+          await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
+
+      final backupPrivateKey =
+          await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
+      final privateKey = await encryptMsg(backupPrivateKey, password);
+      backupInfo[SbtChain.values[i].name] = privateKey;
+    }
+    final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
+    final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
+    unawaited(
+      launchUrl(
+        Uri.parse(oneDriveUrl),
+        mode: Platform.isAndroid
+            ? LaunchMode.externalApplication
+            : LaunchMode.platformDefault,
+      ),
+    );
+    final completer = Completer<String?>();
+    final appLinks = AppLinks();
+    final linkSubscription = appLinks.uriLinkStream.listen((uri) {
+      if (uri.toString().startsWith(_scheme)) {
+        completer.complete(jsonEncode(uri.queryParameters));
+      }
+    });
+    final data = await completer.future;
+    final dataMap = jsonDecode(data!) as Map<String, dynamic>;
+    final code = dataMap['code'] as String;
+    final state = dataMap['state'] as String;
+    loadingStreamController.add(true);
+    try {
+      await api.oneDriveBatchBackup(
+        code,
+        state == 'undefined' ? 'state' : state,
+        backupInfo,
+      );
+      if (Platform.isIOS) {
+        await closeInAppWebView();
+      }
+      await linkSubscription.cancel();
+    } catch (e) {
+      rethrow;
+    } finally {
+      loadingStreamController.add(false);
+    }
+  }
+
   /// Recover by one drive
   Future<void> recoverByOneDrive(
     String password, {
