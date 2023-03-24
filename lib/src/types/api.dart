@@ -36,17 +36,19 @@ class RemoteShareInfo {
 /// User info
 class UserInfo {
   /// User info
-  UserInfo(
-      {required this.userLoginName,
-      required this.userID,
-      required this.username,
-      required this.avatar,
-      required this.userLoginParams,
-      required this.userLoginType,
-      required this.publicKeyAddress,
-      required this.userWhitelist,
-      required this.tokenTime,
-      required this.paymentPwd});
+  UserInfo({
+    required this.userLoginName,
+    required this.userID,
+    required this.username,
+    required this.avatar,
+    required this.userLoginParams,
+    required this.userLoginType,
+    required this.publicKeyAddress,
+    required this.userWhitelist,
+    required this.tokenTime,
+    required this.paymentPwd,
+    required this.userOtp,
+  });
 
   /// User from map
   factory UserInfo.fromMap(Map<String, dynamic> map) {
@@ -61,6 +63,7 @@ class UserInfo {
       userWhitelist: (map['userWhitelist'] ?? false) as bool,
       tokenTime: (map['tokenTime'] ?? '0') as String,
       paymentPwd: (map['paymentPwd'] ?? false) as bool,
+      userOtp: (map['userOtp'] ?? false) as bool,
     );
   }
 
@@ -93,6 +96,9 @@ class UserInfo {
 
   /// Use payment password
   bool paymentPwd;
+
+  /// Use otp
+  bool userOtp;
 
   /// Backup private key
   String? backupPrivateKey;
