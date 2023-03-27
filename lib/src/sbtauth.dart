@@ -400,23 +400,25 @@ class SbtAuth {
     String email,
     String code,
   ) async {
-    var backupInfo = <String, dynamic>{};
-    var coreList = <AuthCore>[
-      _core!,
-      _solanaCore!,
-      _bitcoinCore!,
-      _dogecoinCore!
+    final backupInfo = <String, dynamic>{};
+    final coreList = <AuthCore?>[
+      _core,
+      _solanaCore,
+      _bitcoinCore,
+      _dogecoinCore
     ];
     for (var i = 0; i < SbtChain.values.length; i++) {
-      final remoteShareInfo =
-          await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
-
-      final backupPrivateKey =
-          await coreList[i].getBackupPrivateKey(remoteShareInfo.backupAux);
-      final privateKey = await encryptMsg(backupPrivateKey, password);
-      backupInfo[SbtChain.values[i].name] = privateKey;
+      if (coreList[i] == null) {
+        backupInfo[SbtChain.values[i].name] = '';
+      } else {
+        final remoteShareInfo =
+            await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
+        final backupPrivateKey =
+            await coreList[i]!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        final privateKey = await encryptMsg(backupPrivateKey, password);
+        backupInfo[SbtChain.values[i].name] = privateKey;
+      }
     }
-
     await api.batchBackup(
       code,
       backupInfo,
@@ -704,21 +706,24 @@ class SbtAuth {
 
   /// One drive batch backup
   Future<void> oneDriveBatchBackup(String password) async {
-    var backupInfo = <String, dynamic>{};
-    var coreList = <AuthCore>[
-      _core!,
-      _solanaCore!,
-      _bitcoinCore!,
-      _dogecoinCore!
+    final backupInfo = <String, dynamic>{};
+    final coreList = <AuthCore?>[
+      _core,
+      _solanaCore,
+      _bitcoinCore,
+      _dogecoinCore
     ];
     for (var i = 0; i < SbtChain.values.length; i++) {
-      final remoteShareInfo =
-          await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
-
-      final backupPrivateKey =
-          await coreList[i].getBackupPrivateKey(remoteShareInfo.backupAux);
-      final privateKey = await encryptMsg(backupPrivateKey, password);
-      backupInfo[SbtChain.values[i].name] = privateKey;
+      if (coreList[i] == null) {
+        backupInfo[SbtChain.values[i].name] = '';
+      } else {
+        final remoteShareInfo =
+            await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
+        final backupPrivateKey =
+            await coreList[i]!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        final privateKey = await encryptMsg(backupPrivateKey, password);
+        backupInfo[SbtChain.values[i].name] = privateKey;
+      }
     }
     final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
