@@ -634,13 +634,12 @@ class SbtAuthApi {
     int pageNo,
     int pageSize,
     String network,
-    String keyType,
   ) async {
     var url =
-        '$_baseUrl/user-token/user-tokens?pageNo=$pageNo&pageSize=$pageSize&network=$network&keyType=$keyType';
+        '$_baseUrl/user-token/user-tokens?pageNo=$pageNo&pageSize=$pageSize&network=$network';
     if (network == '') {
       url =
-          '$_baseUrl/user-token/user-tokens?pageNo=$pageNo&pageSize=$pageSize&keyType=$keyType';
+          '$_baseUrl/user-token/user-tokens?pageNo=$pageNo&pageSize=$pageSize';
     }
     final response = await http.get(
       Uri.parse(
@@ -774,27 +773,6 @@ class SbtAuthApi {
       body: jsonEncode(data),
     );
     _checkResponse(response);
-  }
-
-  /// Get strategy list
-  Future<List<SbtStrategy>> getStrategyList(
-    int pageNo,
-    int pageSize, {
-    String network = '',
-    String type = '',
-    String contractAddress = '',
-  }) async {
-    final response = await http.get(
-      Uri.parse(
-        '$_baseUrl/user/strategys?pageNo=$pageNo&pageSize=$pageSize&network=$network&type=$type&contractAddress=$contractAddress',
-      ),
-      headers: _headers,
-    );
-    final data = _checkResponse(response) as Map<String, dynamic>;
-    final items = data['items'] as List?;
-    return [
-      for (var d in items ?? []) SbtStrategy.fromMap(d as Map<String, dynamic>)
-    ];
   }
 
   /// Batch backup
