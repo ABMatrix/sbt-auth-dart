@@ -636,9 +636,15 @@ class SbtAuthApi {
     String network,
     String keyType,
   ) async {
+    var url =
+        '$_baseUrl/user-token/user-tokens?pageNo=$pageNo&pageSize=$pageSize&network=$network&keyType=$keyType';
+    if (network == '') {
+      url =
+          '$_baseUrl/user-token/user-tokens?pageNo=$pageNo&pageSize=$pageSize&keyType=$keyType';
+    }
     final response = await http.get(
       Uri.parse(
-        '$_baseUrl/user-token/user-tokens?pageNo=$pageNo&pageSize=$pageSize&network=$network&keyType=$keyType',
+        url,
       ),
       headers: _headers,
     );
