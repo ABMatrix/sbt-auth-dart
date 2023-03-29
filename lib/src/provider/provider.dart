@@ -177,7 +177,7 @@ class SbtAuthProvider {
   Future<String?> _signTransaction(RequestArgument argument) async {
     final transaction = argument.params[0] as Map<String, dynamic>;
     await _checkTransaction(transaction);
-    var data = transaction['to'] as String;
+    var data = transaction['data'] as String;
     var contractAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
     var toAddress = transaction['to'] as String;
     var transferValue = '0';

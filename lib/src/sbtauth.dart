@@ -192,7 +192,7 @@ class SbtAuth {
     bool isLogin = false,
     SbtChain chain = SbtChain.EVM,
   }) async {
-    await getUserInfo();
+    _user = await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
     if (_user!.userLoginParams.contains('email')) {
       userEmail =
@@ -238,15 +238,19 @@ class SbtAuth {
         switch (chain) {
           case SbtChain.EVM:
             _core = core;
+            _core!.setSignModel(user!.userWhitelist);
             break;
           case SbtChain.SOLANA:
             _solanaCore = core;
+            _solanaCore!.setSignModel(user!.userWhitelist);
             break;
           case SbtChain.BITCOIN:
             _bitcoinCore = core;
+            _bitcoinCore!.setSignModel(user!.userWhitelist);
             break;
           case SbtChain.DOGECOIN:
             _dogecoinCore = core;
+            _dogecoinCore!.setSignModel(user!.userWhitelist);
             break;
         }
       }
