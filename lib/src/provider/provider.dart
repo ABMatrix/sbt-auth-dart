@@ -177,10 +177,13 @@ class SbtAuthProvider {
   Future<String?> _signTransaction(RequestArgument argument) async {
     final transaction = argument.params[0] as Map<String, dynamic>;
     await _checkTransaction(transaction);
-    final data = transaction['to'] as String;
+    var data = transaction['to'] as String;
     var contractAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
     var toAddress = transaction['to'] as String;
     var transferValue = '0';
+    if (!data.startsWith('0x')) {
+      data = '0x$data';
+    }
     if (data.startsWith('0xa9059cbb')) {
       // Extract the "to" address from the input data
       toAddress = '0x${data.substring(34, 74)}';
