@@ -929,24 +929,6 @@ class SbtAuth {
     await api.editStrategy(commandList, googleCode);
   }
 
-  /// Get strategy list
-  Future<List<SbtStrategy>> getStrategyList(
-    int pageNo,
-    int pageSize, {
-    String network = '',
-    String type = '',
-    String contractAddress = '',
-  }) async {
-    final res = await api.getStrategyList(
-      pageNo,
-      pageSize,
-      network: network,
-      type: type,
-      contractAddress: contractAddress,
-    );
-    return res;
-  }
-
   Stream<StreamResponse> _queryWhetherSuccess(
     String password,
     String qrcode,
