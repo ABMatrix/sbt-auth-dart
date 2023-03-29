@@ -845,6 +845,7 @@ class SbtAuth {
     String name,
     String network, {
     bool toLowerCase = true,
+    String googleCode = '',
   }) async {
     await api.createUserWhiteList(
       userEmail,
@@ -852,15 +853,22 @@ class SbtAuth {
       toLowerCase ? address.toLowerCase() : address,
       name,
       network,
+      googleCode: googleCode,
     );
   }
 
   /// Delete white list
   Future<void> deleteWhiteList(
     String authCode,
-    String userWhitelistID,
-  ) async {
-    await api.deleteUserWhiteList(userEmail, authCode, userWhitelistID);
+    String userWhitelistID, {
+    String googleCode = '',
+  }) async {
+    await api.deleteUserWhiteList(
+      userEmail,
+      authCode,
+      userWhitelistID,
+      googleCode: googleCode,
+    );
   }
 
   /// Edit white list
@@ -872,6 +880,7 @@ class SbtAuth {
     String userId,
     String network, {
     bool toLowerCase = true,
+    String googleCode = '',
   }) async {
     await api.editUserWhiteList(
       userEmail,
@@ -881,6 +890,7 @@ class SbtAuth {
       userWhitelistID,
       userId,
       network,
+      googleCode: googleCode,
     );
   }
 
