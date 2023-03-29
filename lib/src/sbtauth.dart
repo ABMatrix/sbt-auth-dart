@@ -192,7 +192,7 @@ class SbtAuth {
     bool isLogin = false,
     SbtChain chain = SbtChain.EVM,
   }) async {
-    await _getUserInfo();
+    await getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
     if (_user!.userLoginParams.contains('email')) {
       userEmail =
@@ -836,10 +836,11 @@ class SbtAuth {
       whitelistSwitch: whitelistSwitch,
       googleCode: googleCode,
     );
-    await _getUserInfo();
+    await getUserInfo();
   }
 
-  Future<void> _getUserInfo() async {
+  /// get user info
+  Future<void> getUserInfo() async {
     _user = await api.getUserInfo();
     if (core != null) {
       core!.setSignModel(user!.userWhitelist);
@@ -985,7 +986,7 @@ class SbtAuth {
       if (result.qrcodeEncryptedFragment != '') {
         final token = result.qrcodeAuthToken!;
         _saveToken(token);
-        await _getUserInfo();
+        await getUserInfo();
         final shareData = result.qrcodeEncryptedFragment!;
         final remoteShareInfo = await api.fetchRemoteShare();
         final shareString = await decryptMsg(
