@@ -828,11 +828,13 @@ class SbtAuth {
   Future<void> switchWhiteList(
     String code, {
     required bool whitelistSwitch,
+    String googleCode = '',
   }) async {
     await api.switchUserWhiteList(
       userEmail,
       code,
       whitelistSwitch: whitelistSwitch,
+      googleCode: googleCode,
     );
     _user = await api.getUserInfo();
     core!.setSignModel(user!.userWhitelist);
