@@ -192,7 +192,7 @@ class SbtAuth {
     bool isLogin = false,
     SbtChain chain = SbtChain.EVM,
   }) async {
-    _user = await api.getUserInfo();
+    await _getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
     if (_user!.userLoginParams.contains('email')) {
       userEmail =
@@ -836,8 +836,23 @@ class SbtAuth {
       whitelistSwitch: whitelistSwitch,
       googleCode: googleCode,
     );
+    await _getUserInfo();
+  }
+
+  Future<void> _getUserInfo() async {
     _user = await api.getUserInfo();
-    core!.setSignModel(user!.userWhitelist);
+    if (core != null) {
+      core!.setSignModel(user!.userWhitelist);
+    }
+    if (solanaCore != null) {
+      solanaCore!.setSignModel(user!.userWhitelist);
+    }
+    if (bitcoinCore != null) {
+      bitcoinCore!.setSignModel(user!.userWhitelist);
+    }
+    if (dogecoinCore != null) {
+      dogecoinCore!.setSignModel(user!.userWhitelist);
+    }
   }
 
   /// Create white list
@@ -970,7 +985,7 @@ class SbtAuth {
       if (result.qrcodeEncryptedFragment != '') {
         final token = result.qrcodeAuthToken!;
         _saveToken(token);
-        _user = await api.getUserInfo();
+        await _getUserInfo();
         final shareData = result.qrcodeEncryptedFragment!;
         final remoteShareInfo = await api.fetchRemoteShare();
         final shareString = await decryptMsg(
