@@ -108,6 +108,7 @@ class SbtAuthProvider {
     String? maxFeePerGas,
     String? maxPriorityFeePerGas,
     String? contractAddress,
+    String? amountValue,
   }) async {
     final transaction = {
       'gasPrice': gasPrice,
@@ -118,6 +119,7 @@ class SbtAuthProvider {
       'maxFeePerGas': maxFeePerGas,
       'maxPriorityFeePerGas': maxPriorityFeePerGas,
       'contractAddress': contractAddress,
+      'amountValue': amountValue,
     };
     final result = await request(
       RequestArgument(method: 'eth_sendTransaction', params: [transaction]),
@@ -183,7 +185,7 @@ class SbtAuthProvider {
       int.parse(chainId),
       network,
       [transaction['to'] as String],
-      transaction['value'] as String,
+      transaction['amountValue'] as String,
       int.parse((transaction['nonce'] ?? '0').toString()),
       contractAddress: transaction['contractAddress'] as String?,
     );
