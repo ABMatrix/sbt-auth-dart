@@ -398,8 +398,9 @@ class SbtAuth {
   Future<void> batchBackup(
     String password,
     String email,
-    String code,
-  ) async {
+    String code, {
+    String googleCode = '',
+  }) async {
     final backupInfo = <String, dynamic>{};
     final coreList = <AuthCore?>[
       _core,
@@ -423,7 +424,7 @@ class SbtAuth {
       code,
       backupInfo,
       email,
-      '',
+      googleCode: googleCode,
     );
     userEmail = email;
   }
@@ -916,17 +917,18 @@ class SbtAuth {
 
   /// Create strategy
   Future<void> createStrategy(
-    List<Map<String, dynamic>> commandList,
-  ) async {
-    await api.createStrategy(commandList);
+    List<Map<String, dynamic>> commandList, {
+    String googleCode = '',
+  }) async {
+    await api.createStrategy(commandList, googleCode: googleCode);
   }
 
   /// Edit strategy
   Future<void> editStrategy(
-    List<Map<String, dynamic>> commandList,
-    String googleCode,
-  ) async {
-    await api.editStrategy(commandList, googleCode);
+    List<Map<String, dynamic>> commandList, {
+    String googleCode = '',
+  }) async {
+    await api.editStrategy(commandList, googleCode: googleCode);
   }
 
   Stream<StreamResponse> _queryWhetherSuccess(

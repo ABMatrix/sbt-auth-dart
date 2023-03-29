@@ -745,10 +745,12 @@ class SbtAuthApi {
 
   /// Create strategy
   Future<void> createStrategy(
-    List<Map<String, dynamic>> commandList,
-  ) async {
+    List<Map<String, dynamic>> commandList, {
+    String googleCode = '',
+  }) async {
     final data = {
       'commandList': commandList,
+      'googleCode': googleCode,
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/strategy'),
@@ -760,9 +762,9 @@ class SbtAuthApi {
 
   /// Edit strategy
   Future<void> editStrategy(
-    List<Map<String, dynamic>> commandList,
-    String googleCode,
-  ) async {
+    List<Map<String, dynamic>> commandList, {
+    String googleCode = '',
+  }) async {
     final data = {
       'commandList': commandList,
       'googleCode': googleCode,
@@ -779,9 +781,9 @@ class SbtAuthApi {
   Future<void> batchBackup(
     String authCode,
     Map<String, dynamic> backupInfo,
-    String emailAddress,
-    String googleCode,
-  ) async {
+    String emailAddress, {
+    String googleCode = '',
+  }) async {
     final data = {
       'authCode': authCode,
       'backupInfo': backupInfo,
