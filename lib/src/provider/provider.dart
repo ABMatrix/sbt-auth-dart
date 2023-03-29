@@ -4,6 +4,7 @@ import 'package:sbt_auth_dart/src/types/error.dart';
 import 'package:sbt_auth_dart/src/types/exception.dart';
 import 'package:sbt_auth_dart/src/types/provider.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
+import 'package:web3dart/crypto.dart';
 import 'package:web3dart/json_rpc.dart';
 
 const _ethSignerMethods = [
@@ -107,8 +108,6 @@ class SbtAuthProvider {
     String? gasLimit,
     String? maxFeePerGas,
     String? maxPriorityFeePerGas,
-    String? contractAddress,
-    String? amountValue,
   }) async {
     final transaction = {
       'gasPrice': gasPrice,
@@ -117,9 +116,7 @@ class SbtAuthProvider {
       'to': to,
       'data': data,
       'maxFeePerGas': maxFeePerGas,
-      'maxPriorityFeePerGas': maxPriorityFeePerGas,
-      'contractAddress': contractAddress,
-      'amountValue': amountValue,
+      'maxPriorityFeePerGas': maxPriorityFeePerGas
     };
     final result = await request(
       RequestArgument(method: 'eth_sendTransaction', params: [transaction]),
@@ -180,14 +177,26 @@ class SbtAuthProvider {
   Future<String?> _signTransaction(RequestArgument argument) async {
     final transaction = argument.params[0] as Map<String, dynamic>;
     await _checkTransaction(transaction);
+    final data = transaction['to'] as String;
+    var contractAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+    var toAddress = transaction['to'] as String;
+    var transferValue = '0';
+    if (data.startsWith('0xa9059cbb')) {
+      // Extract the "to" address from the input data
+      toAddress = '0x${data.substring(34, 74)}';
+
+      // Extract the transfer value from the input data
+      transferValue = hexToInt(data.substring(74)).toString();
+      contractAddress = transaction['to'] as String;
+    }
     final res = await signer.signTransaction(
       UnsignedTransaction.fromMap(transaction),
       int.parse(chainId),
       network,
-      [transaction['to'] as String],
-      transaction['amountValue'] as String,
+      [toAddress],
+      transferValue,
       int.parse((transaction['nonce'] ?? '0').toString()),
-      contractAddress: transaction['contractAddress'] as String?,
+      contractAddress: contractAddress,
     );
     return res;
   }
