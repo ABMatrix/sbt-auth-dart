@@ -180,7 +180,7 @@ class SbtAuthProvider {
     var data = transaction['data'] as String;
     var contractAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
     var toAddress = transaction['to'] as String;
-    var transferValue = '0';
+    var transferValue = transaction['value'] as String;
     if (!data.startsWith('0x')) {
       data = '0x$data';
     }
