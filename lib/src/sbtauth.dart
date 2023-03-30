@@ -367,6 +367,7 @@ class SbtAuth {
     String email,
     String code, {
     SbtChain chain = SbtChain.EVM,
+    String googleCode = '',
   }) async {
     final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
     var backupPrivateKey = '';
@@ -394,6 +395,7 @@ class SbtAuth {
       email,
       code,
       keyType: chain.name,
+      googleCode: googleCode,
     );
     userEmail = email;
   }
