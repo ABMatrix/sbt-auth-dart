@@ -129,7 +129,7 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
       lamports: 100000,
     );
     final res = await singer!
-        .sendTransaction(instruction, fromAddress, solanaAddress, '0.1');
+        .sendTransaction(instruction, fromAddress, solanaAddress, '100000');
     setState(() {
       hash = res;
     });

@@ -89,7 +89,7 @@ class BitcoinSinger {
         witnessValue:
             network == dogecoinMainnet ? null : int.parse(inputUtxos[i].amount),
         toList: [to],
-        amount: (amount / 1000000000).toString(),
+        amount: amount.toString(),
       );
     }
     final hash = await btcApi.sendTransaction(txb.build().toHex());

@@ -35,10 +35,11 @@ class _DogecoinSignPageState extends State<DogecoinSignPage> {
       goToAuthorization();
     }
     setState(() {
-      dogecoinAddress = widget.sbtauth.user!.publicKeyAddress['DOGECOIN'] == null
-          ? widget.sbtauth.dogecoinCore!
-          .getAddress(isTestnet: widget.sbtauth.developMode)
-          : widget.sbtauth.user!.publicKeyAddress['DOGECOIN']['address'];
+      dogecoinAddress =
+          widget.sbtauth.user!.publicKeyAddress['DOGECOIN'] == null
+              ? widget.sbtauth.dogecoinCore!
+                  .getAddress(isTestnet: widget.sbtauth.developMode)
+              : widget.sbtauth.user!.publicKeyAddress['DOGECOIN']['address'];
     });
     debugPrint(dogecoinAddress);
   }
@@ -48,9 +49,9 @@ class _DogecoinSignPageState extends State<DogecoinSignPage> {
         context,
         MaterialPageRoute(
             builder: (context) => GrantAuthorizationPage(
-              auth: widget.sbtauth,
-              chain: SbtChain.DOGECOIN,
-            )));
+                  auth: widget.sbtauth,
+                  chain: SbtChain.DOGECOIN,
+                )));
   }
 
   @override
@@ -61,52 +62,53 @@ class _DogecoinSignPageState extends State<DogecoinSignPage> {
       ),
       body: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                  onPressed: () {
-                    widget.sbtauth
-                        .backupWithOneDrive('123', chain: SbtChain.DOGECOIN);
-                  },
-                  child: const Text('Backup by one drive')),
-              const SizedBox(height: 40),
-              TextButton(
-                  onPressed: () {
-                    widget.sbtauth
-                        .recoverByOneDrive('123', chain: SbtChain.DOGECOIN);
-                  },
-                  child: const Text('Recover by one drive')),
-              const SizedBox(height: 40),
-              TextField(
-                controller: _emailController,
-              ),
-              TextButton(
-                  onPressed: () {
-                    widget.sbtauth.sendBackupPrivateKey(
-                      '123',
-                      _emailController.text.trim(),
-                      'code',
-                      chain: SbtChain.BITCOIN,
-                    );
-                  },
-                  child: const Text('send')),
-              const SizedBox(height: 20),
-              Text(dogecoinAddress),
-              TextButton(
-                onPressed: _sendDoge,
-                child: const Text('Send doge'),
-              ),
-              const SizedBox(height: 10),
-              Text(hash),
-              const SizedBox(height: 10),
-            ],
-          )),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TextButton(
+              onPressed: () {
+                widget.sbtauth
+                    .backupWithOneDrive('123', chain: SbtChain.DOGECOIN);
+              },
+              child: const Text('Backup by one drive')),
+          const SizedBox(height: 40),
+          TextButton(
+              onPressed: () {
+                widget.sbtauth
+                    .recoverByOneDrive('123', chain: SbtChain.DOGECOIN);
+              },
+              child: const Text('Recover by one drive')),
+          const SizedBox(height: 40),
+          TextField(
+            controller: _emailController,
+          ),
+          TextButton(
+              onPressed: () {
+                widget.sbtauth.sendBackupPrivateKey(
+                  '123',
+                  _emailController.text.trim(),
+                  'code',
+                  chain: SbtChain.BITCOIN,
+                );
+              },
+              child: const Text('send')),
+          const SizedBox(height: 20),
+          Text(dogecoinAddress),
+          TextButton(
+            onPressed: _sendDoge,
+            child: const Text('Send doge'),
+          ),
+          const SizedBox(height: 10),
+          Text(hash),
+          const SizedBox(height: 10),
+        ],
+      )),
     );
   }
 
-  _sendDoge()async{
+  _sendDoge() async {
     final dogeSign = widget.sbtauth.dogecoinSinger!;
-    final res = await dogeSign.sendBtcTransaction(dogecoinAddress, 'DDzDZ8Wnb43rAuvRd3XuRd5Zsuc8eLeaLz', 300000);
+    final res = await dogeSign.sendBtcTransaction(
+        dogecoinAddress, 'DDzDZ8Wnb43rAuvRd3XuRd5Zsuc8eLeaLz', 300000);
     setState(() {
       hash = res;
     });
