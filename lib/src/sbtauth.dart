@@ -415,9 +415,7 @@ class SbtAuth {
       _dogecoinCore
     ];
     for (var i = 0; i < SbtChain.values.length; i++) {
-      if (coreList[i] == null) {
-        backupInfo[SbtChain.values[i].name] = '';
-      } else {
+      if (coreList[i] != null) {
         final remoteShareInfo =
             await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
         final backupPrivateKey =
@@ -474,7 +472,7 @@ class SbtAuth {
         break;
       case SbtChain.DOGECOIN:
         if (dogecoinCore == null) {
-          throw SbtAuthException('Bitcoin auth not inited');
+          throw SbtAuthException('Dogecoin auth not inited');
         }
         local = dogecoinCore!.localShare!.privateKey;
         break;
@@ -721,9 +719,7 @@ class SbtAuth {
       _dogecoinCore
     ];
     for (var i = 0; i < SbtChain.values.length; i++) {
-      if (coreList[i] == null) {
-        backupInfo[SbtChain.values[i].name] = '';
-      } else {
+      if (coreList[i] != null) {
         final remoteShareInfo =
             await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
         final backupPrivateKey =
