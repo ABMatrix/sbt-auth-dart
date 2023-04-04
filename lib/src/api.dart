@@ -46,9 +46,10 @@ class SbtAuthApi {
     String email, {
     required String baseUrl,
     required String localLan,
+    required String clientID,
   }) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/user/user:email?email=$email'),
+      Uri.parse('$baseUrl/user/user:email?email=$email&clientID=$clientID'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         'Accept-Language': localLan
