@@ -671,7 +671,7 @@ class SbtAuth {
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     final baseUrl =
-        customUrl ?? developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
+        customUrl ?? (developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL);
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
     unawaited(
       launchUrl(
@@ -714,7 +714,7 @@ class SbtAuth {
   /// One drive batch backup
   Future<void> oneDriveBatchBackup(
     String password, {
-    String customUrl,
+    String? customUrl,
   }) async {
     final backupInfo = <String, dynamic>{};
     final coreList = <AuthCore?>[
@@ -734,7 +734,7 @@ class SbtAuth {
       }
     }
     final baseUrl =
-        customUrl ?? developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
+        customUrl ?? (developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL);
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
     unawaited(
       launchUrl(
@@ -780,7 +780,7 @@ class SbtAuth {
     String? customUrl,
   }) async {
     final baseUrl =
-        customUrl ?? developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
+        customUrl ?? (developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL);
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
     unawaited(
       launchUrl(
