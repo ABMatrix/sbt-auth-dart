@@ -647,6 +647,7 @@ class SbtAuth {
   Future<void> backupWithOneDrive(
     String password, {
     SbtChain chain = SbtChain.EVM,
+    String? customUrl,
   }) async {
     final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
     var backupPrivateKey = '';
@@ -669,7 +670,8 @@ class SbtAuth {
         break;
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
-    final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
+    final baseUrl =
+        customUrl ?? developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
     unawaited(
       launchUrl(
@@ -710,7 +712,10 @@ class SbtAuth {
   }
 
   /// One drive batch backup
-  Future<void> oneDriveBatchBackup(String password) async {
+  Future<void> oneDriveBatchBackup(
+    String password, {
+    String customUrl,
+  }) async {
     final backupInfo = <String, dynamic>{};
     final coreList = <AuthCore?>[
       _core,
@@ -728,7 +733,8 @@ class SbtAuth {
         backupInfo[SbtChain.values[i].name] = privateKey;
       }
     }
-    final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
+    final baseUrl =
+        customUrl ?? developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
     unawaited(
       launchUrl(
@@ -771,8 +777,10 @@ class SbtAuth {
   Future<void> recoverByOneDrive(
     String password, {
     SbtChain chain = SbtChain.EVM,
+    String? customUrl,
   }) async {
-    final baseUrl = developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
+    final baseUrl =
+        customUrl ?? developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL;
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
     unawaited(
       launchUrl(
