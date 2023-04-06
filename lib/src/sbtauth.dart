@@ -193,8 +193,10 @@ class SbtAuth {
     bool isLogin = false,
     SbtChain chain = SbtChain.EVM,
   }) async {
-    _user = await api.getUserInfo();
+    _user = DBUtil.userBox.get('user');
+    _user ??= await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
+    await DBUtil.userBox.put('user', user);
     if (_user!.userLoginParams.contains('email')) {
       userEmail =
           (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
@@ -437,6 +439,7 @@ class SbtAuth {
   /// Logout
   void logout() {
     DBUtil.tokenBox.delete(TOKEN_KEY);
+    DBUtil.userBox.delete('user');
     _user = null;
     _core = null;
     _solanaCore = null;
@@ -853,6 +856,7 @@ class SbtAuth {
   /// get user info
   Future<void> getUserInfo() async {
     _user = await api.getUserInfo();
+    await DBUtil.userBox.put('user', user);
     if (core != null) {
       core!.setSignModel(user!.userWhitelist);
     }
