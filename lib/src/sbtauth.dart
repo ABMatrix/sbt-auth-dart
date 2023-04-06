@@ -672,8 +672,8 @@ class SbtAuth {
     }
     final privateKey = await encryptMsg(backupPrivateKey, password);
     final baseUrl =
-        customUrl ?? (developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL);
-    final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
+        customUrl ?? (developMode ? DEVELOP_AUTH_URL : PRODUCTION_AUTH_URL);
+    final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme&developMode=$developMode';
     unawaited(
       launchUrl(
         Uri.parse(oneDriveUrl),
