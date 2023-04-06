@@ -650,27 +650,6 @@ class SbtAuth {
     SbtChain chain = SbtChain.EVM,
     String? customUrl,
   }) async {
-    final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
-    var backupPrivateKey = '';
-    switch (chain) {
-      case SbtChain.EVM:
-        backupPrivateKey =
-            await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-      case SbtChain.SOLANA:
-        backupPrivateKey =
-            await _solanaCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-      case SbtChain.BITCOIN:
-        backupPrivateKey =
-            await _bitcoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-      case SbtChain.DOGECOIN:
-        backupPrivateKey =
-            await _dogecoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-    }
-    final privateKey = await encryptMsg(backupPrivateKey, password);
     final baseUrl =
         customUrl ?? (developMode ? DEVELOP_AUTH_URL : PRODUCTION_AUTH_URL);
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme&developMode=$developMode';
@@ -694,6 +673,27 @@ class SbtAuth {
     final code = dataMap['code'] as String;
     final state = dataMap['state'] as String;
     loadingStreamController.add(true);
+    final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
+    var backupPrivateKey = '';
+    switch (chain) {
+      case SbtChain.EVM:
+        backupPrivateKey =
+            await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
+      case SbtChain.SOLANA:
+        backupPrivateKey =
+            await _solanaCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
+      case SbtChain.BITCOIN:
+        backupPrivateKey =
+            await _bitcoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
+      case SbtChain.DOGECOIN:
+        backupPrivateKey =
+            await _dogecoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        break;
+    }
+    final privateKey = await encryptMsg(backupPrivateKey, password);
     try {
       await api.backupByOneDrive(
         code,
@@ -717,26 +717,9 @@ class SbtAuth {
     String password, {
     String? customUrl,
   }) async {
-    final backupInfo = <String, dynamic>{};
-    final coreList = <AuthCore?>[
-      _core,
-      _solanaCore,
-      _bitcoinCore,
-      _dogecoinCore
-    ];
-    for (var i = 0; i < SbtChain.values.length; i++) {
-      if (coreList[i] != null) {
-        final remoteShareInfo =
-            await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
-        final backupPrivateKey =
-            await coreList[i]!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        final privateKey = await encryptMsg(backupPrivateKey, password);
-        backupInfo[SbtChain.values[i].name] = privateKey;
-      }
-    }
     final baseUrl =
         customUrl ?? (developMode ? DEVELOP_AUTH_URL : PRODUCTION_AUTH_URL);
-    final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
+    final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme&developMode=$developMode';
     unawaited(
       launchUrl(
         Uri.parse(oneDriveUrl),
@@ -757,6 +740,23 @@ class SbtAuth {
     final code = dataMap['code'] as String;
     final state = dataMap['state'] as String;
     loadingStreamController.add(true);
+    final backupInfo = <String, dynamic>{};
+    final coreList = <AuthCore?>[
+      _core,
+      _solanaCore,
+      _bitcoinCore,
+      _dogecoinCore
+    ];
+    for (var i = 0; i < SbtChain.values.length; i++) {
+      if (coreList[i] != null) {
+        final remoteShareInfo =
+            await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
+        final backupPrivateKey =
+            await coreList[i]!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        final privateKey = await encryptMsg(backupPrivateKey, password);
+        backupInfo[SbtChain.values[i].name] = privateKey;
+      }
+    }
     try {
       await api.oneDriveBatchBackup(
         code,
