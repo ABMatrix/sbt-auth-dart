@@ -59,7 +59,7 @@ class UserInfo {
       avatar: map['avatar'] as String?,
       userLoginParams: map['userLoginParams'] as String,
       userLoginType: map['userLoginType'] as String,
-      publicKeyAddress: map['publicKeyAddress'] as Map<String, dynamic>,
+      publicKeyAddress: map['publicKeyAddress'] as Map<dynamic, dynamic>,
       userWhitelist: (map['userWhitelist'] ?? false) as bool,
       tokenTime: (map['tokenTime'] ?? '0') as String,
       paymentPwd: (map['paymentPwd'] ?? false) as bool,
@@ -103,7 +103,7 @@ class UserInfo {
   String userLoginType;
 
   /// User wallet address
-  Map<String, dynamic> publicKeyAddress;
+  Map<dynamic, dynamic> publicKeyAddress;
 
   /// White list switch
   bool userWhitelist;
