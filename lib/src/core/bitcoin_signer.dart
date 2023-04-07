@@ -568,7 +568,7 @@ class TransactionBuilder {
         (hashType & 0x1f) != SIGHASH_NONE) {
       final txOutsSize = tx.outs.fold(
           0, (sum, output) => (sum as int) + 8 + varSliceSize(output.script!));
-      tbuffer = new Uint8List(txOutsSize);
+      tbuffer = Uint8List(txOutsSize);
       bytes = tbuffer.buffer.asByteData();
       toffset = 0;
       tx.outs.forEach((txOut) {

@@ -17,3 +17,20 @@ class ShareAdapter extends TypeAdapter<Share> {
     writer.writeMap(obj.toJson());
   }
 }
+
+/// UserInfo hive adapter
+class UserInfoAdapter extends TypeAdapter<UserInfo> {
+  @override
+  final typeId = 2;
+
+  @override
+  UserInfo read(BinaryReader reader) {
+    final data = reader.readMap();
+    return UserInfo.fromMap(data);
+  }
+
+  @override
+  void write(BinaryWriter writer, UserInfo obj) {
+    writer.writeMap(obj.toJson());
+  }
+}

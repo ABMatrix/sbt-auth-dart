@@ -51,7 +51,7 @@ class UserInfo {
   });
 
   /// User from map
-  factory UserInfo.fromMap(Map<String, dynamic> map) {
+  factory UserInfo.fromMap(Map<dynamic, dynamic> map) {
     return UserInfo(
       userLoginName: map['userLoginName'] as String,
       userID: map['userID'] as String,
@@ -65,6 +65,23 @@ class UserInfo {
       paymentPwd: (map['paymentPwd'] ?? false) as bool,
       userOtp: (map['userOtp'] ?? false) as bool,
     );
+  }
+
+  /// User to json
+  Map<String, dynamic> toJson() {
+    return {
+      'userLoginName': userLoginName,
+      'userID': userID,
+      'username': username,
+      'avatar': avatar,
+      'userLoginParams': userLoginParams,
+      'userLoginType': userLoginType,
+      'publicKeyAddress': publicKeyAddress,
+      'userWhitelist': userWhitelist,
+      'tokenTime': tokenTime,
+      'paymentPwd': paymentPwd,
+      'userOtp': userOtp,
+    };
   }
 
   /// User login name

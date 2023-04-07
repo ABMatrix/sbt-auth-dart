@@ -43,6 +43,9 @@ class DBUtil {
     if (!Hive.isAdapterRegistered(1)) {
       Hive.registerAdapter(ShareAdapter());
     }
+    if (!Hive.isAdapterRegistered(2)) {
+      Hive.registerAdapter(UserInfoAdapter());
+    }
     tokenBox = await Hive.openBox(TOKEN_KEY);
     shareBox = await Hive.openBox(CACHE_KEY);
     userBox = await Hive.openBox(USER_KEY);
