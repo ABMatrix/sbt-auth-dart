@@ -526,13 +526,22 @@ class SbtAuth {
       throw SbtAuthException('QrCode used already');
     }
     if (core == null) throw SbtAuthException('Auth not inited');
-    final local = {
+    final local = <String, String?>{
       'clientId': _clientId,
       'evm': core!.localShare!.privateKey,
-      'solana': solanaCore?.localShare?.privateKey,
-      'dogecoin': dogecoinCore?.localShare?.privateKey,
-      'bitcoin': bitcoinCore?.localShare?.privateKey
     };
+    if (solanaCore == null) {
+      await init(chain: SbtChain.SOLANA);
+    }
+    local['solana'] = solanaCore?.localShare?.privateKey;
+    if (bitcoinCore == null) {
+      await init(chain: SbtChain.BITCOIN);
+    }
+    local['bitcoin'] = bitcoinCore?.localShare?.privateKey;
+    if (dogecoinCore == null) {
+      await init(chain: SbtChain.DOGECOIN);
+    }
+    local['dogecoin'] = dogecoinCore?.localShare?.privateKey;
     final encrypted = await encryptMsg(jsonEncode(local), password);
     await api.confirmLoginWithQrCode(qrCodeId, encrypted);
   }
