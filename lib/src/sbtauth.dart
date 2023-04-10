@@ -329,7 +329,7 @@ class SbtAuth {
       final deviceName = await getDeviceName();
       final appUrl = developMode ? DEVELOP_AUTH_URL : PRODUCTION_AUTH_URL;
       final loginUrl =
-          '$appUrl?loginType=${loginType.name}&developMode=$developMode&scheme=$_scheme&deviceName=$deviceName&clientId=$_clientId';
+          '''$appUrl?loginType=${loginType.name}&developMode=$developMode&scheme=$_scheme&deviceName=$deviceName&clientId=$_clientId''';
       unawaited(
         launchUrl(
           Uri.parse(loginUrl),
@@ -526,8 +526,14 @@ class SbtAuth {
       throw SbtAuthException('QrCode used already');
     }
     if (core == null) throw SbtAuthException('Auth not inited');
-    final local = core!.localShare!.privateKey;
-    final encrypted = await encryptMsg(local, password);
+    final local = {
+      'clientId': _clientId,
+      'evm': core!.localShare!.privateKey,
+      'solana': solanaCore?.localShare?.privateKey,
+      'dogecoin': dogecoinCore?.localShare?.privateKey,
+      'bitcoin': bitcoinCore?.localShare?.privateKey
+    };
+    final encrypted = await encryptMsg(jsonEncode(local), password);
     await api.confirmLoginWithQrCode(qrCodeId, encrypted);
   }
 
