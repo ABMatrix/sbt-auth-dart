@@ -1,4 +1,4 @@
-// ignore_for_file: constant_identifier_names
+// ignore_for_file: constant_identifier_names, avoid_dynamic_calls
 
 import 'dart:async';
 import 'dart:convert';
@@ -1067,25 +1067,28 @@ class SbtAuth {
           shareData,
           password,
         );
-        final localShares = jsonDecode(shareString) as Map<String, String?>;
+        final localShares = jsonDecode(shareString);
         final clientId = localShares['clientId'];
         if (clientId != _clientId) throw SbtAuthException('ClientId not match');
         if (localShares['evm'] != null) {
-          await _initCoreWithLocalPrivateKey(localShares['evm']!, SbtChain.EVM);
+          await _initCoreWithLocalPrivateKey(
+              localShares['evm']!.toString(), SbtChain.EVM,);
         }
         if (localShares['solana'] != null) {
           await _initCoreWithLocalPrivateKey(
-              localShares['solana']!, SbtChain.SOLANA,);
+            localShares['solana']!.toString(),
+            SbtChain.SOLANA,
+          );
         }
         if (localShares['dogecoin'] != null) {
           await _initCoreWithLocalPrivateKey(
-            localShares['dogecoin']!,
+            localShares['dogecoin']!.toString(),
             SbtChain.DOGECOIN,
           );
         }
         if (localShares['bitcoin'] != null) {
           await _initCoreWithLocalPrivateKey(
-            localShares['bitcoin']!,
+            localShares['bitcoin']!.toString(),
             SbtChain.BITCOIN,
           );
         }
