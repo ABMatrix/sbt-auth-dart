@@ -991,6 +991,49 @@ class SbtAuth {
     await api.editStrategy(commandList, googleCode: googleCode);
   }
 
+  Future<void> _initCoreWithLocalPrivateKey(
+    String privateKey,
+    SbtChain chain,
+  ) async {
+    final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
+    final localShare = Share(
+      privateKey: privateKey,
+      publicKey: remoteShareInfo.remote.publicKey,
+      extraData: remoteShareInfo.localAux,
+    );
+    final core = AuthCore(
+      mpcUrl: MpcUrl(
+        url: _baseUrl,
+        get: 'user/forward:query:data',
+        set: 'user/forward:data',
+      ),
+      signUrl: '$_baseUrl/user:sign',
+      token: token,
+      chain: chain,
+    );
+    final inited = await core.init(
+      address: remoteShareInfo.address,
+      remote: remoteShareInfo.remote,
+      local: localShare,
+      isTestnet: developMode,
+    );
+    if (!inited) throw SbtAuthException('Init error');
+    switch (chain) {
+      case SbtChain.EVM:
+        _core = core;
+        break;
+      case SbtChain.SOLANA:
+        _solanaCore = core;
+        break;
+      case SbtChain.BITCOIN:
+        _bitcoinCore = core;
+        break;
+      case SbtChain.DOGECOIN:
+        _dogecoinCore = core;
+        break;
+    }
+  }
+
   Stream<StreamResponse> _queryWhetherSuccess(
     String password,
     String qrcode,
@@ -1020,33 +1063,32 @@ class SbtAuth {
         _saveToken(token);
         await getUserInfo();
         final shareData = result.qrcodeEncryptedFragment!;
-        final remoteShareInfo = await api.fetchRemoteShare();
         final shareString = await decryptMsg(
           shareData,
           password,
         );
-        final localShare = Share(
-          privateKey: shareString,
-          publicKey: remoteShareInfo.remote.publicKey,
-          extraData: remoteShareInfo.localAux,
-        );
-        final core = AuthCore(
-          mpcUrl: MpcUrl(
-            url: _baseUrl,
-            get: 'user/forward:query:data',
-            set: 'user/forward:data',
-          ),
-          signUrl: '$_baseUrl/user:sign',
-          token: token,
-        );
-        final inited = await core.init(
-          address: remoteShareInfo.address,
-          remote: remoteShareInfo.remote,
-          local: localShare,
-          isTestnet: developMode,
-        );
-        _core = core;
-        if (!inited) throw SbtAuthException('Init error');
+        final localShares = jsonDecode(shareString) as Map<String, String?>;
+        final clientId = localShares['clientId'];
+        if (clientId != _clientId) throw SbtAuthException('ClientId not match');
+        if (localShares['evm'] != null) {
+          await _initCoreWithLocalPrivateKey(localShares['evm']!, SbtChain.EVM);
+        }
+        if (localShares['solana'] != null) {
+          await _initCoreWithLocalPrivateKey(
+              localShares['solana']!, SbtChain.SOLANA,);
+        }
+        if (localShares['dogecoin'] != null) {
+          await _initCoreWithLocalPrivateKey(
+            localShares['dogecoin']!,
+            SbtChain.DOGECOIN,
+          );
+        }
+        if (localShares['bitcoin'] != null) {
+          await _initCoreWithLocalPrivateKey(
+            localShares['bitcoin']!,
+            SbtChain.BITCOIN,
+          );
+        }
         await _authRequestListener();
         loginStreamController.add(true);
       }
@@ -1066,10 +1108,11 @@ class SbtAuth {
     }
 
     controller = StreamController<StreamResponse>(
-        onListen: startTimer,
-        onPause: stopTimer,
-        onResume: startTimer,
-        onCancel: stopTimer);
+      onListen: startTimer,
+      onPause: stopTimer,
+      onResume: startTimer,
+      onCancel: stopTimer,
+    );
 
     return controller.stream;
   }
