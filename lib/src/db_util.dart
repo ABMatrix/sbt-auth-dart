@@ -14,13 +14,7 @@ const USER_KEY = 'user_key';
 const CACHE_KEY = 'local_cache_key';
 
 /// Hive cache box key
-const SOLANA_CACHE_KEY = 'local_solana_cache_key';
-
-/// Hive cache box key
-const BITCOIN_CACHE_KEY = 'local_bitcoin_cache_key';
-
-/// Hive cache box key
-const DOGECOIN_CACHE_KEY = 'local_dogecoin_cache_key';
+const AUX_KEY = 'local_aux_key';
 
 /// Hive Util
 class DBUtil {
@@ -30,11 +24,11 @@ class DBUtil {
   /// share box
   static late Box<Share?>? shareBox;
 
-  /// share box
+  /// user box
   static late Box<UserInfo?> userBox;
 
-  /// solana share box
-  static late Box<Share?>? solanaShareBox;
+  /// aux box
+  static late Box<String> auxBox;
 
   /// init Box
   static Future<void> init() async {
@@ -49,6 +43,6 @@ class DBUtil {
     tokenBox = await Hive.openBox(TOKEN_KEY);
     shareBox = await Hive.openBox(CACHE_KEY);
     userBox = await Hive.openBox(USER_KEY);
-    solanaShareBox = await Hive.openBox(SOLANA_CACHE_KEY);
+    auxBox = await Hive.openBox(AUX_KEY);
   }
 }

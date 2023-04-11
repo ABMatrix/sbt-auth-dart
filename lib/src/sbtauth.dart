@@ -204,6 +204,7 @@ class SbtAuth {
     if (_user!.publicKeyAddress[chain.name] == null) {
       final core = getCore(chain);
       final account = await core.generatePubKey(testnet: developMode);
+      await DBUtil.auxBox.put(account.address, account.shares[2].extraData);
       await api.uploadShares(
         account.shares,
         account.address,
@@ -256,6 +257,10 @@ class SbtAuth {
             _dogecoinCore!.setSignModel(user!.userWhitelist);
             break;
         }
+        await DBUtil.auxBox.put(
+          core.getAddress(isTestnet: developMode),
+          remoteLocalShareInfo.backupAux,
+        );
       }
     }
     await _authRequestListener();
@@ -356,7 +361,7 @@ class SbtAuth {
     try {
       if (token == null) return;
       _saveToken(token);
-      DBUtil.userBox.delete('user');
+      await DBUtil.userBox.delete('user');
       await init(isLogin: true);
     } catch (e) {
       rethrow;
@@ -607,6 +612,10 @@ class SbtAuth {
         break;
     }
     if (!inited) throw SbtAuthException('Init error');
+    await DBUtil.auxBox.put(
+      core.getAddress(isTestnet: developMode),
+      remoteShareInfo.backupAux,
+    );
     await _authRequestListener();
     await api.verifyIdentity(localShare, keyType: chain.name);
   }
@@ -641,7 +650,7 @@ class SbtAuth {
       address: remoteShareInfo.address,
       remote: remoteShareInfo.remote,
       backup: backShare,
-      backupAux: remoteShareInfo.localAux,
+      localAux: remoteShareInfo.localAux,
       isTestnet: developMode,
     );
     switch (chain) {
@@ -659,6 +668,10 @@ class SbtAuth {
         break;
     }
     if (!inited) throw SbtAuthException('Init error');
+    await DBUtil.auxBox.put(
+      core.getAddress(isTestnet: developMode),
+      remoteShareInfo.backupAux,
+    );
     await _authRequestListener();
     await api.verifyIdentity(core.localShare!, keyType: chain.name);
   }

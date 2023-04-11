@@ -29,20 +29,6 @@ extension SbtChainInfo on SbtChain {
         return Engine.EDDSA;
     }
   }
-
-  /// cache key
-  String get cacheKey {
-    switch (this) {
-      case SbtChain.EVM:
-        return CACHE_KEY;
-      case SbtChain.SOLANA:
-        return SOLANA_CACHE_KEY;
-      case SbtChain.BITCOIN:
-        return BITCOIN_CACHE_KEY;
-      case SbtChain.DOGECOIN:
-        return DOGECOIN_CACHE_KEY;
-    }
-  }
 }
 
 /// Mpc url
@@ -105,7 +91,7 @@ class AuthCore {
     Share? remote,
     String? address,
     Share? backup,
-    String? backupAux,
+    String? localAux,
     Share? local,
     bool isTestnet = true,
   }) async {
@@ -117,7 +103,7 @@ class AuthCore {
     }
     _remote = remote;
     if (_local == null && _remote != null && backup != null) {
-      await _recover(_remote!, backup, backupAux!, isTestnet: isTestnet);
+      await _recover(_remote!, backup, localAux!, isTestnet: isTestnet);
     }
     return _local != null;
   }
@@ -394,14 +380,34 @@ class AuthCore {
   }
 
   /// Get privateKey
-// String getPrivateKey() {
-//   if (_local == null || _remote == null) {
-//     throw SbtAuthException('Please init auth core');
-//   }
-//   final privateKey = MultiMpc.([
-//     shareToKey(_local!),
-//     shareToKey(_remote!, index: 2),
-//   ]);
-//   return privateKey;
-// }
+  Future<String> getPrivateKey(
+    String address,
+    String backupPrivateKey,
+    String password, {
+    bool isTestnet = false,
+  }) async {
+    final local = await _getSavedShare(address);
+    if (local == null) throw SbtAuthException('$address non-existent');
+    final aux = DBUtil.auxBox.get(address);
+    if (aux == null) throw SbtAuthException('$address aux non-existent');
+    var backup = '';
+    if (backupPrivateKey.startsWith('0x')) {
+      backup = backupPrivateKey;
+    } else {
+      backup = await decryptMsg(backupPrivateKey, password);
+    }
+    final backShare = Share(
+      privateKey: backup,
+      publicKey: local.publicKey,
+      extraData: aux,
+    );
+    final privateKey = await MultiMpc.secretKey(
+      [
+        shareToKey(local),
+        shareToKey(backShare, index: 3),
+      ],
+      chain.engine,
+    );
+    return privateKey;
+  }
 }

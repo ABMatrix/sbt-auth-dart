@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
-import 'package:solana/solana.dart';
 
 import 'main.dart';
 
@@ -24,6 +23,7 @@ class _SignPageState extends State<SignPage> {
   String _signature = '';
   String _result = '';
   String hash = '';
+  String _privateKey = '';
 
   final TextEditingController _emailController = TextEditingController();
 
@@ -111,11 +111,11 @@ class _SignPageState extends State<SignPage> {
           ),
           Text(_result),
           const SizedBox(height: 10),
-          // TextButton(
-          //   onPressed: _getPrivateKey,
-          //   child: const Text('Get privateKey'),
-          // ),
-          // Text(_privateKey),
+          TextButton(
+            onPressed: _getPrivateKey,
+            child: const Text('Get privateKey'),
+          ),
+          Text(_privateKey),
           TextButton(
             onPressed: () async {
               final data = await Navigator.of(context).push(MaterialPageRoute(
@@ -133,6 +133,17 @@ class _SignPageState extends State<SignPage> {
         ],
       )),
     );
+  }
+
+  _getPrivateKey() async {
+    final res = await widget.sbtauth.core!.getPrivateKey(
+        '0xb89bc496038d1713cf8cbac60224189886d56971',
+        'LHnkfr9HyQdShMPu8mpqa3yfZmJLBnWMRsy7DBSjhTSTXVUV6uesonsUK4eGRezIAPMiUwXe1SnAycAy/EgqJrlnpMDHv4MNm85eTN4a',
+        '123');
+    setState(() {
+      _privateKey = res;
+    });
+    print(_privateKey);
   }
 
   _signMessage() async {

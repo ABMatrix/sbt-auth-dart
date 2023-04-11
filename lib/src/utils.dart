@@ -57,12 +57,13 @@ KeyPair localShareToKey(Share share, [int index = 1]) {
 /// Convert share to keypair
 MultiKeypair shareToKey(Share share, {int index = 1}) {
   return MultiKeypair(
-      sk: share.privateKey,
-      pk: share.publicKey,
-      partyInd: index,
-      threshold: 1,
-      sharCount: 3,
-      aux: jsonDecode(share.extraData) as Map<String, dynamic>);
+    sk: share.privateKey,
+    pk: share.publicKey,
+    partyInd: index,
+    threshold: 1,
+    sharCount: 3,
+    aux: jsonDecode(share.extraData) as Map<String, dynamic>,
+  );
 }
 
 /// Keccak hash
