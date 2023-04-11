@@ -24,10 +24,42 @@ const _ethSignerMethods = [
 const _ethRpc = {
   '0x1': 'https://rpc-eth.abmatrix.cn',
   '0x5': 'https://test-rpc-eth.abmatrix.cn',
+  // Sepolia
+  '0xaa36a7': 'https://rpc.abmatrix.cn/json-rpc/http/sepolia',
   '0x38': 'https://rpc-bsc.abmatrix.cn',
   '0x61': 'https://test-rpc-bsc.abmatrix.cn',
+  // Polygon
   '0x89': 'https://rpc-polygon.abmatrix.cn',
+  // Polygon Mumbai
   '0x13881': 'https://test-rpc-polygon.abmatrix.cn/',
+  // Filecoin
+  '0x13a': 'https://rpc.abmatrix.cn/json-rpc/http/filecoin',
+  // Filecoin hyperspace
+  '0xc45': 'https://rpc.abmatrix.cn/json-rpc/http/filecoin_hyperspace',
+  // Avalanche
+  '0xa86a': 'https://rpc.abmatrix.cn/json-rpc/http/avalanche',
+  // Avalance Fuji
+  '0xa869': 'https://rpc.abmatrix.cn/json-rpc/http/avalanche_fuji',
+  // Optimism
+  '0xa': 'https://rpc.abmatrix.cn/json-rpc/http/optimism',
+  // Optimism Goerli
+  '0x1a4': 'https://rpc.abmatrix.cn/json-rpc/http/optimism_goerli',
+  // Arbitrum
+  '0xa4b1': 'https://rpc.abmatrix.cn/json-rpc/http/arbitrum',
+  // Arbitrum Goerli
+  '0x66eed': 'https://rpc.abmatrix.cn/json-rpc/http/arbitrum_goerli',
+  // Cronos
+  '0x19': 'https://rpc.abmatrix.cn/json-rpc/http/cronos',
+  // Cronos Testnet
+  '0x152': 'https://rpc.abmatrix.cn/json-rpc/http/cronos_testnet',
+  // ETHW
+  '0x4e21': 'https://rpc.abmatrix.cn/json-rpc/http/ethw',
+  // Fantom
+  '0xfa': 'https://rpc.abmatrix.cn/json-rpc/http/fantom',
+  // Fantom Testnet
+  '0xfa2': 'https://rpc.abmatrix.cn/json-rpc/http/fantom_testnet',
+  // ZkSync
+  '0x144': 'https://rpc.abmatrix.cn/json-rpc/http/zksync',
 };
 
 /// Ethereum provider, use to connect to sbtauth wallet.

@@ -186,7 +186,8 @@ class AuthCore {
         network,
         toList,
         amount,
-        contractAddress: contractAddress,
+        contractAddress:
+            contractAddress ?? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
       );
       result = await MultiMpc.sign(
         MultiSignParams(
@@ -391,4 +392,16 @@ class AuthCore {
   void setSignModel(bool signModel) {
     remoteSign = signModel;
   }
+
+  /// Get privateKey
+// String getPrivateKey() {
+//   if (_local == null || _remote == null) {
+//     throw SbtAuthException('Please init auth core');
+//   }
+//   final privateKey = MultiMpc.([
+//     shareToKey(_local!),
+//     shareToKey(_remote!, index: 2),
+//   ]);
+//   return privateKey;
+// }
 }

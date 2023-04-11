@@ -356,6 +356,7 @@ class SbtAuth {
     try {
       if (token == null) return;
       _saveToken(token);
+      DBUtil.userBox.delete('user');
       await init(isLogin: true);
     } catch (e) {
       rethrow;
@@ -1072,7 +1073,9 @@ class SbtAuth {
         if (clientId != _clientId) throw SbtAuthException('ClientId not match');
         if (localShares['evm'] != null) {
           await _initCoreWithLocalPrivateKey(
-              localShares['evm']!.toString(), SbtChain.EVM,);
+            localShares['evm']!.toString(),
+            SbtChain.EVM,
+          );
         }
         if (localShares['solana'] != null) {
           await _initCoreWithLocalPrivateKey(
