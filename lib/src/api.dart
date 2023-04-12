@@ -140,7 +140,9 @@ class SbtAuthApi {
 
   /// Get qrcode status
   static Future<QrCodeStatus> getQrCodeStatus(
-      String baseUrl, String qrCodeId) async {
+    String baseUrl,
+    String qrCodeId,
+  ) async {
     final response = await http.get(
       Uri.parse('$baseUrl/user/qrcode?qrCodeID=$qrCodeId'),
       headers: <String, String>{
@@ -148,8 +150,9 @@ class SbtAuthApi {
       },
     );
 
-    final result = _checkResponse(response) as Map<String, dynamic>;
-    return QrCodeStatus.fromMap(result);
+    final result = _checkResponse(response) as Map<String, dynamic>?;
+    if (result == null) SbtAuthException('QR code expired');
+    return QrCodeStatus.fromMap(result!);
   }
 
   /// Get user info.

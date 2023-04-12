@@ -17,8 +17,6 @@ class _DogecoinSignPageState extends State<DogecoinSignPage> {
   String hash = '';
   String dogecoinAddress = '';
 
-  final TextEditingController _emailController = TextEditingController();
-
   @override
   void initState() {
     initDogecoin();
@@ -64,12 +62,6 @@ class _DogecoinSignPageState extends State<DogecoinSignPage> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TextButton(
-              onPressed: () {
-                widget.sbtauth
-                    .backupWithOneDrive('123', chain: SbtChain.DOGECOIN);
-              },
-              child: const Text('Backup by one drive')),
           const SizedBox(height: 40),
           TextButton(
               onPressed: () {
@@ -78,20 +70,6 @@ class _DogecoinSignPageState extends State<DogecoinSignPage> {
               },
               child: const Text('Recover by one drive')),
           const SizedBox(height: 40),
-          TextField(
-            controller: _emailController,
-          ),
-          TextButton(
-              onPressed: () {
-                widget.sbtauth.sendBackupPrivateKey(
-                  '123',
-                  _emailController.text.trim(),
-                  'code',
-                  chain: SbtChain.BITCOIN,
-                );
-              },
-              child: const Text('send')),
-          const SizedBox(height: 20),
           Text(dogecoinAddress),
           TextButton(
             onPressed: _sendDoge,

@@ -25,8 +25,6 @@ class _SignPageState extends State<SignPage> {
   String hash = '';
   String _privateKey = '';
 
-  final TextEditingController _emailController = TextEditingController();
-
   @override
   void initState() {
     print(widget.address);
@@ -58,27 +56,12 @@ class _SignPageState extends State<SignPage> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TextButton(
-              onPressed: () {
-                widget.sbtauth.backupWithOneDrive('123');
-              },
-              child: const Text('Backup by one drive')),
           const SizedBox(height: 40),
           TextButton(
               onPressed: () {
                 widget.sbtauth.recoverByOneDrive('123');
               },
               child: const Text('Recover by one drive')),
-          const SizedBox(height: 40),
-          TextField(
-            controller: _emailController,
-          ),
-          TextButton(
-              onPressed: () {
-                widget.sbtauth.sendBackupPrivateKey(
-                    '123', _emailController.text.trim(), 'code');
-              },
-              child: const Text('send')),
           const SizedBox(height: 40),
           Text(widget.address),
           const SizedBox(height: 20),

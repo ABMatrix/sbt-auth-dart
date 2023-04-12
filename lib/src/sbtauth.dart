@@ -370,45 +370,6 @@ class SbtAuth {
     }
   }
 
-  /// Send privateKey fragment
-  Future<void> sendBackupPrivateKey(
-    String password,
-    String email,
-    String code, {
-    SbtChain chain = SbtChain.EVM,
-    String googleCode = '',
-  }) async {
-    final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
-    var backupPrivateKey = '';
-    switch (chain) {
-      case SbtChain.EVM:
-        backupPrivateKey =
-            await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-      case SbtChain.SOLANA:
-        backupPrivateKey =
-            await _solanaCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-      case SbtChain.BITCOIN:
-        backupPrivateKey =
-            await _bitcoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-      case SbtChain.DOGECOIN:
-        backupPrivateKey =
-            await _dogecoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-    }
-    final privateKey = await encryptMsg(backupPrivateKey, password);
-    await api.backupShare(
-      privateKey,
-      email,
-      code,
-      keyType: chain.name,
-      googleCode: googleCode,
-    );
-    userEmail = email;
-  }
-
   /// Batch backup
   Future<void> batchBackup(
     String password,
@@ -674,75 +635,6 @@ class SbtAuth {
     );
     await _authRequestListener();
     await api.verifyIdentity(core.localShare!, keyType: chain.name);
-  }
-
-  /// Backup with one drive
-  Future<void> backupWithOneDrive(
-    String password, {
-    SbtChain chain = SbtChain.EVM,
-    String? customUrl,
-  }) async {
-    final baseUrl =
-        customUrl ?? (developMode ? DEVELOP_AUTH_URL : PRODUCTION_AUTH_URL);
-    final oneDriveUrl =
-        '$baseUrl/onedrive?scheme=$_scheme&developMode=$developMode';
-    unawaited(
-      launchUrl(
-        Uri.parse(oneDriveUrl),
-        mode: Platform.isAndroid
-            ? LaunchMode.externalApplication
-            : LaunchMode.platformDefault,
-      ),
-    );
-    final completer = Completer<String?>();
-    final appLinks = AppLinks();
-    final linkSubscription = appLinks.uriLinkStream.listen((uri) {
-      if (uri.toString().startsWith(_scheme)) {
-        completer.complete(jsonEncode(uri.queryParameters));
-      }
-    });
-    final data = await completer.future;
-    final dataMap = jsonDecode(data!) as Map<String, dynamic>;
-    final code = dataMap['code'] as String;
-    final state = dataMap['state'] as String;
-    loadingStreamController.add(true);
-    final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
-    var backupPrivateKey = '';
-    switch (chain) {
-      case SbtChain.EVM:
-        backupPrivateKey =
-            await _core!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-      case SbtChain.SOLANA:
-        backupPrivateKey =
-            await _solanaCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-      case SbtChain.BITCOIN:
-        backupPrivateKey =
-            await _bitcoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-      case SbtChain.DOGECOIN:
-        backupPrivateKey =
-            await _dogecoinCore!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        break;
-    }
-    final privateKey = await encryptMsg(backupPrivateKey, password);
-    try {
-      await api.backupByOneDrive(
-        code,
-        state == 'undefined' ? 'state' : state,
-        privateKey,
-        keyType: chain.name,
-      );
-      if (Platform.isIOS) {
-        await closeInAppWebView();
-      }
-      await linkSubscription.cancel();
-    } catch (e) {
-      rethrow;
-    } finally {
-      loadingStreamController.add(false);
-    }
   }
 
   /// One drive batch backup

@@ -21,8 +21,6 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
   String tokenHash = '';
   String solanaAddress = '';
 
-  final TextEditingController _emailController = TextEditingController();
-
   @override
   void initState() {
     initSolana();
@@ -67,12 +65,6 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TextButton(
-              onPressed: () {
-                widget.sbtauth
-                    .backupWithOneDrive('123', chain: SbtChain.SOLANA);
-              },
-              child: const Text('Backup by one drive')),
           const SizedBox(height: 40),
           TextButton(
               onPressed: () {
@@ -80,20 +72,6 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
               },
               child: const Text('Recover by one drive')),
           const SizedBox(height: 40),
-          TextField(
-            controller: _emailController,
-          ),
-          TextButton(
-              onPressed: () {
-                widget.sbtauth.sendBackupPrivateKey(
-                  '123',
-                  _emailController.text.trim(),
-                  'code',
-                  chain: SbtChain.SOLANA,
-                );
-              },
-              child: const Text('send')),
-          const SizedBox(height: 20),
           Text(solanaAddress),
           TextButton(
             onPressed: _sendSol,

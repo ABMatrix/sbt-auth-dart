@@ -17,8 +17,6 @@ class _BitcoinSignPageState extends State<BitcoinSignPage> {
   String hash = '';
   String bitcoinAddress = '';
 
-  final TextEditingController _emailController = TextEditingController();
-
   @override
   void initState() {
     initBitcoin();
@@ -63,12 +61,6 @@ class _BitcoinSignPageState extends State<BitcoinSignPage> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TextButton(
-              onPressed: () {
-                widget.sbtauth
-                    .backupWithOneDrive('123', chain: SbtChain.BITCOIN);
-              },
-              child: const Text('Backup by one drive')),
           const SizedBox(height: 40),
           TextButton(
               onPressed: () {
@@ -77,20 +69,6 @@ class _BitcoinSignPageState extends State<BitcoinSignPage> {
               },
               child: const Text('Recover by one drive')),
           const SizedBox(height: 40),
-          TextField(
-            controller: _emailController,
-          ),
-          TextButton(
-              onPressed: () {
-                widget.sbtauth.sendBackupPrivateKey(
-                  '123',
-                  _emailController.text.trim(),
-                  'code',
-                  chain: SbtChain.BITCOIN,
-                );
-              },
-              child: const Text('send')),
-          const SizedBox(height: 20),
           Text(bitcoinAddress),
           TextButton(
             onPressed: _sendBtc,
