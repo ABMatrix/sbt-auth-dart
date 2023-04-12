@@ -378,36 +378,4 @@ class AuthCore {
   void setSignModel(bool signModel) {
     remoteSign = signModel;
   }
-
-  /// Get privateKey
-  Future<String> getPrivateKey(
-    String address,
-    String backupPrivateKey,
-    String password, {
-    bool isTestnet = false,
-  }) async {
-    final local = await _getSavedShare(address);
-    if (local == null) throw SbtAuthException('$address non-existent');
-    final aux = DBUtil.auxBox.get(address);
-    if (aux == null) throw SbtAuthException('$address aux non-existent');
-    var backup = '';
-    if (backupPrivateKey.startsWith('0x')) {
-      backup = backupPrivateKey;
-    } else {
-      backup = await decryptMsg(backupPrivateKey, password);
-    }
-    final backShare = Share(
-      privateKey: backup,
-      publicKey: local.publicKey,
-      extraData: aux,
-    );
-    final privateKey = await MultiMpc.secretKey(
-      [
-        shareToKey(local),
-        shareToKey(backShare, index: 3),
-      ],
-      chain.engine,
-    );
-    return privateKey;
-  }
 }

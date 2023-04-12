@@ -9,6 +9,7 @@ import 'package:app_links/app_links.dart';
 import 'package:eth_sig_util/util/utils.dart';
 import 'package:eventsource/eventsource.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:mpc_dart/multi_mpc_dart.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
 import 'package:sbt_auth_dart/src/core/bitcoin_signer.dart';
@@ -864,6 +865,39 @@ class SbtAuth {
   /// Set local
   void setLocale(LocaleType localeType) {
     _locale = localeType;
+  }
+
+  /// Get privateKey
+  Future<String> getPrivateKey(
+    String address,
+    String backupPrivateKey,
+    String password, {
+    bool isTestnet = false,
+    String chain = 'EVM',
+  }) async {
+    final local = DBUtil.shareBox!.get(address);
+    if (local == null) throw SbtAuthException('$address non-existent');
+    final aux = DBUtil.auxBox.get(address);
+    if (aux == null) throw SbtAuthException('$address aux non-existent');
+    var backup = '';
+    if (backupPrivateKey.startsWith('0x')) {
+      backup = backupPrivateKey;
+    } else {
+      backup = await decryptMsg(backupPrivateKey, password);
+    }
+    final backShare = Share(
+      privateKey: backup,
+      publicKey: local.publicKey,
+      extraData: aux,
+    );
+    final privateKey = await MultiMpc.secretKey(
+      [
+        shareToKey(local),
+        shareToKey(backShare, index: 3),
+      ],
+      SbtChain.values.byName(chain).engine,
+    );
+    return privateKey;
   }
 
   void _saveToken(String token) {

@@ -119,7 +119,7 @@ class _SignPageState extends State<SignPage> {
   }
 
   _getPrivateKey() async {
-    final res = await widget.sbtauth.core!.getPrivateKey(
+    final res = await widget.sbtauth.getPrivateKey(
         '0xb89bc496038d1713cf8cbac60224189886d56971',
         'LHnkfr9HyQdShMPu8mpqa3yfZmJLBnWMRsy7DBSjhTSTXVUV6uesonsUK4eGRezIAPMiUwXe1SnAycAy/EgqJrlnpMDHv4MNm85eTN4a',
         '123');
