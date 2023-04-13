@@ -510,19 +510,19 @@ class SbtAuth {
       'evm': core!.localShare!.privateKey,
     };
     if (solanaCore == null) {
-      await init(chain: SbtChain.SOLANA);
+      await init(chain: SbtChain.SOLANA, isLogin: true);
     }
     if (solanaCore != null) {
       local['solana'] = solanaCore?.localShare?.privateKey;
     }
     if (bitcoinCore == null) {
-      await init(chain: SbtChain.BITCOIN);
+      await init(chain: SbtChain.BITCOIN, isLogin: true);
     }
     if (bitcoinCore != null) {
       local['bitcoin'] = bitcoinCore?.localShare?.privateKey;
     }
     if (dogecoinCore == null) {
-      await init(chain: SbtChain.DOGECOIN);
+      await init(chain: SbtChain.DOGECOIN, isLogin: true);
     }
     if (dogecoinCore != null) {
       local['dogecoin'] = dogecoinCore?.localShare?.privateKey;
@@ -919,14 +919,18 @@ class SbtAuth {
       backup = await decryptMsg(backupPrivateKey, password);
     }
     final backupHash = DBUtil.hashBox.get(address);
-    if ('0x$backup' != backupHash) {
-      throw SbtAuthException('$address password error');
-    }
     final backShare = Share(
       privateKey: backup,
       publicKey: local.publicKey,
       extraData: aux,
     );
+    final hash = bytesToHex(
+      hashMessage(ascii.encode(jsonEncode(backShare.toJson()))),
+      include0x: true,
+    );
+    if (hash != backupHash) {
+      throw SbtAuthException('$address password error');
+    }
     final privateKey = await MultiMpc.secretKey(
       [
         shareToKey(local),
