@@ -737,18 +737,18 @@ class SbtAuth {
         state == 'undefined' ? 'state' : state,
         keyType: chain.name,
       );
-      final dataList = jsonDecode(res) as List;
+      // final dataList = jsonDecode(res) as List;
       if (Platform.isIOS) {
         await closeInAppWebView();
       }
-      var privateKey = '';
-      for (var i = 0; i < dataList.length; i++) {
-        if (dataList[i]['network'] == chain.name) {
-          privateKey = (dataList[i]['privateKey'] ?? '') as String;
-        }
-      }
+      // var privateKey = '';
+      // for (var i = 0; i < dataList.length; i++) {
+      //   if (dataList[i]['network'] == chain.name) {
+      //     privateKey = (dataList[i]['privateKey'] ?? '') as String;
+      //   }
+      // }
       await linkSubscription.cancel();
-      await recoverWidthBackup(privateKey, password, chain: chain);
+      await recoverWidthBackup(res, password, chain: chain);
     } catch (e) {
       rethrow;
     } finally {
