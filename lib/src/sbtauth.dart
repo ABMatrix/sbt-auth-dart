@@ -500,16 +500,16 @@ class SbtAuth {
     };
     if (solanaCore == null) {
       await init(chain: SbtChain.SOLANA);
+      local['solana'] = solanaCore?.localShare?.privateKey;
     }
-    local['solana'] = solanaCore?.localShare?.privateKey;
     if (bitcoinCore == null) {
       await init(chain: SbtChain.BITCOIN);
+      local['bitcoin'] = bitcoinCore?.localShare?.privateKey;
     }
-    local['bitcoin'] = bitcoinCore?.localShare?.privateKey;
     if (dogecoinCore == null) {
       await init(chain: SbtChain.DOGECOIN);
+      local['dogecoin'] = dogecoinCore?.localShare?.privateKey;
     }
-    local['dogecoin'] = dogecoinCore?.localShare?.privateKey;
     final encrypted = await encryptMsg(jsonEncode(local), password);
     await api.confirmLoginWithQrCode(qrCodeId, encrypted);
   }
