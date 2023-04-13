@@ -16,6 +16,9 @@ const CACHE_KEY = 'local_cache_key';
 /// Hive cache box key
 const AUX_KEY = 'local_aux_key';
 
+/// Hive cache box key
+const HASH_KEY = 'local_hash_key';
+
 /// Hive Util
 class DBUtil {
   /// user token box
@@ -29,6 +32,9 @@ class DBUtil {
 
   /// aux box
   static late Box<String> auxBox;
+
+  /// backup hash box
+  static late Box<String> hashBox;
 
   /// init Box
   static Future<void> init() async {
@@ -44,5 +50,6 @@ class DBUtil {
     shareBox = await Hive.openBox(CACHE_KEY);
     userBox = await Hive.openBox(USER_KEY);
     auxBox = await Hive.openBox(AUX_KEY);
+    hashBox = await Hive.openBox(HASH_KEY);
   }
 }

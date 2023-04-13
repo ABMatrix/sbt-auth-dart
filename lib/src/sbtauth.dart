@@ -206,6 +206,13 @@ class SbtAuth {
       final core = getCore(chain);
       final account = await core.generatePubKey(testnet: developMode);
       await DBUtil.auxBox.put(account.address, account.shares[2].extraData);
+      await DBUtil.hashBox.put(
+        account.address,
+        bytesToHex(
+          hashMessage(ascii.encode(jsonEncode(account.shares[2].toJson()))),
+          include0x: true,
+        ),
+      );
       await api.uploadShares(
         account.shares,
         account.address,
@@ -261,6 +268,10 @@ class SbtAuth {
         await DBUtil.auxBox.put(
           core.getAddress(isTestnet: developMode),
           remoteLocalShareInfo.backupAux,
+        );
+        await DBUtil.hashBox.put(
+          core.getAddress(isTestnet: developMode),
+          remoteLocalShareInfo.backupHash,
         );
       }
     }
@@ -500,14 +511,20 @@ class SbtAuth {
     };
     if (solanaCore == null) {
       await init(chain: SbtChain.SOLANA);
+    }
+    if (solanaCore != null) {
       local['solana'] = solanaCore?.localShare?.privateKey;
     }
     if (bitcoinCore == null) {
       await init(chain: SbtChain.BITCOIN);
+    }
+    if (bitcoinCore != null) {
       local['bitcoin'] = bitcoinCore?.localShare?.privateKey;
     }
     if (dogecoinCore == null) {
       await init(chain: SbtChain.DOGECOIN);
+    }
+    if (dogecoinCore != null) {
       local['dogecoin'] = dogecoinCore?.localShare?.privateKey;
     }
     final encrypted = await encryptMsg(jsonEncode(local), password);
@@ -578,6 +595,10 @@ class SbtAuth {
       core.getAddress(isTestnet: developMode),
       remoteShareInfo.backupAux,
     );
+    await DBUtil.hashBox.put(
+      core.getAddress(isTestnet: developMode),
+      remoteShareInfo.backupHash,
+    );
     await _authRequestListener();
     await api.verifyIdentity(localShare, keyType: chain.name);
   }
@@ -633,6 +654,10 @@ class SbtAuth {
     await DBUtil.auxBox.put(
       core.getAddress(isTestnet: developMode),
       remoteShareInfo.backupAux,
+    );
+    await DBUtil.hashBox.put(
+      core.getAddress(isTestnet: developMode),
+      remoteShareInfo.backupHash,
     );
     await _authRequestListener();
     await api.verifyIdentity(core.localShare!, keyType: chain.name);
@@ -737,18 +762,18 @@ class SbtAuth {
         state == 'undefined' ? 'state' : state,
         keyType: chain.name,
       );
-      // final dataList = jsonDecode(res) as List;
+      final dataList = jsonDecode(res) as List;
       if (Platform.isIOS) {
         await closeInAppWebView();
       }
-      // var privateKey = '';
-      // for (var i = 0; i < dataList.length; i++) {
-      //   if (dataList[i]['network'] == chain.name) {
-      //     privateKey = (dataList[i]['privateKey'] ?? '') as String;
-      //   }
-      // }
+      var privateKey = '';
+      for (var i = 0; i < dataList.length; i++) {
+        if (dataList[i]['network'] == chain.name) {
+          privateKey = (dataList[i]['privateKey'] ?? '') as String;
+        }
+      }
       await linkSubscription.cancel();
-      await recoverWidthBackup(res, password, chain: chain);
+      await recoverWidthBackup(privateKey, password, chain: chain);
     } catch (e) {
       rethrow;
     } finally {
@@ -892,6 +917,10 @@ class SbtAuth {
       backup = backupPrivateKey;
     } else {
       backup = await decryptMsg(backupPrivateKey, password);
+    }
+    final backupHash = DBUtil.hashBox.get(address);
+    if ('0x$backup' != backupHash) {
+      throw SbtAuthException('$address password error');
     }
     final backShare = Share(
       privateKey: backup,
