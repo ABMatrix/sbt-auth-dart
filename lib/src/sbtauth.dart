@@ -708,7 +708,7 @@ class SbtAuth {
     String? customUrl,
   }) async {
     final baseUrl =
-        customUrl ?? (developMode ? DEVELOP_APP_URL : PRODUCTION_APP_URL);
+        customUrl ?? (developMode ? DEVELOP_AUTH_URL : PRODUCTION_AUTH_URL);
     final oneDriveUrl = '$baseUrl/onedrive?scheme=$_scheme';
     unawaited(
       launchUrl(
