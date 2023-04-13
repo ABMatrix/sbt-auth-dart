@@ -732,13 +732,20 @@ class SbtAuth {
     final state = dataMap['state'] as String;
     loadingStreamController.add(true);
     try {
-      final privateKey = await api.recoverByOneDrive(
+      final res = await api.recoverByOneDrive(
         code,
         state == 'undefined' ? 'state' : state,
         keyType: chain.name,
       );
+      final dataList = jsonDecode(res) as List;
       if (Platform.isIOS) {
         await closeInAppWebView();
+      }
+      var privateKey = '';
+      for (var i = 0; i < dataList.length; i++) {
+        if (dataList[i]['network'] == chain.name) {
+          privateKey = (dataList[i]['privateKey'] ?? '') as String;
+        }
       }
       await linkSubscription.cancel();
       await recoverWidthBackup(privateKey, password, chain: chain);
