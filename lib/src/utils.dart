@@ -27,30 +27,11 @@ Uint8List uint8ListFromList(List<int> data) {
 }
 
 /// Convert keypair to share
-Share keyToLocalShare(KeyPair key) {
-  return Share(
-    privateKey: key.x_i,
-    extraData: jsonEncode(key.y),
-  );
-}
-
-/// Convert keypair to share
 Share keyToShare(MultiKeypair key) {
   return Share(
     privateKey: key.sk,
     publicKey: key.pk,
     extraData: jsonEncode(key.aux),
-  );
-}
-
-/// Convert local share to keypair
-KeyPair localShareToKey(Share share, [int index = 1]) {
-  return KeyPair(
-    share.privateKey,
-    jsonDecode(share.extraData) as Map<String, dynamic>,
-    index,
-    1,
-    3,
   );
 }
 
