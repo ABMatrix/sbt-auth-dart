@@ -172,30 +172,35 @@ class SbtAuthProvider {
     }
   }
 
+  final Map<String, String> _networkMap = {
+    '0x1': 'eth',
+    '0x5': 'eth_goerli',
+    '0x38': 'bsc',
+    '0x61': 'bsc_chapel',
+    '0x89': 'polygon',
+    '0x13881': 'polygon_mumbai',
+    '0x13a': 'filecoin_evm',
+    '0xc45': 'filecoin_hyperspace_evm',
+    '0xa86a': 'avalanche',
+    '0xa869': 'avalanche_fuji',
+    '0xa': 'optimism',
+    '0x1a4': 'optimism_goerli',
+    '0xa4b1': 'arbitrum',
+    '0x66eed': 'arbitrum_goerli',
+    '0x19': 'cronos',
+    '0x152': 'cronos_testnet',
+    '0x4e21': 'ethw',
+    '0xfa': 'fantom',
+    '0xfa2': 'fantom_testnet',
+    '0x144': 'zksync',
+    '0x118': 'zksync_testnet',
+  };
+
   void _getNetwork(String chainNetwork) {
     if (chainNetwork != '') {
       network = chainNetwork;
     } else {
-      switch (chainId) {
-        case '0x1':
-          network = 'eth';
-          break;
-        case '0x38':
-          network = 'bsc';
-          break;
-        case '0x89':
-          network = 'polygon';
-          break;
-        case '0x5':
-          network = 'eth_goerli';
-          break;
-        case '0x61':
-          network = 'bsc_chapel';
-          break;
-        case '0x13881':
-          network = 'polygon_mumbai';
-          break;
-      }
+      network = _networkMap[chainId] ?? 'eth';
     }
   }
 
