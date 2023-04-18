@@ -191,7 +191,7 @@ class SbtAuthProvider {
     '0x66eed': 'arbitrum_goerli',
     '0x19': 'cronos',
     '0x152': 'cronos_testnet',
-    '0x4e21': 'ethw',
+    '0x2711': 'ethw',
     '0xfa': 'fantom',
     '0xfa2': 'fantom_testnet',
     '0x144': 'zksync',
