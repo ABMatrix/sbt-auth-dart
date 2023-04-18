@@ -60,6 +60,8 @@ const _ethRpc = {
   '0xfa2': 'https://rpc.abmatrix.cn/json-rpc/http/fantom_testnet',
   // ZkSync
   '0x144': 'https://rpc.abmatrix.cn/json-rpc/http/zksync',
+  // ZkSync Testnet
+  '0x118': 'https://rpc.abmatrix.cn/json-rpc/http/zksync_testnet',
 };
 
 /// Ethereum provider, use to connect to sbtauth wallet.
