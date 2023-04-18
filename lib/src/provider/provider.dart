@@ -53,7 +53,7 @@ const _ethRpc = {
   // Cronos Testnet
   '0x152': 'https://rpc.abmatrix.cn/json-rpc/http/cronos_testnet',
   // ETHW
-  '0x4e21': 'https://rpc.abmatrix.cn/json-rpc/http/ethw',
+  '0x2711': 'https://rpc.abmatrix.cn/json-rpc/http/ethw',
   // Fantom
   '0xfa': 'https://rpc.abmatrix.cn/json-rpc/http/fantom',
   // Fantom Testnet
