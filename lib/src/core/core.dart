@@ -316,7 +316,9 @@ class AuthCore {
   /// Get remote key pair
   static Share getRemoteKeypair(Share share) {
     final key = shareToKey(share);
-    return keyToShare(MultiKeypair.fromJson(MultiMpc.auxToKeypair(key)));
+    final remoteShare =
+        keyToShare(MultiKeypair.fromJson(MultiMpc.auxToKeypair(key)));
+    return remoteShare.copyWith(privateKey: share.privateKey);
   }
 
   Future<String> _setTaskId(

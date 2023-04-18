@@ -33,6 +33,14 @@ class Share {
       'extraData': extraData
     };
   }
+
+  Share copyWith({String? privateKey, String? publicKey, String? extraData}) {
+    return Share(
+      privateKey: privateKey ?? this.privateKey,
+      publicKey: publicKey ?? this.publicKey,
+      extraData: extraData ?? this.extraData,
+    );
+  }
 }
 
 /// Mpc account
