@@ -196,7 +196,46 @@ class AptosSigner {
     final bcsTxn = bcsToBytes(res);
 
     final resp = await client.submitSignedBCSTransaction(bcsTxn);
-    return (resp["hash"] ?? '') as String;
+    return (resp['hash'] ?? '') as String;
+  }
+
+  /// Register
+  Future<String> registerToken(
+      String from,
+      String tokenAddress,
+      String tokenName,
+      )async{
+    final client = AptosClient(Constants.testnetAPI, enableDebugLog: true);
+    final token = TypeTagStruct(
+        StructTag.fromString('$tokenAddress::aptos_coin::$tokenName'));
+
+    final entryFunctionPayload = TransactionPayloadEntryFunction(
+      EntryFunction.natural(
+        '0x1::managed_coin',
+        'register',
+        [token],
+        [],
+      ),
+    );
+
+    final rawTxn = await client.generateRawTransaction(
+      from,
+      entryFunctionPayload,
+    );
+
+    final signingMessage = TransactionBuilder.getSigningMessage(rawTxn);
+    final signature = await _sign(signingMessage, '', '0');
+
+    final authenticator = TransactionAuthenticatorEd25519(
+      Ed25519PublicKey(_core.getPubkey()),
+      Ed25519Signature(signature),
+    );
+
+    final res = SignedTransaction(rawTxn, authenticator);
+    final bcsTxn = bcsToBytes(res);
+
+    final resp = await client.submitSignedBCSTransaction(bcsTxn);
+    return (resp['hash'] ?? '') as String;
   }
 
   Future<dynamic> _transferAptos(

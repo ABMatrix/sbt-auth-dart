@@ -418,7 +418,8 @@ class SbtAuth {
       _core,
       _solanaCore,
       _bitcoinCore,
-      _dogecoinCore
+      _dogecoinCore,
+      _aptosCore,
     ];
     for (var i = 0; i < SbtChain.values.length; i++) {
       if (coreList[i] != null) {
@@ -733,7 +734,8 @@ class SbtAuth {
       _core,
       _solanaCore,
       _bitcoinCore,
-      _dogecoinCore
+      _dogecoinCore,
+      _aptosCore
     ];
     for (var i = 0; i < SbtChain.values.length; i++) {
       if (coreList[i] != null) {

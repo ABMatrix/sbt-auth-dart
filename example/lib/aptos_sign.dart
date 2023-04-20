@@ -91,7 +91,7 @@ class _AptosSignPageState extends State<AptosSignPage> {
     final singer = widget.sbtauth.aptosSigner;
     final res = await singer!.transfer(
       aptosAddress,
-      aptosAddress,
+      '0xa2c66f30b1ab14e5008608c763cbccb3e5b2ec4849f4b5b6857d0a8bd202ceca',
       BigInt.from(100000),
     );
     setState(() {
