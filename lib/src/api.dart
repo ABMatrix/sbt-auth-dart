@@ -84,6 +84,7 @@ class SbtAuthApi {
     required String baseUrl,
     String? password,
     String localLan = 'en-US',
+    String? captchaToken,
   }) async {
     final deviceName = await getDeviceName();
     final data = {
@@ -91,7 +92,8 @@ class SbtAuthApi {
       'authCode': code,
       'deviceName': deviceName,
       'clientID': clientId,
-      'password': password
+      'password': password,
+      'token': captchaToken
     };
     final response = await http.post(
       Uri.parse('$baseUrl/user:login'),
