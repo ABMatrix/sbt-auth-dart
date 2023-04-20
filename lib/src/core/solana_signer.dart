@@ -8,9 +8,9 @@ import 'package:solana/encoder.dart';
 import 'package:solana/solana.dart';
 
 /// Solana Signer
-class SolanaSinger {
+class SolanaSigner {
   /// Solana Signer
-  SolanaSinger(this._core, this._solanaUrl, this._solanaNetwork);
+  SolanaSigner(this._core, this._solanaUrl, this._solanaNetwork);
 
   final AuthCore _core;
 

@@ -33,9 +33,9 @@ const _ethRpc = {
   // Polygon Mumbai
   '0x13881': 'https://test-rpc-polygon.abmatrix.cn/',
   // Filecoin
-  '0x13a': 'https://rpc.abmatrix.cn/json-rpc/http/filecoin',
+  '0x13a': 'https://rpc.abmatrix.cn/json-rpc/http/filecoin_evm',
   // Filecoin hyperspace
-  '0xc45': 'https://rpc.abmatrix.cn/json-rpc/http/filecoin_hyperspace',
+  '0xc45': 'https://rpc.abmatrix.cn/json-rpc/http/filecoin_hyperspace_evm',
   // Avalanche
   '0xa86a': 'https://rpc.abmatrix.cn/json-rpc/http/avalanche',
   // Avalance Fuji

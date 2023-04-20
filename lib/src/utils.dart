@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:aptos/utils/sha.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter_bitcoin/flutter_bitcoin.dart';
 import 'package:mpc_dart/mpc_dart.dart';
@@ -204,3 +205,13 @@ final dogecoinMainnet = NetworkType(
   scriptHash: 0x16,
   wif: 0x9E,
 );
+
+/// Get aptos address
+String aptosAddressFromPubKey(String pubKey) {
+  final pubKeyBytes = hexToBytes(pubKey);
+  final emptyList = <int>[...pubKeyBytes, 0];
+  final bytes = Uint8List.fromList(emptyList);
+  final hash = sha3Hash.process(bytes);
+  final address = bytesToHex(hash);
+  return '0x$address';
+}

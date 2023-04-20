@@ -9,15 +9,16 @@ import 'package:app_links/app_links.dart';
 import 'package:eth_sig_util/util/utils.dart';
 import 'package:eventsource/eventsource.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bitcoin/src/crypto.dart' as bcrypto;
 import 'package:mpc_dart/multi_mpc_dart.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
+import 'package:sbt_auth_dart/src/core/aptos_singer.dart';
 import 'package:sbt_auth_dart/src/core/bitcoin_signer.dart';
 import 'package:sbt_auth_dart/src/core/solana_signer.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:solana/base58.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_bitcoin/src/crypto.dart' as bcrypto;
 
 /// Develop app url
 const DEVELOP_APP_URL = 'https://test-connect.sbtauth.io';
@@ -115,31 +116,44 @@ class SbtAuth {
   EventSource? _eventSource;
 
   /// solana singer
-  SolanaSinger? get solanaSinger => _solanaCore == null
+  SolanaSigner? get solanaSinger => _solanaCore == null
       ? null
-      : SolanaSinger(
+      : SolanaSigner(
           _solanaCore!,
           _solanaUrl,
           _solanaNetwork,
         );
 
   /// bitcoin singer
-  BitcoinSinger? get bitcoinSinger => _bitcoinCore == null
+  BitcoinSigner? get bitcoinSinger => _bitcoinCore == null
       ? null
-      : BitcoinSinger(
+      : BitcoinSigner(
           _bitcoinCore!,
           developMode,
           true,
         );
 
-  /// bitcoin singer
-  BitcoinSinger? get dogecoinSinger => _dogecoinCore == null
+  /// dogecoin singer
+  BitcoinSigner? get dogecoinSinger => _dogecoinCore == null
       ? null
-      : BitcoinSinger(
+      : BitcoinSigner(
           _dogecoinCore!,
           developMode,
           false,
         );
+
+  /// Aptos singer
+  AptosSigner? get aptosSigner => _aptosCore == null
+      ? null
+      : AptosSigner(
+          _aptosCore!,
+          developMode,
+        );
+
+  /// aptos core
+  AuthCore? get aptosCore => _aptosCore;
+
+  AuthCore? _aptosCore;
 
   /// Grant authorization listen controller
   StreamController<String> authRequestStreamController =
@@ -235,6 +249,9 @@ class SbtAuth {
         case SbtChain.DOGECOIN:
           _dogecoinCore = core;
           break;
+        case SbtChain.APTOS:
+          _aptosCore = core;
+          break;
       }
     } else {
       final remoteLocalShareInfo =
@@ -265,6 +282,10 @@ class SbtAuth {
           case SbtChain.DOGECOIN:
             _dogecoinCore = core;
             _dogecoinCore!.setSignModel(user!.userWhitelist);
+            break;
+          case SbtChain.APTOS:
+            _aptosCore = core;
+            _aptosCore!.setSignModel(user!.userWhitelist);
             break;
         }
         await DBUtil.auxBox.put(
@@ -461,6 +482,12 @@ class SbtAuth {
         }
         local = dogecoinCore!.localShare!.privateKey;
         break;
+      case SbtChain.APTOS:
+        if (aptosCore == null) {
+          throw SbtAuthException('Aptos auth not inited');
+        }
+        local = aptosCore!.localShare!.privateKey;
+        break;
     }
     final password = StringBuffer();
     for (var i = 0; i < 6; i++) {
@@ -591,6 +618,9 @@ class SbtAuth {
       case SbtChain.DOGECOIN:
         _dogecoinCore = core;
         break;
+      case SbtChain.APTOS:
+        _aptosCore = core;
+        break;
     }
     if (!inited) throw SbtAuthException('Init error');
     await DBUtil.auxBox.put(
@@ -650,6 +680,9 @@ class SbtAuth {
         break;
       case SbtChain.DOGECOIN:
         _dogecoinCore = core;
+        break;
+      case SbtChain.APTOS:
+        _aptosCore = core;
         break;
     }
     if (!inited) throw SbtAuthException('Init error');

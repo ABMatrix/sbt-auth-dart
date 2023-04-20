@@ -1,3 +1,4 @@
+import 'package:example/aptos_sign.dart';
 import 'package:example/bitcoin_sign.dart';
 import 'package:example/dogecoin_sign.dart';
 import 'package:example/solana_sign.dart';
@@ -80,6 +81,12 @@ class _SignPageState extends State<SignPage> {
           TextButton(
             onPressed: _initDogecoin,
             child: const Text('Init dogecoin'),
+          ),
+          const SizedBox(height: 10),
+          const SizedBox(height: 20),
+          TextButton(
+            onPressed: _initAptos,
+            child: const Text('Init aptos'),
           ),
           const SizedBox(height: 10),
           Text(hash),
@@ -187,6 +194,18 @@ class _SignPageState extends State<SignPage> {
       ),
     );
   }
+
+  _initAptos() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AptosSignPage(
+          sbtauth: widget.sbtauth,
+        ),
+      ),
+    );
+  }
+
 
   _logout() {
     widget.sbtauth.logout();

@@ -22,9 +22,9 @@ const INPUT_RATE = 68;
 const OUTPUT_RATE = 31;
 
 /// Bitcoin Signer
-class BitcoinSinger {
+class BitcoinSigner {
   /// Bitcoin Signer
-  BitcoinSinger(this._core, this._isTestnet, this._isBtc);
+  BitcoinSigner(this._core, this._isTestnet, this._isBtc);
 
   final AuthCore _core;
 
