@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:aptos/aptos_account.dart';
 import 'package:aptos/aptos_client.dart';
 import 'package:aptos/aptos_types/account_address.dart';
 import 'package:aptos/aptos_types/authenticator.dart';
@@ -8,16 +7,12 @@ import 'package:aptos/aptos_types/ed25519.dart';
 import 'package:aptos/aptos_types/transaction.dart';
 import 'package:aptos/aptos_types/type_tag.dart';
 import 'package:aptos/bcs/helper.dart';
-import 'package:aptos/coin_client.dart';
 import 'package:aptos/constants.dart';
-import 'package:aptos/hex_string.dart';
-import 'package:aptos/models/payload.dart';
-import 'package:aptos/models/signature.dart';
-import 'package:aptos/models/transaction.dart';
 import 'package:aptos/transaction_builder/builder.dart';
 import 'package:eth_sig_util/util/utils.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
+/// Aptos Signer
 class AptosSigner {
   /// Aptos Signer
   AptosSigner(this._core, this._isTestnet);
@@ -25,6 +20,11 @@ class AptosSigner {
   final AuthCore _core;
 
   final bool _isTestnet;
+
+  AptosClient get _client => AptosClient(
+        _isTestnet ? Constants.testnetAPI : Constants.mainnetAPI,
+        enableDebugLog: _isTestnet,
+      );
 
   Future<Uint8List> _sign(
       Uint8List signingMessage, String receiverAddress, String amount,
@@ -39,75 +39,7 @@ class AptosSigner {
     return hexToBytes(res);
   }
 
-  // /// transfer
-  // Future<String> transfer(
-  //   String receiverAddress,
-  //   BigInt amount,
-  //   // BigInt gasPrice,
-  //   // BigInt maxGasAmount,
-  //   // BigInt expirationTimestamp,
-  //   String sender,
-  // ) async {
-  //   final aptos = AptosClient(Constants.testnetAPI, enableDebugLog: true);
-  //   final accountInfo = await aptos.getAccount(sender);
-  //   final ledgerInfo = await aptos.getLedgerInfo();
-  //   final sequenceNumber = int.parse(accountInfo.sequenceNumber);
-  //
-  //   const typeArgs = '0x1::aptos_coin::AptosCoin';
-  //   const moduleId = '0x1::coin';
-  //   const moduleFunc = 'transfer';
-  //   final entryFunc = EntryFunction.natural(
-  //     moduleId,
-  //     moduleFunc,
-  //     [TypeTagStruct(StructTag.fromString(typeArgs))],
-  //     [
-  //       bcsToBytes(AccountAddress.fromHex(receiverAddress)),
-  //       bcsSerializeUint64(amount)
-  //     ],
-  //   );
-  //   final entryFunctionPayload = TransactionPayloadEntryFunction(entryFunc);
-  //
-  //   final rawTx = RawTransaction(
-  //       AccountAddress.fromHex(sender),
-  //       BigInt.from(sequenceNumber),
-  //       entryFunctionPayload,
-  //       maxGasAmount,
-  //       gasPrice,
-  //       expirationTimestamp,
-  //       ChainId(ledgerInfo['chain_id'] as int));
-  //
-  //   final publicKey = _core.getPubkey();
-  //
-  //   final txnBuilder = TransactionBuilderEd25519(
-  //     Uint8List.fromList(publicKey),
-  //     (signingMessage) async => Ed25519Signature(
-  //         await _sign(signingMessage, receiverAddress, amount.toString())),
-  //   );
-  //
-  //   final signedTx = txnBuilder.rawToSigned(rawTx);
-  //   final txEdd25519 =
-  //       signedTx.authenticator as TransactionAuthenticatorEd25519;
-  //   final signature = txEdd25519.signature.value;
-  //
-  //   final tx = TransactionRequest(
-  //     sender: sender,
-  //     sequenceNumber: sequenceNumber.toString(),
-  //     maxGasAmount: maxGasAmount.toString(),
-  //     gasUnitPrice: gasPrice.toString(),
-  //     expirationTimestampSecs: expirationTimestamp.toString(),
-  //     payload: Payload('entry_function_payload', '$moduleId::$moduleFunc',
-  //         ['0x1::aptos_coin::AptosCoin'], [receiverAddress, amount.toString()]),
-  //     signature: Signature(
-  //       'ed25519_signature',
-  //       bytesToHex(publicKey),
-  //       bytesToHex(signature),
-  //     ),
-  //   );
-  //
-  //   final result = await aptos.submitTransaction(tx);
-  //   return (result ?? '') as String;
-  // }
-
+  /// Transaction apt
   Future<String> transfer(
     String from,
     String to,
@@ -116,32 +48,26 @@ class AptosSigner {
     BigInt? gasUnitPrice,
     BigInt? expireTimestamp,
     String? coinType,
-    bool createReceiverIfMissing = false,
   }) async {
-    final aptosClient = AptosClient(Constants.testnetAPI, enableDebugLog: true);
     coinType ??= AptosClient.APTOS_COIN;
 
-    final func = createReceiverIfMissing
-        ? '0x1::aptos_account::transfer_coins'
-        : '0x1::coin::transfer';
+    final isExists = await _client.accountExist(to);
+    final func =
+        isExists ? '0x1::coin::transfer' : '0x1::aptos_account::transfer_coins';
 
     final config = ABIBuilderConfig(
-        sender: from,
-        maxGasAmount: maxGasAmount,
-        gasUnitPrice: gasUnitPrice,
-        expSecFromNow: expireTimestamp);
+      sender: from,
+      maxGasAmount: maxGasAmount,
+      gasUnitPrice: gasUnitPrice,
+      expSecFromNow: expireTimestamp,
+    );
 
-    final builder = TransactionBuilderRemoteABI(aptosClient, config);
+    final builder = TransactionBuilderRemoteABI(_client, config);
     final rawTxn = await builder.build(
       func,
       [coinType],
       [to, amount],
     );
-
-    // final txnBuilder = TransactionBuilderEd25519(
-    //     _core.getPubkey(),
-    //     (Uint8List signingMessage) async => Ed25519Signature(
-    //         await _sign(signingMessage, to, amount.toString())));
 
     final signingMessage = TransactionBuilder.getSigningMessage(rawTxn);
     final signature = await _sign(signingMessage, to, amount.toString());
@@ -154,8 +80,8 @@ class AptosSigner {
     final res = SignedTransaction(rawTxn, authenticator);
     final bcsTxn = bcsToBytes(res);
 
-    final resp = await aptosClient.submitSignedBCSTransaction(bcsTxn);
-    return (resp["hash"] ?? '') as String;
+    final resp = await _client.submitSignedBCSTransaction(bcsTxn);
+    return (resp['hash'] ?? '') as String;
   }
 
   /// Token transaction
@@ -166,9 +92,10 @@ class AptosSigner {
     String tokenAddress,
     String tokenName,
   ) async {
-    final client = AptosClient(Constants.testnetAPI, enableDebugLog: true);
-    final token = TypeTagStruct(
-        StructTag.fromString('$tokenAddress::aptos_coin::$tokenName'));
+    final token =
+        TypeTagStruct(StructTag.fromString('$tokenAddress::coins::$tokenName'));
+    final resourceType = '0x1::coin::CoinStore<$to::coins::$tokenName>';
+    await _tokenRegister(to, resourceType);
 
     final entryFunctionPayload = TransactionPayloadEntryFunction(
       EntryFunction.natural(
@@ -179,7 +106,7 @@ class AptosSigner {
       ),
     );
 
-    final rawTxn = await client.generateRawTransaction(
+    final rawTxn = await _client.generateRawTransaction(
       from,
       entryFunctionPayload,
     );
@@ -195,19 +122,18 @@ class AptosSigner {
     final res = SignedTransaction(rawTxn, authenticator);
     final bcsTxn = bcsToBytes(res);
 
-    final resp = await client.submitSignedBCSTransaction(bcsTxn);
+    final resp = await _client.submitSignedBCSTransaction(bcsTxn);
     return (resp['hash'] ?? '') as String;
   }
 
   /// Register
   Future<String> registerToken(
-      String from,
-      String tokenAddress,
-      String tokenName,
-      )async{
-    final client = AptosClient(Constants.testnetAPI, enableDebugLog: true);
-    final token = TypeTagStruct(
-        StructTag.fromString('$tokenAddress::aptos_coin::$tokenName'));
+    String from,
+    String tokenAddress,
+    String tokenName,
+  ) async {
+    final token =
+        TypeTagStruct(StructTag.fromString('$tokenAddress::coins::$tokenName'));
 
     final entryFunctionPayload = TransactionPayloadEntryFunction(
       EntryFunction.natural(
@@ -218,7 +144,7 @@ class AptosSigner {
       ),
     );
 
-    final rawTxn = await client.generateRawTransaction(
+    final rawTxn = await _client.generateRawTransaction(
       from,
       entryFunctionPayload,
     );
@@ -234,28 +160,15 @@ class AptosSigner {
     final res = SignedTransaction(rawTxn, authenticator);
     final bcsTxn = bcsToBytes(res);
 
-    final resp = await client.submitSignedBCSTransaction(bcsTxn);
+    final resp = await _client.submitSignedBCSTransaction(bcsTxn);
     return (resp['hash'] ?? '') as String;
   }
 
-  Future<dynamic> _transferAptos(
-    AptosAccount account,
-    String receiverAddress,
-    BigInt amount, {
-    BigInt? gasPrice,
-    BigInt? maxGasAmount,
-    BigInt? expirationTimestamp,
-  }) async {
-    final aptos = AptosClient(Constants.testnetAPI, enableDebugLog: true);
-    final coinClient = CoinClient(aptos);
-    final txHash = await coinClient.transfer(
-      account,
-      receiverAddress,
-      amount,
-      maxGasAmount: maxGasAmount,
-      gasUnitPrice: gasPrice,
-      expireTimestamp: expirationTimestamp,
-    );
-    return txHash;
+  Future<void> _tokenRegister(String address, String resourceType) async {
+    try {
+      await _client.getAccountResource(address, resourceType);
+    } catch (e) {
+      throw SbtAuthException('The recipient has not registered the token');
+    }
   }
 }

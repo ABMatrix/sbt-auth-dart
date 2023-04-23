@@ -16,6 +16,7 @@ class AptosSignPage extends StatefulWidget {
 class _AptosSignPageState extends State<AptosSignPage> {
   String hash = '';
   String tokenHash = '';
+  String registerHash = '';
   String aptosAddress = '';
 
   @override
@@ -82,6 +83,12 @@ class _AptosSignPageState extends State<AptosSignPage> {
           ),
           const SizedBox(height: 10),
           Text(tokenHash),
+          TextButton(
+            onPressed: _registerToken,
+            child: const Text('Register token'),
+          ),
+          const SizedBox(height: 10),
+          Text(registerHash),
         ],
       )),
     );
@@ -91,7 +98,7 @@ class _AptosSignPageState extends State<AptosSignPage> {
     final singer = widget.sbtauth.aptosSigner;
     final res = await singer!.transfer(
       aptosAddress,
-      '0xa2c66f30b1ab14e5008608c763cbccb3e5b2ec4849f4b5b6857d0a8bd202ceca',
+      '0x8043a732812814f7d8fc6b16ed8a522b7d158b077d8a4856beb30992b98292e2',
       BigInt.from(100000),
     );
     setState(() {
@@ -102,14 +109,24 @@ class _AptosSignPageState extends State<AptosSignPage> {
   _sendToken() async {
     final singer = widget.sbtauth.aptosSigner;
     final res = await singer!.tokenTransfer(
-      aptosAddress,
-      '0xa2c66f30b1ab14e5008608c763cbccb3e5b2ec4849f4b5b6857d0a8bd202ceca',
-      BigInt.from(100000),
-      '0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9',
-      'USDT'
-    );
+        aptosAddress,
+        '0x8043a732812814f7d8fc6b16ed8a522b7d158b077d8a4856beb30992b98292e2',
+        BigInt.from(10000),
+        '0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9',
+        'USDT');
     setState(() {
-      hash = res;
+      tokenHash = res;
+    });
+  }
+
+  _registerToken() async {
+    final singer = widget.sbtauth.aptosSigner;
+    final res = await singer!.registerToken(
+        aptosAddress,
+        '0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9',
+        'USDT');
+    setState(() {
+      registerHash = res;
     });
   }
 }
