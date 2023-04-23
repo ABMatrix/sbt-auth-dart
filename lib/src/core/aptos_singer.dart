@@ -95,7 +95,7 @@ class AptosSigner {
     final token =
         TypeTagStruct(StructTag.fromString('$tokenAddress::coins::$tokenName'));
     final resourceType = '0x1::coin::CoinStore<$to::coins::$tokenName>';
-    await _tokenRegister(to, resourceType);
+    await tokenRegister(to, resourceType);
 
     final entryFunctionPayload = TransactionPayloadEntryFunction(
       EntryFunction.natural(
@@ -164,7 +164,8 @@ class AptosSigner {
     return (resp['hash'] ?? '') as String;
   }
 
-  Future<void> _tokenRegister(String address, String resourceType) async {
+  /// whether token register
+  Future<void> tokenRegister(String address, String resourceType) async {
     try {
       await _client.getAccountResource(address, resourceType);
     } catch (e) {
