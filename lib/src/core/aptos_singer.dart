@@ -27,11 +27,14 @@ class AptosSigner {
       );
 
   Future<Uint8List> _sign(
-      Uint8List signingMessage, String receiverAddress, String amount,
-      {String? contractAddress}) async {
+    Uint8List signingMessage,
+    String receiverAddress,
+    String amount, {
+    String? contractAddress,
+  }) async {
     final res = await _core.signDigest(
       signingMessage,
-      network: _isTestnet ? 'aptos' : 'aptos_testnet',
+      network: _isTestnet ? 'aptos_testnet' : 'aptos',
       [receiverAddress],
       amount,
       contractAddress: contractAddress,
