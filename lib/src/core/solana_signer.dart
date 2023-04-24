@@ -38,6 +38,7 @@ class SolanaSigner {
       amount,
       contractAddress: contractAddress,
       network: _solanaNetwork,
+      nonce: recentBlockhash,
     );
     final tx = SignedTx(
       messageBytes: compiledMessage.data,

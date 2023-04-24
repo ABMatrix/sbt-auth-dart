@@ -31,6 +31,7 @@ class AptosSigner {
     String receiverAddress,
     String amount, {
     String? contractAddress,
+    int? nonce,
   }) async {
     final res = await _core.signDigest(
       signingMessage,
@@ -38,6 +39,7 @@ class AptosSigner {
       [receiverAddress],
       amount,
       contractAddress: contractAddress,
+      nonce: nonce,
     );
     return hexToBytes(res);
   }
@@ -73,7 +75,12 @@ class AptosSigner {
     );
 
     final signingMessage = TransactionBuilder.getSigningMessage(rawTxn);
-    final signature = await _sign(signingMessage, to, amount.toString());
+    final signature = await _sign(
+      signingMessage,
+      to,
+      amount.toString(),
+      nonce: rawTxn.sequenceNumber.toInt(),
+    );
 
     final authenticator = TransactionAuthenticatorEd25519(
       Ed25519PublicKey(_core.getPubkey()),
@@ -115,7 +122,12 @@ class AptosSigner {
     );
 
     final signingMessage = TransactionBuilder.getSigningMessage(rawTxn);
-    final signature = await _sign(signingMessage, to, amount.toString());
+    final signature = await _sign(
+      signingMessage,
+      to,
+      amount.toString(),
+      nonce: rawTxn.sequenceNumber.toInt(),
+    );
 
     final authenticator = TransactionAuthenticatorEd25519(
       Ed25519PublicKey(_core.getPubkey()),
@@ -153,7 +165,12 @@ class AptosSigner {
     );
 
     final signingMessage = TransactionBuilder.getSigningMessage(rawTxn);
-    final signature = await _sign(signingMessage, '', '0');
+    final signature = await _sign(
+      signingMessage,
+      '',
+      '0',
+      nonce: rawTxn.sequenceNumber.toInt(),
+    );
 
     final authenticator = TransactionAuthenticatorEd25519(
       Ed25519PublicKey(_core.getPubkey()),

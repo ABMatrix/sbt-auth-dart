@@ -160,6 +160,7 @@ class AuthCore {
     String amount, {
     required String network,
     String? contractAddress,
+    dynamic nonce,
   }) async {
     var msgs = message;
     if (chain == SbtChain.EVM) {
@@ -177,6 +178,7 @@ class AuthCore {
         amount,
         contractAddress:
             contractAddress ?? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        nonce: nonce,
       );
       result = await MultiMpc.sign(
         MultiSignParams(
@@ -334,7 +336,7 @@ class AuthCore {
     List<String> toList,
     String amount, {
     String? contractAddress,
-    int? nonce,
+    dynamic nonce,
   }) async {
     final uid = MultiMpc.uuid();
     final data = {
