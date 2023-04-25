@@ -823,6 +823,48 @@ class SbtAuthApi {
     _checkResponse(response);
   }
 
+  /// Add backup friend
+  Future<void> addBackupFriend(String userID) async {
+    final data = {'userID': userID};
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/backup-relation'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
+  /// Get backup friends
+  Future<dynamic> getBackupFriends() async {
+    final response = await http.get(
+      Uri.parse(
+        '$_baseUrl/user/backup-relations?pageNo=1&pageSize=1000',
+      ),
+      headers: _headers,
+    );
+    final data = _checkResponse(response) as Map<String, dynamic>;
+    return data;
+  }
+
+  /// Social recover
+  Future<void> socialRecover(
+    String userID,
+    String deviceName,
+    String privateKeyInfo,
+  ) async {
+    final data = {
+      'userID': userID,
+      'deviceName': deviceName,
+      'privateKeyInfo': privateKeyInfo,
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/social-recover'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
+  }
+
   static dynamic _checkResponse(Response response) {
     final body =
         jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;

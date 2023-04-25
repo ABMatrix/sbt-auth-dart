@@ -359,13 +359,14 @@ class SbtAuth {
     String? token;
     if (loginType == LoginType.email) {
       token = await SbtAuthApi.userLogin(
-          email: email!,
-          code: code,
-          password: password,
-          clientId: _clientId,
-          baseUrl: _baseUrl,
-          localLan: _getLocale(_locale),
-          captchaToken: captchaToken);
+        email: email!,
+        code: code,
+        password: password,
+        clientId: _clientId,
+        baseUrl: _baseUrl,
+        localLan: _getLocale(_locale),
+        captchaToken: captchaToken,
+      );
     } else {
       final deviceName = await getDeviceName();
       final appUrl = developMode ? DEVELOP_AUTH_URL : PRODUCTION_AUTH_URL;
