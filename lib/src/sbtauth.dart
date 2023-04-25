@@ -558,6 +558,12 @@ class SbtAuth {
     if (dogecoinCore != null) {
       local['dogecoin'] = dogecoinCore?.localShare?.privateKey;
     }
+    if (aptosCore == null) {
+      await init(chain: SbtChain.APTOS, isLogin: true);
+    }
+    if (aptosCore != null) {
+      local['aptos'] = aptosCore?.localShare?.privateKey;
+    }
     final encrypted = await encryptMsg(jsonEncode(local), password);
     await api.confirmLoginWithQrCode(qrCodeId, encrypted);
   }
@@ -864,6 +870,9 @@ class SbtAuth {
     if (dogecoinCore != null) {
       dogecoinCore!.setSignModel(user!.userWhitelist);
     }
+    if (aptosCore != null) {
+      aptosCore!.setSignModel(user!.userWhitelist);
+    }
   }
 
   /// Create white list
@@ -1062,6 +1071,9 @@ class SbtAuth {
       case SbtChain.DOGECOIN:
         _dogecoinCore = core;
         break;
+      case SbtChain.APTOS:
+        _aptosCore = core;
+        break;
     }
   }
 
@@ -1123,6 +1135,12 @@ class SbtAuth {
           await _initCoreWithLocalPrivateKey(
             localShares['bitcoin']!.toString(),
             SbtChain.BITCOIN,
+          );
+        }
+        if (localShares['aptos'] != null) {
+          await _initCoreWithLocalPrivateKey(
+            localShares['aptos']!.toString(),
+            SbtChain.APTOS,
           );
         }
         await _authRequestListener();
