@@ -65,7 +65,7 @@ class AptosSigner {
       sender: from,
       maxGasAmount: maxGasAmount,
       gasUnitPrice: gasUnitPrice,
-      expSecFromNow: expireTimestamp,
+      expSecFromNow: expireTimestamp ?? BigInt.from(60),
     );
 
     final builder = TransactionBuilderRemoteABI(_client, config);
@@ -120,6 +120,7 @@ class AptosSigner {
     final rawTxn = await _client.generateRawTransaction(
       from,
       entryFunctionPayload,
+      expireTimestamp: BigInt.from(60),
     );
 
     final signingMessage = TransactionBuilder.getSigningMessage(rawTxn);
@@ -163,6 +164,7 @@ class AptosSigner {
     final rawTxn = await _client.generateRawTransaction(
       from,
       entryFunctionPayload,
+      expireTimestamp: BigInt.from(60),
     );
 
     final signingMessage = TransactionBuilder.getSigningMessage(rawTxn);
