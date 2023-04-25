@@ -449,6 +449,7 @@ class SbtAuth {
     _solanaCore = null;
     _bitcoinCore = null;
     _dogecoinCore = null;
+    _aptosCore = null;
     _eventSource?.client.close();
     userEmail = '';
   }
