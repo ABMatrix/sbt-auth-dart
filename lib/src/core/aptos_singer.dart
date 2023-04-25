@@ -7,7 +7,6 @@ import 'package:aptos/aptos_types/ed25519.dart';
 import 'package:aptos/aptos_types/transaction.dart';
 import 'package:aptos/aptos_types/type_tag.dart';
 import 'package:aptos/bcs/helper.dart';
-import 'package:aptos/constants.dart';
 import 'package:aptos/transaction_builder/builder.dart';
 import 'package:eth_sig_util/util/utils.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
@@ -22,7 +21,9 @@ class AptosSigner {
   final bool _isTestnet;
 
   AptosClient get _client => AptosClient(
-        _isTestnet ? Constants.testnetAPI : Constants.mainnetAPI,
+        _isTestnet
+            ? 'https://aptos-testnet-rpc.allthatnode.com/v1'
+            : 'https://aptos-mainnet-rpc.allthatnode.com/v1',
         enableDebugLog: _isTestnet,
       );
 
