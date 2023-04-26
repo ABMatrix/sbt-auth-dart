@@ -953,7 +953,7 @@ class SbtAuth {
   /// Batch recover
   Future<void> batchRecover(
     String password,
-    List<Map<String, dynamic>> privateKeyList,
+    List<dynamic> privateKeyList,
   ) async {
     for (var i = 0; i < privateKeyList.length; i++) {
       final chain =
