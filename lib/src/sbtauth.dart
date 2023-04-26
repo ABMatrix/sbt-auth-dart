@@ -808,7 +808,7 @@ class SbtAuth {
         state == 'undefined' ? 'state' : state,
         keyType: chain.name,
       );
-      final dataList = jsonDecode(res) as List;
+      final dataList = jsonDecode(res) as List<Map<String, dynamic>>;
       if (Platform.isIOS) {
         await closeInAppWebView();
       }
@@ -820,6 +820,7 @@ class SbtAuth {
       }
       await linkSubscription.cancel();
       await recoverWidthBackup(privateKey, password, chain: chain);
+      // await batchRecover(password, dataList);
     } catch (e) {
       rethrow;
     } finally {
@@ -947,6 +948,73 @@ class SbtAuth {
   /// Set local
   void setLocale(LocaleType localeType) {
     _locale = localeType;
+  }
+
+  /// Batch recover
+  Future<void> batchRecover(
+    String password,
+    List<Map<String, dynamic>> privateKeyList,
+  ) async {
+    for (var i = 0; i < privateKeyList.length; i++) {
+      final chain =
+          SbtChain.values.byName(privateKeyList[i]['network'] as String);
+      final backupPrivateKey = privateKeyList[i]['privateKey'] as String;
+      final remoteShareInfo = await api.fetchRemoteShare(keyType: chain.name);
+      var backup = '';
+      if (backupPrivateKey.startsWith('0x')) {
+        backup = backupPrivateKey;
+      } else {
+        backup = await decryptMsg(backupPrivateKey, password);
+      }
+      final core = getCore(chain);
+      final backShare = Share(
+        privateKey: backup,
+        publicKey: remoteShareInfo.remote.publicKey,
+        extraData: remoteShareInfo.backupAux,
+      );
+      final hash = bytesToHex(
+        hashMessage(ascii.encode(jsonEncode(backShare.toJson()))),
+        include0x: true,
+      );
+      if (hash != remoteShareInfo.backupHash) {
+        throw SbtAuthException('Recover failed');
+      }
+      final inited = await core.init(
+        address: remoteShareInfo.address,
+        remote: remoteShareInfo.remote,
+        backup: backShare,
+        localAux: remoteShareInfo.localAux,
+        isTestnet: developMode,
+      );
+      switch (chain) {
+        case SbtChain.EVM:
+          _core = core;
+          break;
+        case SbtChain.SOLANA:
+          _solanaCore = core;
+          break;
+        case SbtChain.BITCOIN:
+          _bitcoinCore = core;
+          break;
+        case SbtChain.DOGECOIN:
+          _dogecoinCore = core;
+          break;
+        case SbtChain.APTOS:
+          _aptosCore = core;
+          break;
+      }
+      if (!inited) throw SbtAuthException('Init error');
+      await DBUtil.auxBox.put(
+        core.getAddress(isTestnet: developMode),
+        remoteShareInfo.backupAux,
+      );
+      await DBUtil.hashBox.put(
+        core.getAddress(isTestnet: developMode),
+        remoteShareInfo.backupHash,
+      );
+      await api.verifyIdentity(core.localShare!, keyType: chain.name);
+    }
+    await _authRequestListener();
   }
 
   /// Get privateKey
