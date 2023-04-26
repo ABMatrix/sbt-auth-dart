@@ -148,6 +148,7 @@ class SbtAuthProvider {
       'gasLimit': gasLimit,
       'value': value,
       'to': to,
+      'nonce': nonce,
       'data': data,
       'maxFeePerGas': maxFeePerGas,
       'maxPriorityFeePerGas': maxPriorityFeePerGas
