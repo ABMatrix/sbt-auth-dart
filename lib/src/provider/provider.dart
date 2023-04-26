@@ -137,7 +137,7 @@ class SbtAuthProvider {
     required String to,
     required String value,
     String? data,
-    int? nonce,
+    String? nonce,
     String? gasPrice,
     String? gasLimit,
     String? maxFeePerGas,
