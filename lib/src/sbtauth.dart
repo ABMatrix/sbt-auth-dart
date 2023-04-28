@@ -778,15 +778,7 @@ class SbtAuth {
       if (Platform.isIOS) {
         await closeInAppWebView();
       }
-      var privateKey = '';
-      for (var i = 0; i < dataList.length; i++) {
-        if (dataList[i]['network'] == chain.name) {
-          privateKey = (dataList[i]['privateKey'] ?? '') as String;
-        }
-      }
-      await linkSubscription.cancel();
-      await recoverWidthBackup(privateKey, password, chain: chain);
-      // await batchRecover(password, dataList);
+      await batchRecover(password, dataList);
     } catch (e) {
       rethrow;
     } finally {
