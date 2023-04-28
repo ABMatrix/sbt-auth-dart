@@ -1114,7 +1114,7 @@ class SbtAuth {
   }
 
   /// Request friend recover
-  Future<void> requestFriendRecover() async {
+  Future<String> requestFriendRecover() async {
     final eventSource =
         await EventSource.connect('$_baseUrl/sse:connect?access_token=$token');
     final completer = Completer<String>();
@@ -1126,6 +1126,7 @@ class SbtAuth {
       }
     });
     final data = await completer.future;
+    return data;
   }
 
   /// Get backup info
