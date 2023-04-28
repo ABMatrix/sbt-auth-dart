@@ -19,6 +19,9 @@ const AUX_KEY = 'local_aux_key';
 /// Hive cache box key
 const HASH_KEY = 'local_hash_key';
 
+/// Hive cache box key
+const FRIEND_SHARE_KEY = 'friend_share_key';
+
 /// Hive Util
 class DBUtil {
   /// user token box
@@ -36,6 +39,9 @@ class DBUtil {
   /// backup hash box
   static late Box<String> hashBox;
 
+  /// friend share box
+  static late Box<String> friendShareBox;
+
   /// init Box
   static Future<void> init() async {
     final document = await getApplicationDocumentsDirectory();
@@ -51,5 +57,6 @@ class DBUtil {
     userBox = await Hive.openBox(USER_KEY);
     auxBox = await Hive.openBox(AUX_KEY);
     hashBox = await Hive.openBox(HASH_KEY);
+    friendShareBox = await Hive.openBox(FRIEND_SHARE_KEY);
   }
 }

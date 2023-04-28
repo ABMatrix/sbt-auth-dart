@@ -414,24 +414,7 @@ class SbtAuth {
     String code, {
     String googleCode = '',
   }) async {
-    final backupInfo = <String, dynamic>{};
-    final coreList = <AuthCore?>[
-      _core,
-      _solanaCore,
-      _bitcoinCore,
-      _dogecoinCore,
-      _aptosCore,
-    ];
-    for (var i = 0; i < SbtChain.values.length; i++) {
-      if (coreList[i] != null) {
-        final remoteShareInfo =
-            await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
-        final backupPrivateKey =
-            await coreList[i]!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        final privateKey = await encryptMsg(backupPrivateKey, password);
-        backupInfo[SbtChain.values[i].name] = privateKey;
-      }
-    }
+    final backupInfo = await getBackupData(password);
     await api.batchBackup(
       code,
       backupInfo,
@@ -737,24 +720,7 @@ class SbtAuth {
     final code = dataMap['code'] as String;
     final state = dataMap['state'] as String;
     loadingStreamController.add(true);
-    final backupInfo = <String, dynamic>{};
-    final coreList = <AuthCore?>[
-      _core,
-      _solanaCore,
-      _bitcoinCore,
-      _dogecoinCore,
-      _aptosCore
-    ];
-    for (var i = 0; i < SbtChain.values.length; i++) {
-      if (coreList[i] != null) {
-        final remoteShareInfo =
-            await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
-        final backupPrivateKey =
-            await coreList[i]!.getBackupPrivateKey(remoteShareInfo.backupAux);
-        final privateKey = await encryptMsg(backupPrivateKey, password);
-        backupInfo[SbtChain.values[i].name] = privateKey;
-      }
-    }
+    final backupInfo = await getBackupData(password);
     try {
       await api.oneDriveBatchBackup(
         code,
@@ -1145,6 +1111,50 @@ class SbtAuth {
         _aptosCore = core;
         break;
     }
+  }
+
+  /// Request friend recover
+  Future<void> requestFriendRecover() async {
+    final eventSource =
+        await EventSource.connect('$_baseUrl/sse:connect?access_token=$token');
+    final completer = Completer<String>();
+    eventSource.listen((Event event) {
+      if (event.id != null) {
+        api.confirmEventReceived(event.id!, 'AUTH_CONFIRM');
+        completer.complete(event.data);
+        eventSource.client.close();
+      }
+    });
+    final data = await completer.future;
+  }
+
+  /// Get backup info
+  Future<Map<String, dynamic>> getBackupData(String password) async {
+    final backupInfo = <String, dynamic>{};
+    final coreList = <AuthCore?>[
+      _core,
+      _solanaCore,
+      _bitcoinCore,
+      _dogecoinCore,
+      _aptosCore
+    ];
+    for (var i = 0; i < SbtChain.values.length; i++) {
+      if (coreList[i] != null) {
+        final remoteShareInfo =
+            await api.fetchRemoteShare(keyType: SbtChain.values[i].name);
+        final backupPrivateKey =
+            await coreList[i]!.getBackupPrivateKey(remoteShareInfo.backupAux);
+        final privateKey = await encryptMsg(backupPrivateKey, password);
+        backupInfo[SbtChain.values[i].name] = privateKey;
+      }
+    }
+    return backupInfo;
+  }
+
+  /// Send friend share
+  Future<void> sendFriendShare(String userId, String deviceName) async {
+    final shareData = getFriendShare(userId) ?? '';
+    await api.socialRecover(userId, deviceName, shareData);
   }
 
   Stream<StreamResponse> _queryWhetherSuccess(

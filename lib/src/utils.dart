@@ -13,6 +13,8 @@ import 'package:sbt_auth_dart/src/types/signer.dart';
 import 'package:sbt_encrypt/sbt_encrypt.dart';
 import 'package:web3dart/crypto.dart';
 
+import 'db_util.dart';
+
 const _messagePrefix = '\u0019Ethereum Signed Message:\n';
 
 /// Check private key format
@@ -214,4 +216,14 @@ String aptosAddressFromPubKey(String pubKey) {
   final hash = sha3Hash.process(bytes);
   final address = bytesToHex(hash);
   return '0x$address';
+}
+
+/// Save friend share
+void saveFriendShare(String userId, String shareData) {
+  DBUtil.friendShareBox.put(userId, shareData);
+}
+
+/// Get friend share
+String? getFriendShare(String userId) {
+  return DBUtil.friendShareBox.get(userId);
 }
