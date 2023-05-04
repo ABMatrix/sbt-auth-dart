@@ -824,8 +824,11 @@ class SbtAuthApi {
   }
 
   /// Add backup friend
-  Future<void> addBackupFriend(String userID) async {
-    final data = {'userID': userID};
+  Future<void> addBackupFriend(String userID,String clientID) async {
+    final data = {
+      'userID': userID,
+      'clientID': clientID,
+    };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/backup-relation'),
       headers: _headers,

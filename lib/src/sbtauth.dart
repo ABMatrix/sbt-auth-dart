@@ -1150,6 +1150,11 @@ class SbtAuth {
     await api.socialRecover(userId, deviceName, shareData);
   }
 
+  /// Add backup friend
+  Future<void> addBackupFriend(String userID) async {
+    await api.addBackupFriend(userID, _clientId);
+  }
+
   Stream<StreamResponse> _queryWhetherSuccess(
     String password,
     String qrcode,

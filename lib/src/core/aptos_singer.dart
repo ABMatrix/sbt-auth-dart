@@ -22,10 +22,8 @@ class AptosSigner {
 
   AptosClient get _client => AptosClient(
         _isTestnet
-            // ? 'https://rpc.abmatrix.cn/restful/http/aptos_testnet/v1'
-            // : 'https://rpc.abmatrix.cn/restful/http/aptos/v1',
-            ? 'https://aptos-testnet-rpc.allthatnode.com/v1'
-            : 'https://aptos-mainnet-rpc.allthatnode.com/v1',
+            ? 'https://rpc.abmatrix.cn/restful/http/aptos_testnet/v1'
+            : 'https://rpc.abmatrix.cn/restful/http/aptos/v1',
         enableDebugLog: _isTestnet,
       );
 
