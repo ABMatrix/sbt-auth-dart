@@ -1112,7 +1112,7 @@ class SbtAuth {
     final completer = Completer<String>();
     eventSource.listen((Event event) {
       if (event.id != null) {
-        api.confirmEventReceived(event.id!, 'AUTH_CONFIRM');
+        api.confirmEventReceived(event.id!, 'SOCIAL_RECOVER');
         completer.complete(event.data);
         eventSource.client.close();
       }
