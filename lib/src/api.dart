@@ -73,7 +73,7 @@ class SbtAuthApi {
       },
       body: jsonEncode(data),
     );
-    _checkResponse(response) as String;
+    _checkResponse(response);
   }
 
   /// Login with email
@@ -824,7 +824,7 @@ class SbtAuthApi {
   }
 
   /// Add backup friend
-  Future<void> addBackupFriend(String userID,String clientID) async {
+  Future<void> addBackupFriend(String userID, String clientID) async {
     final data = {
       'userID': userID,
       'clientID': clientID,

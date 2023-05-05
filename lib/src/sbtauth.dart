@@ -1124,6 +1124,21 @@ class SbtAuth {
   /// Get backup info
   Future<Map<String, dynamic>> getBackupData(String password) async {
     final backupInfo = <String, dynamic>{};
+    if (_core == null) {
+      await init(isLogin: true);
+    }
+    if (_solanaCore == null) {
+      await init(isLogin: true, chain: SbtChain.SOLANA);
+    }
+    if (_bitcoinCore == null) {
+      await init(isLogin: true, chain: SbtChain.BITCOIN);
+    }
+    if (_dogecoinCore == null) {
+      await init(isLogin: true, chain: SbtChain.DOGECOIN);
+    }
+    if (_aptosCore == null) {
+      await init(isLogin: true, chain: SbtChain.APTOS);
+    }
     final coreList = <AuthCore?>[
       _core,
       _solanaCore,
