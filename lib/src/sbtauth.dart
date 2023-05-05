@@ -774,7 +774,7 @@ class SbtAuth {
         state == 'undefined' ? 'state' : state,
         keyType: chain.name,
       );
-      final dataList = jsonDecode(res) as List<Map<String, dynamic>>;
+      final dataList = jsonDecode(res) as List;
       if (Platform.isIOS) {
         await closeInAppWebView();
       }
