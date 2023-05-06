@@ -403,7 +403,11 @@ class SbtAuthApi {
       headers: _headers,
       body: jsonEncode(data),
     );
-    _checkResponse(response);
+    try {
+      _checkResponse(response);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   /// Create user whiteList
