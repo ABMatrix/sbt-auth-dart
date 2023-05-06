@@ -406,7 +406,7 @@ class SbtAuthApi {
     try {
       _checkResponse(response);
     } catch (e) {
-      debugPrint(e.toString());
+      print(e.toString());
     }
   }
 
