@@ -886,11 +886,25 @@ class SbtAuthApi {
   Future<bool> bindGoogleAuth(String authCode, String userID) async {
     final response = await http.get(
       Uri.parse(
-          '$_baseUrl/user/social-recover?authCode=$authCode&userID=$userID'),
+        '$_baseUrl/user/google:verify?authCode=$authCode&userID=$userID',
+      ),
       headers: _headers,
     );
     final res = _checkResponse(response) as bool;
     return res;
+  }
+
+  /// Unite GoogleAuth
+  Future<void> uniteGoogleAuth(String authCode) async {
+    final data = {
+      'authCode': authCode,
+    };
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/google:untie'),
+      headers: _headers,
+      body: jsonEncode(data),
+    );
+    _checkResponse(response);
   }
 
   /// Generate privateKey
