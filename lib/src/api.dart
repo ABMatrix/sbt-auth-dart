@@ -872,6 +872,36 @@ class SbtAuthApi {
     _checkResponse(response);
   }
 
+  /// Generate Google AuthCode
+  Future<String> generateGoogleAuthCode() async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/google:generate'),
+      headers: _headers,
+    );
+    final res = _checkResponse(response) as String;
+    return res;
+  }
+
+  /// Bind google auth
+  Future<bool> bindGoogleAuth(String authCode, String userID) async {
+    final response = await http.get(
+      Uri.parse(
+          '$_baseUrl/user/social-recover?authCode=$authCode&userID=$userID'),
+      headers: _headers,
+    );
+    final res = _checkResponse(response) as bool;
+    return res;
+  }
+
+  /// Generate privateKey
+  Future<void> generatePrivateKey() async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/user/private-key:generate'),
+      headers: _headers,
+    );
+    _checkResponse(response);
+  }
+
   static dynamic _checkResponse(Response response) {
     final body =
         jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
