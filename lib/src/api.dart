@@ -912,6 +912,7 @@ class SbtAuthApi {
     final response = await http.post(
       Uri.parse('$_baseUrl/user/private-key:generate'),
       headers: _headers,
+      body: {},
     );
     _checkResponse(response);
   }
