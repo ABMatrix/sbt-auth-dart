@@ -65,9 +65,10 @@ class UserInfo {
           )['whitelist'] ??
           false) as bool,
       tokenTime: (jsonDecode(
-            (map['userLoginParams'] ?? '{}') as String,
-          )['token_time'] ??
-          '0') as String,
+                (map['userLoginParams'] ?? '{}') as String,
+              )['token_time'] ??
+              '0')
+          .toString(),
       paymentPwd: (jsonDecode(
             (map['userLoginParams'] ?? '{}') as String,
           )['payment_switch'] ??
