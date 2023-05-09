@@ -48,6 +48,7 @@ class UserInfo {
     required this.tokenTime,
     required this.paymentPwd,
     required this.userOtp,
+    required this.keyGenerate,
   });
 
   /// User from map
@@ -57,13 +58,14 @@ class UserInfo {
       userID: map['userID'] as String,
       username: map['username'] as String,
       avatar: map['avatar'] as String?,
-      email: map['email'] as String,
+      email: (map['email'] ?? '') as String,
       userLoginType: map['userLoginType'] as String,
       publicKeyAddress: map['publicKeyAddress'] as Map<dynamic, dynamic>,
       whitelistSwitch: (map['whitelistSwitch'] ?? false) as bool,
       tokenTime: (map['tokenTime'] ?? '0') as String,
       paymentPwd: (map['paymentPwd'] ?? false) as bool,
       userOtp: (map['userOtp'] ?? false) as bool,
+      keyGenerate: (map['keyGenerate'] ?? false) as bool,
     );
   }
 
@@ -81,6 +83,7 @@ class UserInfo {
       'tokenTime': tokenTime,
       'paymentPwd': paymentPwd,
       'userOtp': userOtp,
+      'keyGenerate': keyGenerate,
     };
   }
 
@@ -119,6 +122,9 @@ class UserInfo {
 
   /// Backup private key
   String? backupPrivateKey;
+
+  /// Export privatekry
+  bool keyGenerate;
 }
 
 /// Login QrCode status
