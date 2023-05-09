@@ -61,7 +61,7 @@ class UserInfo {
       email: (map['email'] ?? '') as String,
       userLoginType: map['userLoginType'] as String,
       publicKeyAddress: map['publicKeyAddress'] as Map<dynamic, dynamic>,
-      whitelistSwitch: (map['whitelistSwitch'] ?? false) as bool,
+      whitelistSwitch: (map['userWhitelist'] ?? false) as bool,
       tokenTime: (map['tokenTime'] ?? '0') as String,
       paymentPwd: (map['paymentPwd'] ?? false) as bool,
       userOtp: (map['userOtp'] ?? false) as bool,
