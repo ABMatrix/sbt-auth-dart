@@ -60,9 +60,18 @@ class UserInfo {
       userLoginParams: map['userLoginParams'] as String,
       userLoginType: map['userLoginType'] as String,
       publicKeyAddress: map['publicKeyAddress'] as Map<dynamic, dynamic>,
-      userWhitelist: (map['userWhitelist'] ?? false) as bool,
-      tokenTime: (map['tokenTime'] ?? '0') as String,
-      paymentPwd: (map['paymentPwd'] ?? false) as bool,
+      userWhitelist: (jsonDecode(
+            (map['userLoginParams'] ?? '{}') as String,
+          )['whitelist'] ??
+          false) as bool,
+      tokenTime: (jsonDecode(
+            (map['userLoginParams'] ?? '{}') as String,
+          )['token_time'] ??
+          '0') as String,
+      paymentPwd: (jsonDecode(
+            (map['userLoginParams'] ?? '{}') as String,
+          )['payment_switch'] ??
+          false) as bool,
       userOtp: (map['userOtp'] ?? false) as bool,
     );
   }
