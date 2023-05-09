@@ -27,7 +27,7 @@ class WhiteListPageState extends State<WhiteListPage> {
     final result = await widget.sbtAuth.api.getUserInfo();
     setState(() {
       whiteList = res;
-      open = result.userWhitelist;
+      open = result.whitelistSwitch;
     });
   }
 
@@ -38,13 +38,13 @@ class WhiteListPageState extends State<WhiteListPage> {
         title: const Text('white list'),
         actions: [
           Switch(
-              value: widget.sbtAuth.user!.userWhitelist,
+              value: widget.sbtAuth.user!.whitelistSwitch,
               onChanged: (v) async {
                 await widget.sbtAuth
                     .switchWhiteList('code', whitelistSwitch: v);
                 final res = await widget.sbtAuth.api.getUserInfo();
                 setState(() {
-                  open = res.userWhitelist;
+                  open = res.whitelistSwitch;
                 });
               })
         ],

@@ -41,10 +41,10 @@ class UserInfo {
     required this.userID,
     required this.username,
     required this.avatar,
-    required this.userLoginParams,
+    required this.email,
     required this.userLoginType,
     required this.publicKeyAddress,
-    required this.userWhitelist,
+    required this.whitelistSwitch,
     required this.tokenTime,
     required this.paymentPwd,
     required this.userOtp,
@@ -57,22 +57,12 @@ class UserInfo {
       userID: map['userID'] as String,
       username: map['username'] as String,
       avatar: map['avatar'] as String?,
-      userLoginParams: map['userLoginParams'] as String,
+      email: map['email'] as String,
       userLoginType: map['userLoginType'] as String,
       publicKeyAddress: map['publicKeyAddress'] as Map<dynamic, dynamic>,
-      userWhitelist: (jsonDecode(
-            (map['userLoginParams'] ?? '{}') as String,
-          )['whitelist'] ??
-          false) as bool,
-      tokenTime: (jsonDecode(
-                (map['userLoginParams'] ?? '{}') as String,
-              )['token_time'] ??
-              '0')
-          .toString(),
-      paymentPwd: (jsonDecode(
-            (map['userLoginParams'] ?? '{}') as String,
-          )['payment_switch'] ??
-          false) as bool,
+      whitelistSwitch: (map['whitelistSwitch'] ?? false) as bool,
+      tokenTime: (map['tokenTime'] ?? '0') as String,
+      paymentPwd: (map['paymentPwd'] ?? false) as bool,
       userOtp: (map['userOtp'] ?? false) as bool,
     );
   }
@@ -84,10 +74,10 @@ class UserInfo {
       'userID': userID,
       'username': username,
       'avatar': avatar,
-      'userLoginParams': userLoginParams,
+      'email': email,
       'userLoginType': userLoginType,
       'publicKeyAddress': publicKeyAddress,
-      'userWhitelist': userWhitelist,
+      'whitelistSwitch': whitelistSwitch,
       'tokenTime': tokenTime,
       'paymentPwd': paymentPwd,
       'userOtp': userOtp,
@@ -106,8 +96,8 @@ class UserInfo {
   /// Avatar
   String? avatar;
 
-  /// Login params
-  String userLoginParams;
+  /// Email
+  String email;
 
   /// Login type, google | twitter | facebook | email
   String userLoginType;
@@ -116,7 +106,7 @@ class UserInfo {
   Map<dynamic, dynamic> publicKeyAddress;
 
   /// White list switch
-  bool userWhitelist;
+  bool whitelistSwitch;
 
   /// Token time
   String? tokenTime;

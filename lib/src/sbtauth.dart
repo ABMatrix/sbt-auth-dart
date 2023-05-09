@@ -90,9 +90,6 @@ class SbtAuth {
 
   UserInfo? _user;
 
-  /// User email
-  String userEmail = '';
-
   /// core
   AuthCore? get core => _core;
 
@@ -214,10 +211,6 @@ class SbtAuth {
     _user ??= await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
     await DBUtil.userBox.put('user', user);
-    if (_user!.userLoginParams.contains('email')) {
-      userEmail =
-          (jsonDecode(_user!.userLoginParams) as Map)['email'] as String;
-    }
     if (_user!.publicKeyAddress[chain.name] == null) {
       final core = getCore(chain);
       final account = await core.generatePubKey(testnet: developMode);
@@ -269,23 +262,23 @@ class SbtAuth {
         switch (chain) {
           case SbtChain.EVM:
             _core = core;
-            _core!.setSignModel(user!.userWhitelist);
+            _core!.setSignModel(user!.whitelistSwitch);
             break;
           case SbtChain.SOLANA:
             _solanaCore = core;
-            _solanaCore!.setSignModel(user!.userWhitelist);
+            _solanaCore!.setSignModel(user!.whitelistSwitch);
             break;
           case SbtChain.BITCOIN:
             _bitcoinCore = core;
-            _bitcoinCore!.setSignModel(user!.userWhitelist);
+            _bitcoinCore!.setSignModel(user!.whitelistSwitch);
             break;
           case SbtChain.DOGECOIN:
             _dogecoinCore = core;
-            _dogecoinCore!.setSignModel(user!.userWhitelist);
+            _dogecoinCore!.setSignModel(user!.whitelistSwitch);
             break;
           case SbtChain.APTOS:
             _aptosCore = core;
-            _aptosCore!.setSignModel(user!.userWhitelist);
+            _aptosCore!.setSignModel(user!.whitelistSwitch);
             break;
         }
         await DBUtil.auxBox.put(
@@ -421,7 +414,6 @@ class SbtAuth {
       email,
       googleCode: googleCode,
     );
-    userEmail = email;
   }
 
   /// Logout
@@ -435,7 +427,6 @@ class SbtAuth {
     _dogecoinCore = null;
     _aptosCore = null;
     _eventSource?.client.close();
-    userEmail = '';
   }
 
   /// Approve auth request
@@ -807,7 +798,7 @@ class SbtAuth {
     String googleCode = '',
   }) async {
     await api.switchUserWhiteList(
-      userEmail,
+      user!.email,
       code,
       whitelistSwitch: whitelistSwitch,
       googleCode: googleCode,
@@ -820,19 +811,19 @@ class SbtAuth {
     _user = await api.getUserInfo();
     await DBUtil.userBox.put('user', user);
     if (core != null) {
-      core!.setSignModel(user!.userWhitelist);
+      core!.setSignModel(user!.whitelistSwitch);
     }
     if (solanaCore != null) {
-      solanaCore!.setSignModel(user!.userWhitelist);
+      solanaCore!.setSignModel(user!.whitelistSwitch);
     }
     if (bitcoinCore != null) {
-      bitcoinCore!.setSignModel(user!.userWhitelist);
+      bitcoinCore!.setSignModel(user!.whitelistSwitch);
     }
     if (dogecoinCore != null) {
-      dogecoinCore!.setSignModel(user!.userWhitelist);
+      dogecoinCore!.setSignModel(user!.whitelistSwitch);
     }
     if (aptosCore != null) {
-      aptosCore!.setSignModel(user!.userWhitelist);
+      aptosCore!.setSignModel(user!.whitelistSwitch);
     }
   }
 
@@ -846,7 +837,7 @@ class SbtAuth {
     String googleCode = '',
   }) async {
     await api.createUserWhiteList(
-      userEmail,
+      user!.email,
       authCode,
       toLowerCase ? address.toLowerCase() : address,
       name,
@@ -862,7 +853,7 @@ class SbtAuth {
     String googleCode = '',
   }) async {
     await api.deleteUserWhiteList(
-      userEmail,
+      user!.email,
       authCode,
       userWhitelistID,
       googleCode: googleCode,
@@ -881,7 +872,7 @@ class SbtAuth {
     String googleCode = '',
   }) async {
     await api.editUserWhiteList(
-      userEmail,
+      user!.email,
       authCode,
       toLowerCase ? address.toLowerCase() : address,
       name,
