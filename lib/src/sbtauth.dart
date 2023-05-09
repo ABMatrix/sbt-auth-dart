@@ -686,6 +686,7 @@ class SbtAuth {
   Future<void> oneDriveBatchBackup(
     String password, {
     String? customUrl,
+    String googleCode = '',
   }) async {
     final baseUrl =
         customUrl ?? (developMode ? DEVELOP_AUTH_URL : PRODUCTION_AUTH_URL);
@@ -717,6 +718,7 @@ class SbtAuth {
         code,
         state == 'undefined' ? 'state' : state,
         backupInfo,
+        googleCode: googleCode,
       );
       if (Platform.isIOS) {
         await closeInAppWebView();

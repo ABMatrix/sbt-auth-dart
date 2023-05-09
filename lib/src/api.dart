@@ -812,12 +812,14 @@ class SbtAuthApi {
   Future<void> oneDriveBatchBackup(
     String code,
     String state,
-    Map<String, dynamic> backupInfo,
-  ) async {
+    Map<String, dynamic> backupInfo, {
+    String googleCode = '',
+  }) async {
     final data = {
       'code': code,
       'backupInfo': backupInfo,
       'state': state,
+      'googleCode': googleCode,
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/microsoft:upload-file:batch'),
