@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
@@ -406,7 +407,7 @@ class SbtAuthApi {
     try {
       _checkResponse(response);
     } catch (e) {
-      print(e.toString());
+      debugPrint(e.toString());
     }
   }
 
@@ -497,7 +498,8 @@ class SbtAuthApi {
       ),
       headers: _headers,
     );
-    final data = _checkResponse(response) ?? <String, dynamic>{};
+    final data = (_checkResponse(response) ?? <String, dynamic>{})
+        as Map<String, dynamic>;
     final items = data['items'] as List?;
     return [
       for (var d in items ?? [])

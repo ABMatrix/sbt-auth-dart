@@ -9,11 +9,10 @@ import 'package:flutter_bitcoin/flutter_bitcoin.dart';
 import 'package:mpc_dart/mpc_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
+import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
 import 'package:sbt_encrypt/sbt_encrypt.dart';
 import 'package:web3dart/crypto.dart';
-
-import 'db_util.dart';
 
 const _messagePrefix = '\u0019Ethereum Signed Message:\n';
 
@@ -135,8 +134,6 @@ List<dynamic> encodeToRlp(
 Uint8List padUnit8ListTo32(Uint8List data) {
   assert(data.length <= 32, 'Wrong data length');
   if (data.length == 32) return data;
-
-  // todo there must be a faster way to do this?
   return Uint8List(32)..setRange(32 - data.length, 32, data);
 }
 
