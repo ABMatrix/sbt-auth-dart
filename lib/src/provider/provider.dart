@@ -225,14 +225,19 @@ class SbtAuthProvider {
     if (!data.startsWith('0x')) {
       data = '0x$data';
     }
-    if (data.startsWith('0xa9059cbb')) {
-      // Extract the "to" address from the input data
-      toAddress = '0x${data.substring(34, 74)}';
 
-      // Extract the transfer value from the input data
+    /// token transaction
+    if (data.startsWith('0xa9059cbb')) {
+      toAddress = '0x${data.substring(34, 74)}';
       transferValue = hexToInt(data.substring(74)).toString();
       contractAddress = transaction['to'] as String;
+    } else if (data.startsWith('0x5f575529')) {
+      /// swap
+      toAddress = '0x${data.substring(98, 138)}';
+      transferValue = hexToInt(data.substring(138, 202)).toString();
+      contractAddress = transaction['to'] as String;
     }
+
     final res = await signer.signTransaction(
       UnsignedTransaction.fromMap(transaction),
       int.parse(chainId),
