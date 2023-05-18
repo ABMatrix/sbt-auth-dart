@@ -233,9 +233,11 @@ class SbtAuthProvider {
       contractAddress = transaction['to'] as String;
     } else if (data.startsWith('0x5f575529')) {
       /// swap
-      toAddress = '0x${data.substring(98, 138)}';
+      // token address
+      contractAddress = '0x${data.substring(98, 138)}';
       transferValue = hexToInt(data.substring(138, 202)).toString();
-      contractAddress = transaction['to'] as String;
+      // swap contract address
+      toAddress = transaction['to'] as String;
     }
 
     final res = await signer.signTransaction(
