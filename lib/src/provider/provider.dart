@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:http/http.dart';
 import 'package:sbt_auth_dart/src/core/signer.dart';
 import 'package:sbt_auth_dart/src/types/error.dart';
@@ -64,12 +66,19 @@ const _ethRpc = {
   '0x118': 'https://rpc.abmatrix.cn/json-rpc/http/zksync_testnet',
 };
 
+/// develop url
+const String developUrl = 'https://test-api.safff.xyz/safff/wallet/transfer';
+
+/// prod url
+const String prodUrl = 'https://api.safff.xyz/safff/wallet/transfer';
+
 /// Ethereum provider, use to connect to sbtauth wallet.
 class SbtAuthProvider {
   /// Ethereum provider
   SbtAuthProvider({
     required this.signer,
     required this.clientId,
+    required this.isTestnet,
   }) {
     accounts = signer.getAccounts();
     _setupJsonRpcClient();
@@ -80,6 +89,9 @@ class SbtAuthProvider {
 
   ///  Client id
   late String clientId;
+
+  /// is testnet
+  final bool isTestnet;
 
   /// namespace
   final namespace = 'eip155';
@@ -207,11 +219,14 @@ class SbtAuthProvider {
     }
   }
 
-  Future<void> _sendTransaction(RequestArgument argument) async {
+  Future<String> _sendTransaction(RequestArgument argument) async {
     final transaction = await _signTransaction(argument);
-    final response =
-        await jsonRpcClient!.call('eth_sendRawTransaction', [transaction]);
-    return response.result;
+    // final response =
+    //     await jsonRpcClient!.call('eth_sendRawTransaction', [transaction]);
+    // return response.result;
+    final api = EvmApi(url: isTestnet ? developUrl : prodUrl, network: network);
+    final hash = await api.sendTransaction(transaction ?? '');
+    return hash;
   }
 
   Future<String?> _signTransaction(RequestArgument argument) async {
@@ -297,5 +312,40 @@ class SbtAuthProvider {
       final response = await jsonRpcClient!.call('eth_estimateGas', [request]);
       transaction['gasLimit'] = response.result;
     }
+  }
+}
+
+/// api
+class EvmApi {
+  ///api
+  EvmApi({required this.url, required this.network});
+
+  ///url
+  final String url;
+
+  /// net work
+  final String network;
+
+  /// send transaction
+  Future<String> sendTransaction(String singedData) async {
+    final data = {'singedData': singedData, 'network': network};
+    final response = await post(
+      Uri.parse('$url/transfer'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(data),
+    );
+    final hash = _checkResponse(response) as String;
+    return hash;
+  }
+
+  static dynamic _checkResponse(Response response) {
+    final body =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    if (body['code'] != '000') {
+      throw SbtAuthException((body['msg'] ?? '') as String);
+    }
+    return body['data'];
   }
 }

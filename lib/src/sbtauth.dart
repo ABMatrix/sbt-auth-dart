@@ -184,6 +184,7 @@ class SbtAuth {
       : SbtAuthProvider(
           signer: core!.signer,
           clientId: _clientId,
+          isTestnet: developMode,
         );
 
   /// Init sbtauth hive
