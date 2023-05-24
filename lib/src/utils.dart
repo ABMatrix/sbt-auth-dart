@@ -6,12 +6,14 @@ import 'dart:typed_data';
 import 'package:aptos/utils/sha.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter_bitcoin/flutter_bitcoin.dart';
+import 'package:flutter_bitcoin/src/crypto.dart' as bcrypto;
 import 'package:mpc_dart/mpc_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
 import 'package:sbt_encrypt/sbt_encrypt.dart';
+import 'package:solana/base58.dart';
 import 'package:web3dart/crypto.dart';
 
 const _messagePrefix = '\u0019Ethereum Signed Message:\n';
@@ -223,4 +225,16 @@ void saveFriendShare(String userId, String shareData) {
 /// Get friend share
 String? getFriendShare(String userId) {
   return DBUtil.friendShareBox.get(userId);
+}
+
+///To WIF
+String toWif(String key, {bool isBtc = true}) {
+  if (key.startsWith('0x')) {
+    key = key.substring(2);
+  }
+  final initKey = isBtc ? '80${key}01' : '9e${key}01';
+  final hash1 = bcrypto.hash256(hexToBytes(initKey));
+  final hexHash = listToHex(hash1).substring(2, 10);
+  final hexKey = '$initKey$hexHash';
+  return base58encode(hexToBytes(hexKey));
 }

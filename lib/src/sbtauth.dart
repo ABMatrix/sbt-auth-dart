@@ -9,7 +9,6 @@ import 'package:app_links/app_links.dart';
 import 'package:eth_sig_util/util/utils.dart';
 import 'package:eventsource/eventsource.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_bitcoin/src/crypto.dart' as bcrypto;
 import 'package:mpc_dart/multi_mpc_dart.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
@@ -17,7 +16,6 @@ import 'package:sbt_auth_dart/src/core/aptos_singer.dart';
 import 'package:sbt_auth_dart/src/core/bitcoin_signer.dart';
 import 'package:sbt_auth_dart/src/core/solana_signer.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
-import 'package:solana/base58.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Develop app url
@@ -1012,18 +1010,6 @@ class SbtAuth {
 
   void _saveToken(String token) {
     DBUtil.tokenBox.put(TOKEN_KEY, token);
-  }
-
-  ///To WIF
-  String toWif(String key, {bool isBtc = true}) {
-    if (key.startsWith('0x')) {
-      key = key.substring(2);
-    }
-    final initKey = isBtc ? '80${key}01' : '9e${key}01';
-    final hash1 = bcrypto.hash256(hexToBytes(initKey));
-    final hexHash = listToHex(hash1).substring(2, 10);
-    final hexKey = '$initKey$hexHash';
-    return base58encode(hexToBytes(hexKey));
   }
 
   /// Get token list

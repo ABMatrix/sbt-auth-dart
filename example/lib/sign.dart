@@ -30,7 +30,7 @@ class _SignPageState extends State<SignPage> {
   void initState() {
     print(widget.address);
     super.initState();
-    print(widget.sbtauth.toWif(
+    print(toWif(
         '1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd'));
   }
 
@@ -205,7 +205,6 @@ class _SignPageState extends State<SignPage> {
       ),
     );
   }
-
 
   _logout() {
     widget.sbtauth.logout();
