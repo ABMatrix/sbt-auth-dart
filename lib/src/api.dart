@@ -223,13 +223,15 @@ class SbtAuthApi {
     String emailAddress,
     String authCode,
     String password,
-    String baseUrl, {
+    String baseUrl,
+    String clientID, {
     String localLan = 'en-US',
   }) async {
     final data = {
       'emailAddress': emailAddress,
       'authCode': authCode,
-      'password': password
+      'password': password,
+      'clientID': clientID,
     };
     final response = await http.post(
       Uri.parse('$baseUrl/user/reset:password'),

@@ -323,6 +323,7 @@ class SbtAuth {
       authCode,
       password,
       _baseUrl,
+      _clientId,
       localLan: _getLocale(_locale),
     );
   }
