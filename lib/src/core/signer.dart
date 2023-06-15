@@ -36,7 +36,7 @@ class Signer {
     return res;
   }
 
-  /// Sign typeddata
+  /// Sign type data
   Future<String> signTypedData(Map<String, dynamic> data) async {
     final res = await _core.signDigest(
       TypedDataUtil.hashMessage(

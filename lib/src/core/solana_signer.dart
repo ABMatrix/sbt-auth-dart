@@ -28,6 +28,7 @@ class SolanaSigner {
   }) async {
     final message = Message(instructions: [instruction]);
     final recentBlockhash = await SbtAuthApi.getRecentBlockhash(_solanaUrl);
+    final recentBlockHeight = await SbtAuthApi.getRecentBlockHeight(_solanaUrl);
     final compiledMessage = message.compile(
       recentBlockhash: recentBlockhash,
       feePayer: from,
@@ -38,7 +39,7 @@ class SolanaSigner {
       amount,
       contractAddress: contractAddress,
       network: _solanaNetwork,
-      nonce: recentBlockhash,
+      nonce: recentBlockHeight,
     );
     final tx = SignedTx(
       messageBytes: compiledMessage.data,

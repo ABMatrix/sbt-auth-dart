@@ -709,6 +709,24 @@ class SbtAuthApi {
     }
   }
 
+  /// Get Recent Block height
+  static Future<String> getRecentBlockHeight(String url) async {
+    final data = {'jsonrpc': '2.0', 'id': 1, 'method': 'getBlockHeight'};
+    final res = await http.post(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode(data),
+    );
+    final body = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+    if (body['result'] != null) {
+      return body['result'].toString();
+    } else {
+      throw SbtAuthException((body['error'] ?? 'Network') as String);
+    }
+  }
+
   /// Get slot
   static Future<int> getSlot(String url) async {
     final data = {
