@@ -246,14 +246,15 @@ class SbtAuthProvider {
       toAddress = '0x${data.substring(34, 74)}';
       transferValue = hexToInt(data.substring(74)).toString();
       contractAddress = transaction['to'] as String;
-    } else if (data.startsWith('0x5f575529')) {
-      /// swap
-      // token address
-      contractAddress = '0x${data.substring(98, 138)}';
-      transferValue = hexToInt(data.substring(138, 202)).toString();
-      // swap contract address
-      toAddress = transaction['to'] as String;
     }
+    // else if (data.startsWith('0x5f575529')) {
+    //   /// swap
+    //   // token address
+    //   contractAddress = '0x${data.substring(98, 138)}';
+    //   transferValue = hexToInt(data.substring(138, 202)).toString();
+    //   // swap contract address
+    //   toAddress = transaction['to'] as String;
+    // }
 
     final res = await signer.signTransaction(
       UnsignedTransaction.fromMap(transaction),
