@@ -751,7 +751,7 @@ class SbtAuth {
     );
     final completer = Completer<String?>();
     final appLinks = AppLinks();
-    final linkSubscription = appLinks.uriLinkStream.listen((uri) {
+    appLinks.uriLinkStream.listen((uri) {
       if (uri.toString().startsWith(_scheme)) {
         completer.complete(jsonEncode(uri.queryParameters));
       }
@@ -1192,30 +1192,37 @@ class SbtAuth {
             localShares['evm']!.toString(),
             SbtChain.EVM,
           );
+          await api.verifyIdentity(core!.localShare!);
         }
         if (localShares['solana'] != null) {
           await _initCoreWithLocalPrivateKey(
             localShares['solana']!.toString(),
             SbtChain.SOLANA,
           );
+          await api.verifyIdentity(solanaCore!.localShare!, keyType: 'SOLANA');
         }
         if (localShares['dogecoin'] != null) {
           await _initCoreWithLocalPrivateKey(
             localShares['dogecoin']!.toString(),
             SbtChain.DOGECOIN,
           );
+          await api.verifyIdentity(dogecoinCore!.localShare!,
+              keyType: 'DOGECOIN');
         }
         if (localShares['bitcoin'] != null) {
           await _initCoreWithLocalPrivateKey(
             localShares['bitcoin']!.toString(),
             SbtChain.BITCOIN,
           );
+          await api.verifyIdentity(bitcoinCore!.localShare!,
+              keyType: 'BITCOIN');
         }
         if (localShares['aptos'] != null) {
           await _initCoreWithLocalPrivateKey(
             localShares['aptos']!.toString(),
             SbtChain.APTOS,
           );
+          await api.verifyIdentity(aptosCore!.localShare!, keyType: 'APTOS');
         }
         await _authRequestListener();
         loginStreamController.add(true);
