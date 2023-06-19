@@ -387,7 +387,9 @@ class SbtAuth {
       await linkSubscription.cancel();
     }
     _timer?.cancel();
-    loadingStreamController.add(true);
+    if (loginType != LoginType.email) {
+      loadingStreamController.add(true);
+    }
     try {
       if (token == null) return;
       _saveToken(token);
@@ -396,7 +398,9 @@ class SbtAuth {
     } catch (e) {
       rethrow;
     } finally {
-      loadingStreamController.add(false);
+      if (loginType != LoginType.email) {
+        loadingStreamController.add(false);
+      }
     }
   }
 
