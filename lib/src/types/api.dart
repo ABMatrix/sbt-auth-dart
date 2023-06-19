@@ -49,6 +49,7 @@ class UserInfo {
     required this.paymentPwd,
     required this.userOtp,
     required this.keyGenerate,
+    required this.oldDevice,
   });
 
   /// User from map
@@ -66,6 +67,7 @@ class UserInfo {
       paymentPwd: (map['paymentPwd'] ?? false) as bool,
       userOtp: (map['userOtp'] ?? false) as bool,
       keyGenerate: (map['keyGenerate'] ?? false) as bool,
+      oldDevice: (map['oldDevice'] ?? true) as bool,
     );
   }
 
@@ -84,6 +86,7 @@ class UserInfo {
       'paymentPwd': paymentPwd,
       'userOtp': userOtp,
       'keyGenerate': keyGenerate,
+      'oldDevice': oldDevice,
     };
   }
 
@@ -125,6 +128,9 @@ class UserInfo {
 
   /// Export privatekry
   bool keyGenerate;
+
+  /// Old device
+  bool oldDevice;
 }
 
 /// Login QrCode status
