@@ -550,7 +550,11 @@ class SbtAuth {
 
   /// Send verify Code
   Future<void> sendVerifyCode(String email) async {
-    await SbtAuthApi.sendEmailCode(email: email, baseUrl: _baseUrl);
+    await SbtAuthApi.sendEmailCode(
+      email: email,
+      baseUrl: _baseUrl,
+      clientID: _clientId,
+    );
   }
 
   /// Init local share

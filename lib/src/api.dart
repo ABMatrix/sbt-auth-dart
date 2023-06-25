@@ -63,9 +63,10 @@ class SbtAuthApi {
   static Future<void> sendEmailCode({
     required String email,
     required String baseUrl,
+    required String clientID,
     String localLan = 'en-US',
   }) async {
-    final data = {'emailAddress': email};
+    final data = {'emailAddress': email,'clientID':clientID};
     final response = await http.post(
       Uri.parse('$baseUrl/user:auth-code'),
       headers: <String, String>{
