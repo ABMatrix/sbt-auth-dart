@@ -239,7 +239,7 @@ class SbtAuthProvider {
     var contractAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
     var toAddress = transaction['to'] as String;
     var transferValue =
-        int.parse(transaction['value'] as String).toRadixString(10);
+        BigInt.parse(transaction['value'] as String).toRadixString(10);
     if (!data.startsWith('0x')) {
       data = '0x$data';
     }
