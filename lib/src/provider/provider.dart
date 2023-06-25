@@ -112,10 +112,7 @@ class SbtAuthProvider {
   JsonRPC? jsonRpcClient;
 
   /// Json rpc request
-  Future<dynamic> request(
-    RequestArgument arguments, {
-    bool useNetwork = true,
-  }) async {
+  Future<dynamic> request(RequestArgument arguments) async {
     switch (arguments.method) {
       case 'eth_requestAccounts':
         return accounts;
@@ -126,7 +123,7 @@ class SbtAuthProvider {
       case 'eth_signTransaction':
         return _signTransaction(arguments);
       case 'eth_sendTransaction':
-        return _sendTransaction(arguments, useNetwork: useNetwork);
+        return _sendTransaction(arguments);
       case 'personal_sign':
       case 'eth_sign':
         final message = arguments.params[0] as String;
@@ -157,7 +154,6 @@ class SbtAuthProvider {
     String? gasLimit,
     String? maxFeePerGas,
     String? maxPriorityFeePerGas,
-    bool useNetwork = true,
   }) async {
     final transaction = {
       'gasPrice': gasPrice,
@@ -171,7 +167,6 @@ class SbtAuthProvider {
     };
     final result = await request(
       RequestArgument(method: 'eth_sendTransaction', params: [transaction]),
-      useNetwork: useNetwork,
     );
     return result as String;
   }
@@ -224,12 +219,8 @@ class SbtAuthProvider {
     }
   }
 
-  Future<String> _sendTransaction(
-    RequestArgument argument, {
-    bool useNetwork = true,
-  }) async {
-    final transaction =
-        await _signTransaction(argument, useNetwork: useNetwork);
+  Future<String> _sendTransaction(RequestArgument argument) async {
+    final transaction = await _signTransaction(argument);
     // final response =
     //     await jsonRpcClient!.call('eth_sendRawTransaction', [transaction]);
     // return response.result;
@@ -241,10 +232,7 @@ class SbtAuthProvider {
     return hash;
   }
 
-  Future<String?> _signTransaction(
-    RequestArgument argument, {
-    bool useNetwork = true,
-  }) async {
+  Future<String?> _signTransaction(RequestArgument argument) async {
     final transaction = argument.params[0] as Map<String, dynamic>;
     await _checkTransaction(transaction);
     var data = transaction['data'] as String;
@@ -261,20 +249,26 @@ class SbtAuthProvider {
       toAddress = '0x${data.substring(34, 74)}';
       transferValue = hexToInt(data.substring(74)).toString();
       contractAddress = transaction['to'] as String;
+    } else if (data.startsWith('0x5f575529')) {
+      /// swap
+      // token address
+      contractAddress = '0x${data.substring(98, 138)}';
+      transferValue = hexToInt(data.substring(138, 202)).toString();
+      // swap contract address
+      toAddress = transaction['to'] as String;
+    } else if (data.startsWith('0x095ea7b3')) {
+      /// approve
+      // token address
+      contractAddress = transaction['to'] as String;
+      transferValue = hexToInt(data.substring(74, 138)).toString();
+      //contract address
+      toAddress = '0x${data.substring(34, 74)}';
     }
-    // else if (data.startsWith('0x5f575529')) {
-    //   /// swap
-    //   // token address
-    //   contractAddress = '0x${data.substring(98, 138)}';
-    //   transferValue = hexToInt(data.substring(138, 202)).toString();
-    //   // swap contract address
-    //   toAddress = transaction['to'] as String;
-    // }
 
     final res = await signer.signTransaction(
       UnsignedTransaction.fromMap(transaction),
       int.parse(chainId),
-      useNetwork ? network : null,
+      network,
       [toAddress],
       transferValue,
       int.parse((transaction['nonce'] ?? '0').toString()),
