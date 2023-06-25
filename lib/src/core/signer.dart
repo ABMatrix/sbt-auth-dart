@@ -54,7 +54,7 @@ class Signer {
   Future<String> signTransaction(
     UnsignedTransaction transaction,
     int chainId,
-    String network,
+    String? network,
     List<String> toList,
     String amount,
     int nonce, {

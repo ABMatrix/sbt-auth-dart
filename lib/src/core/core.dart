@@ -210,7 +210,7 @@ class AuthCore {
     Uint8List message,
     List<String> toList,
     String amount, {
-    required String network,
+    String? network,
     required int chainId,
     required int nonce,
     bool isEIP1559 = false,
@@ -332,7 +332,7 @@ class AuthCore {
 
   Future<String> _setTaskId(
     String rawMessage,
-    String network,
+    String? network,
     List<String> toList,
     String amount, {
     String? contractAddress,
@@ -346,13 +346,17 @@ class AuthCore {
         'engine': chain.engine.name,
       }),
       'rawMsg': rawMessage,
-      'network': network,
+      // 'network': network,
       'keyType': chain.name,
       'toList': toList,
       'amount': amount,
       'contractAddress': contractAddress,
       'nonce': nonce
     };
+
+    if (network != null) {
+      data['network'] = network;
+    }
     final res = await http.post(
       Uri.parse(signUrl),
       headers: {

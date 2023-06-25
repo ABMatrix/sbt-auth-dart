@@ -112,7 +112,10 @@ class SbtAuthProvider {
   JsonRPC? jsonRpcClient;
 
   /// Json rpc request
-  Future<dynamic> request(RequestArgument arguments) async {
+  Future<dynamic> request(
+    RequestArgument arguments, {
+    bool useNetwork = true,
+  }) async {
     switch (arguments.method) {
       case 'eth_requestAccounts':
         return accounts;
@@ -123,7 +126,7 @@ class SbtAuthProvider {
       case 'eth_signTransaction':
         return _signTransaction(arguments);
       case 'eth_sendTransaction':
-        return _sendTransaction(arguments);
+        return _sendTransaction(arguments, useNetwork: useNetwork);
       case 'personal_sign':
       case 'eth_sign':
         final message = arguments.params[0] as String;
@@ -154,6 +157,7 @@ class SbtAuthProvider {
     String? gasLimit,
     String? maxFeePerGas,
     String? maxPriorityFeePerGas,
+    bool useNetwork = true,
   }) async {
     final transaction = {
       'gasPrice': gasPrice,
@@ -167,6 +171,7 @@ class SbtAuthProvider {
     };
     final result = await request(
       RequestArgument(method: 'eth_sendTransaction', params: [transaction]),
+      useNetwork: useNetwork,
     );
     return result as String;
   }
@@ -219,17 +224,27 @@ class SbtAuthProvider {
     }
   }
 
-  Future<String> _sendTransaction(RequestArgument argument) async {
-    final transaction = await _signTransaction(argument);
+  Future<String> _sendTransaction(
+    RequestArgument argument, {
+    bool useNetwork = true,
+  }) async {
+    final transaction =
+        await _signTransaction(argument, useNetwork: useNetwork);
     // final response =
     //     await jsonRpcClient!.call('eth_sendRawTransaction', [transaction]);
     // return response.result;
-    final api = EvmApi(url: isTestnet ? developUrl : prodUrl, network: network);
+    final api = EvmApi(
+      url: isTestnet ? developUrl : prodUrl,
+      network: network,
+    );
     final hash = await api.sendTransaction(transaction ?? '');
     return hash;
   }
 
-  Future<String?> _signTransaction(RequestArgument argument) async {
+  Future<String?> _signTransaction(
+    RequestArgument argument, {
+    bool useNetwork = true,
+  }) async {
     final transaction = argument.params[0] as Map<String, dynamic>;
     await _checkTransaction(transaction);
     var data = transaction['data'] as String;
@@ -259,7 +274,7 @@ class SbtAuthProvider {
     final res = await signer.signTransaction(
       UnsignedTransaction.fromMap(transaction),
       int.parse(chainId),
-      network,
+      useNetwork ? network : null,
       [toAddress],
       transferValue,
       int.parse((transaction['nonce'] ?? '0').toString()),
