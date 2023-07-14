@@ -36,8 +36,8 @@ const _ethRpc = {
   '0x13881': 'https://test-rpc-polygon.abmatrix.cn/',
   // Filecoin
   '0x13a': 'https://rpc.abmatrix.cn/json-rpc/http/filecoin_evm',
-  // Filecoin hyperspace
-  '0xc45': 'https://rpc.abmatrix.cn/json-rpc/http/filecoin_hyperspace_evm',
+  // Filecoin calibration
+  '0x4cb2f': 'https://rpc.abmatrix.cn/json-rpc/http/filecoin_calibration_evm',
   // Avalanche
   '0xa86a': 'https://rpc.abmatrix.cn/json-rpc/http/avalanche',
   // Avalance Fuji
@@ -195,7 +195,7 @@ class SbtAuthProvider {
     '0x89': 'polygon',
     '0x13881': 'polygon_mumbai',
     '0x13a': 'filecoin_evm',
-    '0xc45': 'filecoin_hyperspace_evm',
+    '0x4cb2f': 'filecoin_calibration_evm',
     '0xa86a': 'avalanche',
     '0xa869': 'avalanche_fuji',
     '0xa': 'optimism',
