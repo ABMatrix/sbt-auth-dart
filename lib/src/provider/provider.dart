@@ -70,7 +70,7 @@ const _ethRpc = {
 const String developUrl = 'https://test-api.safff.xyz/safff/wallet';
 
 /// prod url
-const String prodUrl = 'https://api.safff.xyz:31443/safff/wallet';
+const String prodUrl = 'https://api.safff.xyz/safff/wallet';
 
 /// Ethereum provider, use to connect to sbtauth wallet.
 class SbtAuthProvider {
