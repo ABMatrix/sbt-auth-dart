@@ -10,10 +10,10 @@ import 'package:http/http.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
 /// bitcoin url
-const MAINNET_URL = 'https://api.abmatrix.cn/safff/wallet';
+const MAINNET_URL = 'https://api.safff.xyz:31443/safff/wallet';
 
 /// bitcoin test url
-const TESTNET_URL = 'https://test-api.abmatrix.cn/safff/wallet';
+const TESTNET_URL = 'https://test-api.safff.xyz/safff/wallet';
 
 /// input rate
 const INPUT_RATE = 68;
