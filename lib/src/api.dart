@@ -11,7 +11,7 @@ import 'package:web3dart/crypto.dart';
 const DEVELOP_BASE_URL = 'https://test-api.sbtauth.io/sbt-auth';
 
 /// Production mode base url
-const PRODUCTION_BASE_URL = 'https://api.sbtauth.io/sbt-auth';
+const PRODUCTION_BASE_URL = 'https://api.sbtauth.io:31443/sbt-auth';
 
 /// Develop mode solana url
 const DEVELOP_SOLANA_URL = 'https://test-rpc-solana.abmatrix.cn';
