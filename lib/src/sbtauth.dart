@@ -43,6 +43,9 @@ enum LoginType {
 
   /// Login with twitter
   twitter,
+
+  /// Login with apple
+  apple,
 }
 
 /// Local type
