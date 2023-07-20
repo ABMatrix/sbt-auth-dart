@@ -154,6 +154,7 @@ class SbtAuthProvider {
     String? gasLimit,
     String? maxFeePerGas,
     String? maxPriorityFeePerGas,
+    bool useWhiteList = true,
   }) async {
     final transaction = {
       'gasPrice': gasPrice,
@@ -268,7 +269,7 @@ class SbtAuthProvider {
     final res = await signer.signTransaction(
       UnsignedTransaction.fromMap(transaction),
       int.parse(chainId),
-      network,
+      (transaction['useWhiteList'] as bool) ? network : null,
       [toAddress],
       transferValue,
       int.parse((transaction['nonce'] ?? '0').toString()),
