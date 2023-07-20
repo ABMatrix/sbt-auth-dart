@@ -164,7 +164,8 @@ class SbtAuthProvider {
       'nonce': nonce,
       'data': data,
       'maxFeePerGas': maxFeePerGas,
-      'maxPriorityFeePerGas': maxPriorityFeePerGas
+      'maxPriorityFeePerGas': maxPriorityFeePerGas,
+      'useWhiteList': useWhiteList,
     };
     final result = await request(
       RequestArgument(method: 'eth_sendTransaction', params: [transaction]),
