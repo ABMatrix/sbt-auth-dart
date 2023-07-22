@@ -34,7 +34,7 @@ class SolanaSigner {
       feePayer: from,
     );
     final signature = await _core.signDigest(
-      Uint8List.fromList(compiledMessage.data.toList()),
+      Uint8List.fromList(compiledMessage.toByteArray().toList()),
       [to],
       amount,
       contractAddress: contractAddress,
@@ -42,13 +42,13 @@ class SolanaSigner {
       nonce: recentBlockHeight,
     );
     final tx = SignedTx(
-      messageBytes: compiledMessage.data,
+      compiledMessage: compiledMessage,
       signatures: [Signature(hexToBytes(signature), publicKey: from)],
     );
     final data = ByteArray.merge([
       CompactArray.fromIterable(tx.signatures.map((e) => ByteArray(e.bytes)))
           .toByteArray(),
-      tx.messageBytes,
+      tx.compiledMessage.toByteArray(),
     ]);
     final hash = await SbtAuthApi.sendSolanaTransaction(
       _solanaUrl,
