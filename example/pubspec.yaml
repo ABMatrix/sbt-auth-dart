@@ -43,7 +43,7 @@ dependencies:
   pin_code_fields: ^7.4.0
   qr_flutter: ^4.0.0
   simple_barcode_scanner: ^0.0.5
-  solana: ^0.27.0
+  solana: ^0.26.0
 
 dev_dependencies:
   flutter_test:

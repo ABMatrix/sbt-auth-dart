@@ -112,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     code = res;
                   });
                 },
-                child: QrImage(data: code),
+                child: QrImageView(data: code),
               ),
               TextField(
                 controller: _controller,
