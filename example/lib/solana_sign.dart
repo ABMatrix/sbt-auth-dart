@@ -142,9 +142,9 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
         encoding: Encoding.jsonParsed,
         commitment: commitment,
       );
-      if (accounts.isEmpty) return null;
+      if (accounts.value.isEmpty) return null;
 
-      return accounts.first;
+      return accounts.value.first;
     }
 
     final singer = widget.sbtauth.solanaSinger;
