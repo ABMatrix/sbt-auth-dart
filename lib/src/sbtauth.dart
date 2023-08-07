@@ -344,6 +344,8 @@ class SbtAuth {
   Future<void> login(
     LoginType loginType, {
     String? email,
+    String? areaCode,
+    String? phone,
     String? code,
     String? password,
     String? captchaToken,
@@ -355,16 +357,26 @@ class SbtAuth {
               !(code == null && password == null)),
       'Password or code required if login with email',
     );
+    assert(
+      loginType != LoginType.phone ||
+          (loginType == LoginType.phone &&
+              phone != null &&
+              !(code == null && password == null)),
+      'Password or code required if login with phone',
+    );
     String? token;
-    if (loginType == LoginType.email) {
+    if (loginType == LoginType.email || loginType == LoginType.phone) {
       token = await SbtAuthApi.userLogin(
-        email: email!,
+        email: email,
+        areaCode: areaCode,
+        phone: phone,
         code: code,
         password: password,
         clientId: _clientId,
         baseUrl: _baseUrl,
         localLan: _getLocale(_locale),
         captchaToken: captchaToken,
+        loginType: loginType,
       );
     } else {
       final deviceName = await getDeviceName();
