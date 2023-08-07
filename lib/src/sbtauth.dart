@@ -571,6 +571,7 @@ class SbtAuth {
     String email, {
     String areaCode = '',
     String phoneNumber = '',
+    LoginType loginType = LoginType.email,
   }) async {
     await SbtAuthApi.sendEmailCode(
       email: email,
@@ -578,6 +579,7 @@ class SbtAuth {
       phoneNumber: phoneNumber,
       baseUrl: _baseUrl,
       clientID: _clientId,
+      loginType: loginType,
     );
   }
 

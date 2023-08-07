@@ -67,12 +67,14 @@ class SbtAuthApi {
     required String baseUrl,
     required String clientID,
     String localLan = 'en-US',
+    LoginType loginType = LoginType.email,
   }) async {
     final data = {
       'emailAddress': email,
       'areaCode': areaCode,
       'phoneNumber': phoneNumber,
       'clientID': clientID,
+      'loginType': loginType.name.toUpperCase(),
     };
     final response = await http.post(
       Uri.parse('$baseUrl/user:auth-code'),
