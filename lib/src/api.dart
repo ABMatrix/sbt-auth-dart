@@ -61,12 +61,19 @@ class SbtAuthApi {
 
   /// Send email verification code
   static Future<void> sendEmailCode({
-    required String email,
+    String email = '',
+    String areaCode = '',
+    String phoneNumber = '',
     required String baseUrl,
     required String clientID,
     String localLan = 'en-US',
   }) async {
-    final data = {'emailAddress': email,'clientID':clientID};
+    final data = {
+      'emailAddress': email,
+      'areaCode': areaCode,
+      'phoneNumber': phoneNumber,
+      'clientID': clientID,
+    };
     final response = await http.post(
       Uri.parse('$baseUrl/user:auth-code'),
       headers: <String, String>{
@@ -80,22 +87,28 @@ class SbtAuthApi {
 
   /// Login with email
   static Future<String> userLogin({
-    required String email,
+    String? email,
+    String? areaCode,
+    String? phone,
     String? code,
     required String clientId,
     required String baseUrl,
     String? password,
     String localLan = 'en-US',
     String? captchaToken,
+    LoginType loginType = LoginType.email,
   }) async {
     final deviceName = await getDeviceName();
     final data = {
       'emailAddress': email,
+      'areaCode': areaCode,
+      'phone': phone,
       'authCode': code,
       'deviceName': deviceName,
       'clientID': clientId,
       'password': password,
-      'token': captchaToken
+      'token': captchaToken,
+      'loginType': loginType.name.toUpperCase(),
     };
     final response = await http.post(
       Uri.parse('$baseUrl/user:login'),

@@ -46,6 +46,9 @@ enum LoginType {
 
   /// Login with apple
   apple,
+
+  /// Login with phone
+  phone,
 }
 
 /// Local type
@@ -552,9 +555,15 @@ class SbtAuth {
   }
 
   /// Send verify Code
-  Future<void> sendVerifyCode(String email) async {
+  Future<void> sendVerifyCode(
+    String email, {
+    String areaCode = '',
+    String phoneNumber = '',
+  }) async {
     await SbtAuthApi.sendEmailCode(
       email: email,
+      areaCode: areaCode,
+      phoneNumber: phoneNumber,
       baseUrl: _baseUrl,
       clientID: _clientId,
     );
