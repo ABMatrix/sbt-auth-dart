@@ -59,6 +59,26 @@ class SbtAuthApi {
     return (_checkResponse(response) ?? false) as bool;
   }
 
+  /// User exit
+  static Future<bool> userExist(
+    String loginName,
+    LoginType loginType, {
+    required String baseUrl,
+    required String localLan,
+    required String clientID,
+  }) async {
+    final response = await http.get(
+      Uri.parse(
+        '$baseUrl/user/user:exist?loginName=$loginName&clientID=$clientID&loginType=${loginType.name.toUpperCase()}',
+      ),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Accept-Language': localLan
+      },
+    );
+    return (_checkResponse(response) ?? false) as bool;
+  }
+
   /// Send email verification code
   static Future<void> sendEmailCode({
     String email = '',
@@ -208,12 +228,18 @@ class SbtAuthApi {
     String emailAddress,
     String authCode, {
     bool? paymentSwitch,
+    String areaCode = '',
+    String phoneNumber = '',
+    LoginType loginType = LoginType.email,
   }) async {
     final data = {
       'paymentPassword': paymentPassword,
       'paymentSwitch': paymentSwitch,
       'emailAddress': emailAddress,
-      'authCode': authCode
+      'authCode': authCode,
+      'areaCode': areaCode,
+      'phoneNumber': phoneNumber,
+      'loginType': loginType.name.toUpperCase(),
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/reset:payment-password'),
@@ -242,12 +268,18 @@ class SbtAuthApi {
     String baseUrl,
     String clientID, {
     String localLan = 'en-US',
+    String areaCode = '',
+    String phoneNumber = '',
+    LoginType loginType = LoginType.email,
   }) async {
     final data = {
       'emailAddress': emailAddress,
       'authCode': authCode,
       'password': password,
       'clientID': clientID,
+      'areaCode': areaCode,
+      'phoneNumber': phoneNumber,
+      'loginType': loginType.name.toUpperCase(),
     };
     final response = await http.post(
       Uri.parse('$baseUrl/user/reset:password'),
