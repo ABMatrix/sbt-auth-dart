@@ -207,6 +207,22 @@ class SbtAuth {
     return res;
   }
 
+  /// check user
+  Future<bool> userExist(
+    String loginName,
+    LoginType loginType, {
+    String localLan = 'en-US',
+  }) async {
+    final res = await SbtAuthApi.userExist(
+      loginName,
+      loginType: loginType,
+      baseUrl: _baseUrl,
+      localLan: localLan,
+      clientID: _clientId,
+    );
+    return res;
+  }
+
   /// Init sbtauth
   Future<void> init({
     bool isLogin = false,

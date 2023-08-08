@@ -61,8 +61,8 @@ class SbtAuthApi {
 
   /// User exit
   static Future<bool> userExist(
-    String loginName,
-    LoginType loginType, {
+    String loginName, {
+    required LoginType loginType,
     required String baseUrl,
     required String localLan,
     required String clientID,
