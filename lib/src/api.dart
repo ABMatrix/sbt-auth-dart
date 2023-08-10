@@ -76,7 +76,8 @@ class SbtAuthApi {
         'Accept-Language': localLan
       },
     );
-    return (_checkResponse(response) ?? false) as bool;
+    return ((_checkResponse(response) as Map<String, dynamic>)['password'])
+        as bool;
   }
 
   /// Send email verification code

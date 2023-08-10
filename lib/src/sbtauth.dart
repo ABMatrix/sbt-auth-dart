@@ -338,8 +338,11 @@ class SbtAuth {
   Future<void> resetPwd(
     String emailAddress,
     String authCode,
-    String password,
-  ) async {
+    String password, {
+    String areaCode = '',
+    String phoneNumber = '',
+    LoginType loginType = LoginType.email,
+  }) async {
     await SbtAuthApi.resetPassword(
       emailAddress,
       authCode,
@@ -347,6 +350,9 @@ class SbtAuth {
       _baseUrl,
       _clientId,
       localLan: _getLocale(_locale),
+      areaCode: areaCode,
+      phoneNumber: phoneNumber,
+      loginType: loginType,
     );
   }
 
