@@ -8,16 +8,16 @@ import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:web3dart/crypto.dart';
 
 /// Develop mode base url
-const DEVELOP_BASE_URL = 'https://test-api.sbtauth.io/sbt-auth';
+const DEVELOP_BASE_URL = 'https://test-api.safematrix.io/sbt-auth';
 
 /// Production mode base url
-const PRODUCTION_BASE_URL = 'https://api.sbtauth.io/sbt-auth';
+const PRODUCTION_BASE_URL = 'https://api.safematrix.io/sbt-auth';
 
 /// Develop mode solana url
-const DEVELOP_SOLANA_URL = 'https://test-rpc-solana.abmatrix.cn';
+const DEVELOP_SOLANA_URL = 'https://rpc-product.safematrix.io/json-rpc/http/solana_devnet';
 
 /// Production mode solana url
-const PRODUCTION_SOLANA_URL = 'https://rpc-solana.abmatrix.cn';
+const PRODUCTION_SOLANA_URL = 'https://rpc-product.safematrix.io/json-rpc/http/solana';
 
 /// SBTAuth apis
 class SbtAuthApi {

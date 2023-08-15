@@ -24,46 +24,47 @@ const _ethSignerMethods = [
 ];
 
 const _ethRpc = {
-  '0x1': 'https://rpc-eth.abmatrix.cn',
-  '0x5': 'https://test-rpc-eth.abmatrix.cn',
+  '0x1': 'https://rpc-product.safematrix.io/json-rpc/http/eth',
+  '0x5': 'https://rpc-product.safematrix.io/json-rpc/http/eth_goerli',
   // Sepolia
-  '0xaa36a7': 'https://rpc.abmatrix.cn/json-rpc/http/sepolia',
-  '0x38': 'https://rpc-bsc.abmatrix.cn',
-  '0x61': 'https://test-rpc-bsc.abmatrix.cn',
+  '0xaa36a7': 'https://rpc-product.safematrix.io/json-rpc/http/sepolia',
+  '0x38': 'https://rpc-product.safematrix.io/json-rpc/http/bsc',
+  '0x61': 'https://rpc-product.safematrix.io/json-rpc/http/bsc_chapel',
   // Polygon
-  '0x89': 'https://rpc-polygon.abmatrix.cn',
+  '0x89': 'https://rpc-product.safematrix.io/json-rpc/http/polygon',
   // Polygon Mumbai
-  '0x13881': 'https://test-rpc-polygon.abmatrix.cn/',
+  '0x13881': 'https://rpc-product.safematrix.io/json-rpc/http/polygon_mumbai',
   // Filecoin
-  '0x13a': 'https://rpc.abmatrix.cn/json-rpc/http/filecoin_evm',
+  '0x13a': 'https://rpc-product.safematrix.io/json-rpc/http/filecoin_evm',
   // Filecoin calibration
-  '0x4cb2f': 'https://rpc.abmatrix.cn/json-rpc/http/filecoin_calibration_evm',
+  '0x4cb2f':
+      'https://rpc-product.safematrix.io/json-rpc/http/filecoin_calibration_evm',
   // Avalanche
-  '0xa86a': 'https://rpc.abmatrix.cn/json-rpc/http/avalanche',
+  '0xa86a': 'https://rpc-product.safematrix.io/json-rpc/http/avalanche',
   // Avalance Fuji
-  '0xa869': 'https://rpc.abmatrix.cn/json-rpc/http/avalanche_fuji',
+  '0xa869': 'https://rpc-product.safematrix.io/json-rpc/http/avalanche_fuji',
   // Optimism
-  '0xa': 'https://rpc.abmatrix.cn/json-rpc/http/optimism',
+  '0xa': 'https://rpc-product.safematrix.io/json-rpc/http/optimism',
   // Optimism Goerli
-  '0x1a4': 'https://rpc.abmatrix.cn/json-rpc/http/optimism_goerli',
+  '0x1a4': 'https://rpc-product.safematrix.io/json-rpc/http/optimism_goerli',
   // Arbitrum
-  '0xa4b1': 'https://rpc.abmatrix.cn/json-rpc/http/arbitrum',
+  '0xa4b1': 'https://rpc-product.safematrix.io/json-rpc/http/arbitrum',
   // Arbitrum Goerli
-  '0x66eed': 'https://rpc.abmatrix.cn/json-rpc/http/arbitrum_goerli',
+  '0x66eed': 'https://rpc-product.safematrix.io/json-rpc/http/arbitrum_goerli',
   // Cronos
-  '0x19': 'https://rpc.abmatrix.cn/json-rpc/http/cronos',
+  '0x19': 'https://rpc-product.safematrix.io/json-rpc/http/cronos',
   // Cronos Testnet
-  '0x152': 'https://rpc.abmatrix.cn/json-rpc/http/cronos_testnet',
+  '0x152': 'https://rpc-product.safematrix.io/json-rpc/http/cronos_testnet',
   // ETHW
-  '0x2711': 'https://rpc.abmatrix.cn/json-rpc/http/ethw',
+  '0x2711': 'https://rpc-product.safematrix.io/json-rpc/http/ethw',
   // Fantom
-  '0xfa': 'https://rpc.abmatrix.cn/json-rpc/http/fantom',
+  '0xfa': 'https://rpc-product.safematrix.io/json-rpc/http/fantom',
   // Fantom Testnet
-  '0xfa2': 'https://rpc.abmatrix.cn/json-rpc/http/fantom_testnet',
+  '0xfa2': 'https://rpc-product.safematrix.io/json-rpc/http/fantom_testnet',
   // ZkSync
-  '0x144': 'https://rpc.abmatrix.cn/json-rpc/http/zksync',
+  '0x144': 'https://rpc-product.safematrix.io/json-rpc/http/zksync',
   // ZkSync Testnet
-  '0x118': 'https://rpc.abmatrix.cn/json-rpc/http/zksync_testnet',
+  '0x118': 'https://rpc-product.safematrix.io/json-rpc/http/zksync_testnet',
 };
 
 /// develop url
