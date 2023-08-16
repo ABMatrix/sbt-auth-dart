@@ -1290,6 +1290,7 @@ class SbtAuth {
     }
 
     void startTimer() {
+      _timer?.cancel();
       _timer = Timer.periodic(interval, tick);
     }
 
