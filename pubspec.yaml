@@ -20,7 +20,7 @@ dependencies:
   flutter_bitcoin: ^1.0.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  http: ^0.13.5
+  http: ^1.1.0
   mpc_dart: ^1.4.4
   package_info_plus: ^3.0.3
   path_provider: ^2.0.11

@@ -65,6 +65,8 @@ const _ethRpc = {
   '0x144': 'https://rpc-product.safematrix.io/json-rpc/http/zksync',
   // ZkSync Testnet
   '0x118': 'https://rpc-product.safematrix.io/json-rpc/http/zksync_testnet',
+  // Bool Testnet
+  '0x2f': 'https://rpc-product.safematrix.io/json-rpc/http/bool_testnet',
 };
 
 /// develop url
