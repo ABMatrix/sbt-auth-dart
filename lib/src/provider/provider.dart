@@ -214,6 +214,7 @@ class SbtAuthProvider {
     '0xfa2': 'fantom_testnet',
     '0x144': 'zksync',
     '0x118': 'zksync_testnet',
+    '0x2f': 'bool_testnet',
   };
 
   void _getNetwork(String chainNetwork) {
