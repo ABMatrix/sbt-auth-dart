@@ -14,10 +14,12 @@ const DEVELOP_BASE_URL = 'https://test-api.safematrix.io/sbt-auth';
 const PRODUCTION_BASE_URL = 'https://api.safematrix.io/sbt-auth';
 
 /// Develop mode solana url
-const DEVELOP_SOLANA_URL = 'https://rpc-product.safematrix.io/json-rpc/http/solana_devnet';
+const DEVELOP_SOLANA_URL =
+    'https://rpc-product.safematrix.io/json-rpc/http/solana_devnet';
 
 /// Production mode solana url
-const PRODUCTION_SOLANA_URL = 'https://rpc-product.safematrix.io/json-rpc/http/solana';
+const PRODUCTION_SOLANA_URL =
+    'https://rpc-product.safematrix.io/json-rpc/http/solana';
 
 /// SBTAuth apis
 class SbtAuthApi {
@@ -43,7 +45,7 @@ class SbtAuthApi {
       };
 
   /// Query user
-  static Future<bool> queryUser(
+  static Future<bool?> queryUser(
     String email, {
     required String baseUrl,
     required String localLan,
@@ -56,7 +58,7 @@ class SbtAuthApi {
         'Accept-Language': localLan
       },
     );
-    return (_checkResponse(response) ?? false) as bool;
+    return _checkResponse(response) as bool?;
   }
 
   /// User exit

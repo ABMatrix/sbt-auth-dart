@@ -197,7 +197,7 @@ class SbtAuth {
   }
 
   /// check user
-  Future<bool> checkUser(String email, {String localLan = 'en-US'}) async {
+  Future<bool?> checkUser(String email, {String localLan = 'en-US'}) async {
     final res = await SbtAuthApi.queryUser(
       email,
       baseUrl: _baseUrl,
@@ -227,11 +227,15 @@ class SbtAuth {
   Future<void> init({
     bool isLogin = false,
     SbtChain chain = SbtChain.EVM,
+    bool create = true,
   }) async {
     _user = DBUtil.userBox.get('user');
     _user ??= await api.getUserInfo();
     if (_user == null) throw SbtAuthException('User not logined');
     await DBUtil.userBox.put('user', user);
+    if (!create) {
+      return;
+    }
     if (_user!.publicKeyAddress[chain.name] == null) {
       final core = getCore(chain);
       final account = await core.generatePubKey(testnet: developMode);
@@ -371,6 +375,7 @@ class SbtAuth {
     String? code,
     String? password,
     String? captchaToken,
+    bool create = true,
   }) async {
     assert(
       loginType != LoginType.email ||
@@ -434,7 +439,7 @@ class SbtAuth {
       if (token == null) return;
       _saveToken(token);
       await DBUtil.userBox.delete('user');
-      await init(isLogin: true);
+      await init(isLogin: true, create: create);
     } catch (e) {
       rethrow;
     } finally {
