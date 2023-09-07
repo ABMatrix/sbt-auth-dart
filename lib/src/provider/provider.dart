@@ -78,10 +78,10 @@ const _ethRpc = {
 };
 
 /// develop url
-const String developUrl = 'https://test-api.safff.xyz/safff/wallet';
+const String developUrl = 'https://test-api.safff.xyz/safff';
 
 /// prod url
-const String prodUrl = 'https://api.safff.xyz/safff/wallet';
+const String prodUrl = 'https://api.safff.xyz/safff';
 
 /// Ethereum provider, use to connect to sbtauth wallet.
 class SbtAuthProvider {
@@ -362,7 +362,7 @@ class EvmApi {
   Future<String> sendTransaction(String singedData) async {
     final data = {'singedData': singedData, 'network': network};
     final response = await post(
-      Uri.parse('${url}transfer'),
+      Uri.parse('${url}wallet/transfer'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },

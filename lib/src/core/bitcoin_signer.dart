@@ -10,10 +10,10 @@ import 'package:http/http.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
 /// bitcoin url
-const MAINNET_URL = 'https://api.safff.xyz/safff/wallet';
+const MAINNET_URL = 'https://api.safff.xyz/safff/';
 
 /// bitcoin test url
-const TESTNET_URL = 'https://test-api.safff.xyz/safff/wallet';
+const TESTNET_URL = 'https://test-api.safff.xyz/safff/';
 
 /// input rate
 const INPUT_RATE = 68;
@@ -206,7 +206,7 @@ class Api {
     final network = _network;
     final response = await get(
       Uri.parse(
-        '${url}unspent?address=$address&network=$network',
+        '${url}wallet/unspent?address=$address&network=$network',
       ),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
     );
@@ -219,7 +219,7 @@ class Api {
     final network = _network;
     final data = {'singedData': singedData, 'network': network};
     final response = await post(
-      Uri.parse('${url}transfer'),
+      Uri.parse('${url}wallet/transfer'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
