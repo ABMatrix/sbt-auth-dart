@@ -67,6 +67,14 @@ const _ethRpc = {
   '0x118': 'https://rpc-product.safematrix.io/json-rpc/http/zksync_testnet',
   // Bool Testnet
   '0x2f': 'https://rpc-product.safematrix.io/json-rpc/http/bool_testnet',
+  // Base Goerli
+  '0x14a33': 'https://rpc-product.safematrix.io/json-rpc/http/base_goerli',
+  // Base
+  '0x2105': 'https://rpc-product.safematrix.io/json-rpc/http/base',
+  // Linea testnet
+  '0xe704': 'https://rpc-product.safematrix.io/json-rpc/http/linea_testnet',
+  // Linea
+  '0xe708': 'https://rpc-product.safematrix.io/json-rpc/http/linea',
 };
 
 /// develop url
