@@ -206,7 +206,7 @@ class Api {
     final network = _network;
     final response = await get(
       Uri.parse(
-        '$url/unspent?address=$address&network=$network',
+        '${url}unspent?address=$address&network=$network',
       ),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
     );
@@ -219,7 +219,7 @@ class Api {
     final network = _network;
     final data = {'singedData': singedData, 'network': network};
     final response = await post(
-      Uri.parse('$url/transfer'),
+      Uri.parse('${url}transfer'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
