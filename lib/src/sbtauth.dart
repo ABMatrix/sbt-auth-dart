@@ -70,9 +70,11 @@ class SbtAuth {
     required this.developMode,
     required String clientId,
     required String scheme,
+    String? url,
   }) {
     _clientId = clientId;
     _scheme = scheme;
+    _url = url;
   }
 
   /// If you set developMode true, the use registered is on test site, can only
@@ -81,6 +83,7 @@ class SbtAuth {
 
   late String _clientId;
   late String _scheme;
+  String? _url;
   LocaleType _locale = LocaleType.en_US;
 
   /// Loading stream
@@ -132,6 +135,7 @@ class SbtAuth {
           _bitcoinCore!,
           developMode,
           true,
+          url: _url,
         );
 
   /// dogecoin singer
@@ -141,6 +145,7 @@ class SbtAuth {
           _dogecoinCore!,
           developMode,
           false,
+          url: _url,
         );
 
   /// Aptos singer
@@ -189,6 +194,7 @@ class SbtAuth {
           signer: core!.signer,
           clientId: _clientId,
           isTestnet: developMode,
+          url: _url,
         );
 
   /// Init sbtauth hive

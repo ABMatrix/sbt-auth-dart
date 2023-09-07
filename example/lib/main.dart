@@ -150,8 +150,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _login(LoginType loginType, {String? email, String? password}) async {
     try {
-      await sbtAuth.login(loginType,
-          email: email, code: '203687', password: password);
+      await sbtAuth.login(
+        loginType,
+        email: email,
+        code: '203687',
+        password: password,
+        create: false,
+      );
       if (mounted) {
         if (sbtAuth.provider == null) {
           Navigator.push(

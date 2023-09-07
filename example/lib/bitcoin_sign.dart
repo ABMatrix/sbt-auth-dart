@@ -82,9 +82,10 @@ class _BitcoinSignPageState extends State<BitcoinSignPage> {
     );
   }
 
-  _sendBtc()async{
+  _sendBtc() async {
     final btcSign = widget.sbtauth.bitcoinSinger!;
-    final res = await btcSign.sendBtcTransaction(bitcoinAddress, 'tb1qkzftqpmn5z078twuf48ktj55clztr8fgfxm0vq', 100000);
+    final res = await btcSign.sendBtcTransaction(
+        bitcoinAddress, 'tb1qkzftqpmn5z078twuf48ktj55clztr8fgfxm0vq', 100000);
     setState(() {
       hash = res;
     });

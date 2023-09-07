@@ -82,10 +82,14 @@ class SbtAuthProvider {
     required this.signer,
     required this.clientId,
     required this.isTestnet,
+    String? url,
   }) {
     accounts = signer.getAccounts();
     _setupJsonRpcClient();
+    _url = url;
   }
+
+  String? _url;
 
   /// SBTAuth signer
   Signer signer;
@@ -215,6 +219,10 @@ class SbtAuthProvider {
     '0x144': 'zksync',
     '0x118': 'zksync_testnet',
     '0x2f': 'bool_testnet',
+    '0x14a33': 'base_goerli',
+    '0x2105': 'base',
+    '0xe704': 'linea_testnet',
+    '0xe708': 'linea',
   };
 
   void _getNetwork(String chainNetwork) {
@@ -231,7 +239,7 @@ class SbtAuthProvider {
     //     await jsonRpcClient!.call('eth_sendRawTransaction', [transaction]);
     // return response.result;
     final api = EvmApi(
-      url: isTestnet ? developUrl : prodUrl,
+      url: _url ?? (isTestnet ? developUrl : prodUrl),
       network: network,
     );
     final hash = await api.sendTransaction(transaction ?? '');

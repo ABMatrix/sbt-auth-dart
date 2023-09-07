@@ -24,13 +24,17 @@ const OUTPUT_RATE = 31;
 /// Bitcoin Signer
 class BitcoinSigner {
   /// Bitcoin Signer
-  BitcoinSigner(this._core, this._isTestnet, this._isBtc);
+  BitcoinSigner(this._core, this._isTestnet, this._isBtc, {String? url}) {
+    _url = url;
+  }
 
   final AuthCore _core;
 
   final bool _isTestnet;
 
   final bool _isBtc;
+
+  String? _url;
 
   /// network
   NetworkType get network {
@@ -60,7 +64,11 @@ class BitcoinSigner {
       throw SbtAuthException('Amount too low');
     }
     final txb = TransactionBuilder(network: network)..setVersion(1);
-    final btcApi = Api(isTestnet: _isTestnet, isBtc: _isBtc);
+    final btcApi = Api(
+      isTestnet: _isTestnet,
+      isBtc: _isBtc,
+      url: _url ?? (_isTestnet ? TESTNET_URL : MAINNET_URL),
+    );
     final utxos = await btcApi.getUtxo(from);
     final result = getUsedUtxos(utxos, amount, feeRate: feeRate);
     final inputUtxos = result[0] as List<Utxo>;
@@ -165,13 +173,17 @@ class Api {
   Api({
     required this.isTestnet,
     required this.isBtc,
+    required this.url,
   });
 
   /// is testnet
   final bool isTestnet;
 
-  /// is testnet
+  /// is btc
   final bool isBtc;
+
+  /// url
+  final String url;
 
   String get _network {
     if (isTestnet) {
@@ -191,7 +203,6 @@ class Api {
 
   /// get utxo
   Future<List<Utxo>> getUtxo(String address) async {
-    final url = isTestnet ? TESTNET_URL : MAINNET_URL;
     final network = _network;
     final response = await get(
       Uri.parse(
@@ -205,7 +216,6 @@ class Api {
 
   /// send transaction
   Future<String> sendTransaction(String singedData) async {
-    final url = isTestnet ? TESTNET_URL : MAINNET_URL;
     final network = _network;
     final data = {'singedData': singedData, 'network': network};
     final response = await post(
