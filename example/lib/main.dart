@@ -133,9 +133,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text('Login with Google')),
               ElevatedButton(
                   onPressed: () {
-                    _login(LoginType.facebook);
+                    _login(LoginType.apple);
                   },
-                  child: const Text('Login With Facebook')),
+                  child: const Text('Login With Apple')),
               ElevatedButton(
                   onPressed: () {
                     _login(LoginType.twitter);

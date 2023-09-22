@@ -153,10 +153,17 @@ String bigIntToHex(BigInt input) {
 
 /// Get device name
 Future<String> getDeviceName() async {
-  final packageInfo = await PackageInfo.fromPlatform();
-  final appName = packageInfo.appName;
-  final packageName = packageInfo.packageName;
-  return '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName''';
+  var deviceName = DBUtil.deviceNameBox.get(DEVICE_KEY);
+  if (deviceName == null) {
+    final packageInfo = await PackageInfo.fromPlatform();
+    final appName = packageInfo.appName;
+    final packageName = packageInfo.packageName;
+    deviceName =
+        '''${Platform.operatingSystem}${Platform.operatingSystemVersion}-$appName-$packageName''';
+    await DBUtil.tokenBox.put(DEVICE_KEY, deviceName);
+  }
+
+  return deviceName;
 }
 
 /// Encrypt

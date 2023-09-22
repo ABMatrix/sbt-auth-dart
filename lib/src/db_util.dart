@@ -7,6 +7,9 @@ import 'package:sbt_auth_dart/src/types/adapter.dart';
 /// Hive token box key
 const TOKEN_KEY = 'token_key';
 
+/// Hive device box key
+const DEVICE_KEY = 'device_key';
+
 /// Hive cache box key
 const USER_KEY = 'user_key';
 
@@ -26,6 +29,9 @@ const FRIEND_SHARE_KEY = 'friend_share_key';
 class DBUtil {
   /// user token box
   static late Box<String> tokenBox;
+
+  /// device name box
+  static late Box<String> deviceNameBox;
 
   /// share box
   static late Box<Share?>? shareBox;
@@ -53,6 +59,7 @@ class DBUtil {
       Hive.registerAdapter(UserInfoAdapter());
     }
     tokenBox = await Hive.openBox(TOKEN_KEY);
+    deviceNameBox = await Hive.openBox(DEVICE_KEY);
     shareBox = await Hive.openBox(CACHE_KEY);
     userBox = await Hive.openBox(USER_KEY);
     auxBox = await Hive.openBox(AUX_KEY);
