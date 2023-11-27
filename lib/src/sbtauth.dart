@@ -20,12 +20,6 @@ import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Develop app url
-const DEVELOP_APP_URL = 'https://test-connect.sbtauth.io';
-
-/// Production app url
-const PRODUCTION_APP_URL = 'https://connect.sbtauth.io';
-
-/// Develop app url
 const DEVELOP_AUTH_URL = 'https://test-auth.safematrix.io';
 
 /// Production app url
@@ -72,10 +66,12 @@ class SbtAuth {
     required String clientId,
     required String scheme,
     String? url,
+    Map<String, String>? rpcUrls,
   }) {
     _clientId = clientId;
     _scheme = scheme;
     _url = url;
+    _rpcUrls = rpcUrls;
   }
 
   /// If you set developMode true, the use registered is on test site, can only
@@ -84,8 +80,10 @@ class SbtAuth {
 
   late String _clientId;
   late String _scheme;
+
   String? _url;
   LocaleType _locale = LocaleType.en_US;
+  Map<String, String>? _rpcUrls;
 
   /// Loading stream
   StreamController<bool> loadingStreamController = StreamController.broadcast();
@@ -208,6 +206,7 @@ class SbtAuth {
           clientId: _clientId,
           isTestnet: developMode,
           url: _url,
+          rpcUrls: _rpcUrls,
         );
 
   /// Init sbtauth hive
