@@ -224,6 +224,11 @@ String aptosAddressFromPubKey(String pubKey) {
   return '0x$address';
 }
 
+/// Get near address
+String nearAddressFromPubKey(String pubKey) {
+  return pubKey.substring(2);
+}
+
 /// Save friend share
 void saveFriendShare(String userId, String shareData) {
   DBUtil.friendShareBox.put(userId, shareData);

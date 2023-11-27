@@ -1,6 +1,7 @@
 import 'package:example/aptos_sign.dart';
 import 'package:example/bitcoin_sign.dart';
 import 'package:example/dogecoin_sign.dart';
+import 'package:example/near_sign.dart';
 import 'package:example/solana_sign.dart';
 import 'package:example/white_list.dart';
 import 'package:flutter/material.dart';
@@ -87,6 +88,12 @@ class _SignPageState extends State<SignPage> {
           TextButton(
             onPressed: _initAptos,
             child: const Text('Init aptos'),
+          ),
+          const SizedBox(height: 10),
+          const SizedBox(height: 20),
+          TextButton(
+            onPressed: _initNear,
+            child: const Text('Init near'),
           ),
           const SizedBox(height: 10),
           Text(hash),
@@ -200,6 +207,17 @@ class _SignPageState extends State<SignPage> {
       context,
       MaterialPageRoute(
         builder: (context) => AptosSignPage(
+          sbtauth: widget.sbtauth,
+        ),
+      ),
+    );
+  }
+
+  _initNear() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NearSignPage(
           sbtauth: widget.sbtauth,
         ),
       ),

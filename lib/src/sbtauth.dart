@@ -14,6 +14,7 @@ import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 import 'package:sbt_auth_dart/src/api.dart';
 import 'package:sbt_auth_dart/src/core/aptos_singer.dart';
 import 'package:sbt_auth_dart/src/core/bitcoin_signer.dart';
+import 'package:sbt_auth_dart/src/core/near_signer.dart';
 import 'package:sbt_auth_dart/src/core/solana_signer.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -161,6 +162,18 @@ class SbtAuth {
 
   AuthCore? _aptosCore;
 
+  /// Near singer
+  NearSigner? get nearSigner => _nearCore == null
+      ? null
+      : NearSigner(
+          isTestnet: developMode, core: nearCore!,
+        );
+
+  /// aptos core
+  AuthCore? get nearCore => _nearCore;
+
+  AuthCore? _nearCore;
+
   /// Grant authorization listen controller
   StreamController<String> authRequestStreamController =
       StreamController.broadcast();
@@ -276,6 +289,9 @@ class SbtAuth {
         case SbtChain.APTOS:
           _aptosCore = core;
           break;
+        case SbtChain.NEAR:
+          _nearCore = core;
+          break;
       }
     } else {
       final remoteLocalShareInfo =
@@ -310,6 +326,10 @@ class SbtAuth {
           case SbtChain.APTOS:
             _aptosCore = core;
             _aptosCore!.setSignModel(user!.whitelistSwitch);
+            break;
+          case SbtChain.NEAR:
+            _nearCore = core;
+            _nearCore!.setSignModel(user!.whitelistSwitch);
             break;
         }
         await DBUtil.auxBox.put(
@@ -521,6 +541,12 @@ class SbtAuth {
         }
         local = aptosCore!.localShare!.privateKey;
         break;
+      case SbtChain.NEAR:
+        if (nearCore == null) {
+          throw SbtAuthException('Near auth not inited');
+        }
+        local = nearCore!.localShare!.privateKey;
+        break;
     }
     final password = StringBuffer();
     for (var i = 0; i < 6; i++) {
@@ -672,6 +698,9 @@ class SbtAuth {
       case SbtChain.APTOS:
         _aptosCore = core;
         break;
+      case SbtChain.NEAR:
+        _nearCore = core;
+        break;
     }
     if (!inited) throw SbtAuthException('Init error');
     await DBUtil.auxBox.put(
@@ -734,6 +763,9 @@ class SbtAuth {
         break;
       case SbtChain.APTOS:
         _aptosCore = core;
+        break;
+      case SbtChain.NEAR:
+        _nearCore = core;
         break;
     }
     if (!inited) throw SbtAuthException('Init error');
@@ -1020,6 +1052,9 @@ class SbtAuth {
         case SbtChain.APTOS:
           _aptosCore = core;
           break;
+        case SbtChain.NEAR:
+          _nearCore = core;
+          break;
       }
       if (!inited) throw SbtAuthException('Init error');
       await DBUtil.auxBox.put(
@@ -1149,6 +1184,9 @@ class SbtAuth {
         break;
       case SbtChain.APTOS:
         _aptosCore = core;
+        break;
+      case SbtChain.NEAR:
+        _nearCore = core;
         break;
     }
   }

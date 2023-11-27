@@ -14,7 +14,7 @@ import 'package:solana/base58.dart';
 import 'package:web3dart/crypto.dart';
 
 /// chain
-enum SbtChain { EVM, SOLANA, BITCOIN, DOGECOIN, APTOS }
+enum SbtChain { EVM, SOLANA, BITCOIN, DOGECOIN, APTOS ,NEAR}
 
 /// chain info
 extension SbtChainInfo on SbtChain {
@@ -27,6 +27,7 @@ extension SbtChainInfo on SbtChain {
         return Engine.ECDSA;
       case SbtChain.SOLANA:
       case SbtChain.APTOS:
+      case SbtChain.NEAR:
         return Engine.EDDSA;
     }
   }
@@ -145,6 +146,8 @@ class AuthCore {
         ).data.address!;
       case SbtChain.APTOS:
         return aptosAddressFromPubKey(_local!.publicKey);
+      case SbtChain.NEAR:
+        return nearAddressFromPubKey(_local!.publicKey);
     }
   }
 
@@ -309,6 +312,10 @@ class AuthCore {
       case SbtChain.APTOS:
         backupAddress = aptosAddressFromPubKey(backupKey.pk);
         address = aptosAddressFromPubKey(remoteKey.pk);
+        break;
+      case SbtChain.NEAR:
+        backupAddress = nearAddressFromPubKey(backupKey.pk);
+        address = nearAddressFromPubKey(remoteKey.pk);
         break;
     }
     if (backupAddress != address) {
