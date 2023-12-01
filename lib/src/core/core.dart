@@ -14,7 +14,7 @@ import 'package:solana/base58.dart';
 import 'package:web3dart/crypto.dart';
 
 /// chain
-enum SbtChain { EVM, SOLANA, BITCOIN, DOGECOIN, APTOS ,NEAR}
+enum SbtChain { EVM, SOLANA, BITCOIN, DOGECOIN, APTOS, NEAR, TRON }
 
 /// chain info
 extension SbtChainInfo on SbtChain {
@@ -24,6 +24,7 @@ extension SbtChainInfo on SbtChain {
       case SbtChain.EVM:
       case SbtChain.BITCOIN:
       case SbtChain.DOGECOIN:
+      case SbtChain.TRON:
         return Engine.ECDSA;
       case SbtChain.SOLANA:
       case SbtChain.APTOS:
@@ -148,8 +149,13 @@ class AuthCore {
         return aptosAddressFromPubKey(_local!.publicKey);
       case SbtChain.NEAR:
         return nearAddressFromPubKey(_local!.publicKey);
+      case SbtChain.TRON:
+        return tronPublicKeyToAddress(_local!.publicKey);
     }
   }
+
+  ///
+  String getPubKeyString() =>_local!.publicKey;
 
   /// Get pubkey
   Uint8List getPubkey() {
@@ -317,6 +323,10 @@ class AuthCore {
         backupAddress = nearAddressFromPubKey(backupKey.pk);
         address = nearAddressFromPubKey(remoteKey.pk);
         break;
+      case SbtChain.TRON:
+        backupAddress = tronPublicKeyToAddress(backupKey.pk);
+        address = tronPublicKeyToAddress(remoteKey.pk);
+        break;
     }
     if (backupAddress != address) {
       throw SbtAuthException('Wrong backup private key');
@@ -358,7 +368,7 @@ class AuthCore {
       'toList': toList,
       'amount': amount,
       'contractAddress': contractAddress,
-      'nonce': nonce
+      'nonce': nonce,
     };
 
     if (network != null) {
@@ -396,8 +406,11 @@ class AuthCore {
     return '0x${backup.sk}';
   }
 
+  ///
+  bool get signModel => remoteSign;
+
   /// set sign model
-  void setSignModel(bool signModel) {
+  set signModel(bool signModel) {
     remoteSign = signModel;
   }
 }

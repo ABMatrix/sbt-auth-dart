@@ -3,6 +3,7 @@ import 'package:example/bitcoin_sign.dart';
 import 'package:example/dogecoin_sign.dart';
 import 'package:example/near_sign.dart';
 import 'package:example/solana_sign.dart';
+import 'package:example/tron_sign.dart';
 import 'package:example/white_list.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
@@ -57,80 +58,87 @@ class _SignPageState extends State<SignPage> {
         ],
       ),
       body: SingleChildScrollView(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(height: 40),
-          TextButton(
-              onPressed: () {
-                widget.sbtauth.recoverByOneDrive('123');
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 40),
+            TextButton(
+                onPressed: () {
+                  widget.sbtauth.recoverByOneDrive('123');
+                },
+                child: const Text('Recover by one drive')),
+            const SizedBox(height: 40),
+            Text(widget.address),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: _initSolana,
+              child: const Text('Init solana'),
+            ),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: _initBitcoin,
+              child: const Text('Init bitcoin'),
+            ),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: _initDogecoin,
+              child: const Text('Init dogecoin'),
+            ),
+            const SizedBox(height: 10),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: _initAptos,
+              child: const Text('Init aptos'),
+            ),
+            const SizedBox(height: 10),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: _initNear,
+              child: const Text('Init near'),
+            ),
+            const SizedBox(height: 10),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: _initTron,
+              child: const Text('Init tron'),
+            ),
+            const SizedBox(height: 10),
+            Text(hash),
+            TextButton(
+              onPressed: _signMessage,
+              child: const Text('Sign message'),
+            ),
+            const SizedBox(height: 10),
+            Text(_signature),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: _sendTransaction,
+              child: const Text('Send transaction'),
+            ),
+            Text(_result),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: _getPrivateKey,
+              child: const Text('Get privateKey'),
+            ),
+            Text(_privateKey),
+            TextButton(
+              onPressed: () async {
+                final data = await Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const SimpleBarcodeScannerPage(),
+                ));
+                await widget.sbtauth.approveLoginWithQrCode(data as String);
               },
-              child: const Text('Recover by one drive')),
-          const SizedBox(height: 40),
-          Text(widget.address),
-          const SizedBox(height: 20),
-          TextButton(
-            onPressed: _initSolana,
-            child: const Text('Init solana'),
-          ),
-          const SizedBox(height: 20),
-          TextButton(
-            onPressed: _initBitcoin,
-            child: const Text('Init bitcoin'),
-          ),
-          const SizedBox(height: 20),
-          TextButton(
-            onPressed: _initDogecoin,
-            child: const Text('Init dogecoin'),
-          ),
-          const SizedBox(height: 10),
-          const SizedBox(height: 20),
-          TextButton(
-            onPressed: _initAptos,
-            child: const Text('Init aptos'),
-          ),
-          const SizedBox(height: 10),
-          const SizedBox(height: 20),
-          TextButton(
-            onPressed: _initNear,
-            child: const Text('Init near'),
-          ),
-          const SizedBox(height: 10),
-          Text(hash),
-          TextButton(
-            onPressed: _signMessage,
-            child: const Text('Sign message'),
-          ),
-          const SizedBox(height: 10),
-          Text(_signature),
-          const SizedBox(height: 10),
-          TextButton(
-            onPressed: _sendTransaction,
-            child: const Text('Send transaction'),
-          ),
-          Text(_result),
-          const SizedBox(height: 10),
-          TextButton(
-            onPressed: _getPrivateKey,
-            child: const Text('Get privateKey'),
-          ),
-          Text(_privateKey),
-          TextButton(
-            onPressed: () async {
-              final data = await Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const SimpleBarcodeScannerPage(),
-              ));
-              await widget.sbtauth.approveLoginWithQrCode(data as String);
-            },
-            child: const Text('Scan'),
-          ),
-          const SizedBox(height: 10),
-          TextButton(
-            onPressed: _logout,
-            child: const Text('Logout'),
-          ),
-        ],
-      )),
+              child: const Text('Scan'),
+            ),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: _logout,
+              child: const Text('Logout'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -222,6 +230,13 @@ class _SignPageState extends State<SignPage> {
         ),
       ),
     );
+  }
+
+  _initTron() async {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => TronSignPage(sbtAuth: widget.sbtauth)));
   }
 
   _logout() {

@@ -11,13 +11,17 @@ environment:
 dependencies:
   app_links: ^3.3.0
   aptos: ^0.0.3
+  convert: ^3.1.1
+  crypto: ^3.0.3
   cryptography: ^2.0.5
   decimal: ^2.3.0
   eth_sig_util: ^0.0.9
   eventsource: ^0.4.0
+  fixnum: ^1.1.0
   flutter:
     sdk: flutter
   flutter_bitcoin: ^1.0.1
+  grpc: ^3.2.4
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   http: ^0.13.5
@@ -26,9 +30,11 @@ dependencies:
     git: https://github.com/PGG-X/near-api-flutter
   package_info_plus: ^4.1.0
   path_provider: ^2.0.11
+  pointycastle: ^3.7.3
   sbt_encrypt: ^0.2.0
   sha3: ^0.2.0
   solana: ^0.29.1
+  tron: ^0.0.2
   url_launcher: ^6.1.6
   web3dart: ^2.5.1
 

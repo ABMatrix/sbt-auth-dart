@@ -16,6 +16,7 @@ import 'package:sbt_auth_dart/src/core/aptos_singer.dart';
 import 'package:sbt_auth_dart/src/core/bitcoin_signer.dart';
 import 'package:sbt_auth_dart/src/core/near_signer.dart';
 import 'package:sbt_auth_dart/src/core/solana_signer.dart';
+import 'package:sbt_auth_dart/src/core/tron_signer.dart';
 import 'package:sbt_auth_dart/src/db_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -166,13 +167,27 @@ class SbtAuth {
   NearSigner? get nearSigner => _nearCore == null
       ? null
       : NearSigner(
-          isTestnet: developMode, core: nearCore!,
+          isTestnet: developMode,
+          core: nearCore!,
         );
 
   /// aptos core
   AuthCore? get nearCore => _nearCore;
 
   AuthCore? _nearCore;
+
+  /// tron singer
+  TronSigner? get tronSigner => _tronCore == null
+      ? null
+      : TronSigner(
+          core: tronCore!,
+          testNet: developMode,
+        );
+
+  /// tron core
+  AuthCore? get tronCore => _tronCore;
+
+  AuthCore? _tronCore;
 
   /// Grant authorization listen controller
   StreamController<String> authRequestStreamController =
@@ -292,6 +307,9 @@ class SbtAuth {
         case SbtChain.NEAR:
           _nearCore = core;
           break;
+        case SbtChain.TRON:
+          _tronCore = core;
+          break;
       }
     } else {
       final remoteLocalShareInfo =
@@ -309,27 +327,31 @@ class SbtAuth {
         switch (chain) {
           case SbtChain.EVM:
             _core = core;
-            _core!.setSignModel(user!.whitelistSwitch);
+            _core!.signModel = user!.whitelistSwitch;
             break;
           case SbtChain.SOLANA:
             _solanaCore = core;
-            _solanaCore!.setSignModel(user!.whitelistSwitch);
+            _solanaCore!.signModel = user!.whitelistSwitch;
             break;
           case SbtChain.BITCOIN:
             _bitcoinCore = core;
-            _bitcoinCore!.setSignModel(user!.whitelistSwitch);
+            _bitcoinCore!.signModel = user!.whitelistSwitch;
             break;
           case SbtChain.DOGECOIN:
             _dogecoinCore = core;
-            _dogecoinCore!.setSignModel(user!.whitelistSwitch);
+            _dogecoinCore!.signModel = user!.whitelistSwitch;
             break;
           case SbtChain.APTOS:
             _aptosCore = core;
-            _aptosCore!.setSignModel(user!.whitelistSwitch);
+            _aptosCore!.signModel = user!.whitelistSwitch;
             break;
           case SbtChain.NEAR:
             _nearCore = core;
-            _nearCore!.setSignModel(user!.whitelistSwitch);
+            _nearCore!.signModel = user!.whitelistSwitch;
+            break;
+          case SbtChain.TRON:
+            _tronCore = core;
+            _tronCore!.signModel = user!.whitelistSwitch;
             break;
         }
         await DBUtil.auxBox.put(
@@ -547,6 +569,12 @@ class SbtAuth {
         }
         local = nearCore!.localShare!.privateKey;
         break;
+      case SbtChain.TRON:
+        if (tronCore == null) {
+          throw SbtAuthException('Tron auth not inited');
+        }
+        local = tronCore!.localShare!.privateKey;
+        break;
     }
     final password = StringBuffer();
     for (var i = 0; i < 6; i++) {
@@ -701,6 +729,9 @@ class SbtAuth {
       case SbtChain.NEAR:
         _nearCore = core;
         break;
+      case SbtChain.TRON:
+        _tronCore = core;
+        break;
     }
     if (!inited) throw SbtAuthException('Init error');
     await DBUtil.auxBox.put(
@@ -766,6 +797,9 @@ class SbtAuth {
         break;
       case SbtChain.NEAR:
         _nearCore = core;
+        break;
+      case SbtChain.TRON:
+        _tronCore = core;
         break;
     }
     if (!inited) throw SbtAuthException('Init error');
@@ -912,19 +946,19 @@ class SbtAuth {
     _user = await api.getUserInfo();
     await DBUtil.userBox.put('user', user);
     if (core != null) {
-      core!.setSignModel(user!.whitelistSwitch);
+      core!.signModel = user!.whitelistSwitch;
     }
     if (solanaCore != null) {
-      solanaCore!.setSignModel(user!.whitelistSwitch);
+      solanaCore!.signModel = user!.whitelistSwitch;
     }
     if (bitcoinCore != null) {
-      bitcoinCore!.setSignModel(user!.whitelistSwitch);
+      bitcoinCore!.signModel = user!.whitelistSwitch;
     }
     if (dogecoinCore != null) {
-      dogecoinCore!.setSignModel(user!.whitelistSwitch);
+      dogecoinCore!.signModel = user!.whitelistSwitch;
     }
     if (aptosCore != null) {
-      aptosCore!.setSignModel(user!.whitelistSwitch);
+      aptosCore!.signModel = user!.whitelistSwitch;
     }
   }
 
@@ -996,7 +1030,7 @@ class SbtAuth {
   }
 
   /// Set local
-  void setLocale(LocaleType localeType) {
+  set setLocale(LocaleType localeType) {
     _locale = localeType;
   }
 
@@ -1054,6 +1088,9 @@ class SbtAuth {
           break;
         case SbtChain.NEAR:
           _nearCore = core;
+          break;
+        case SbtChain.TRON:
+          _tronCore = core;
           break;
       }
       if (!inited) throw SbtAuthException('Init error');
@@ -1188,6 +1225,9 @@ class SbtAuth {
       case SbtChain.NEAR:
         _nearCore = core;
         break;
+      case SbtChain.TRON:
+        _tronCore = core;
+        break;
     }
   }
 
@@ -1225,12 +1265,16 @@ class SbtAuth {
     if (_aptosCore == null) {
       await init(isLogin: true, chain: SbtChain.APTOS);
     }
+    if(_tronCore == null){
+      await init(isLogin: true, chain: SbtChain.TRON);
+    }
     final coreList = <AuthCore?>[
       _core,
       _solanaCore,
       _bitcoinCore,
       _dogecoinCore,
-      _aptosCore
+      _aptosCore,
+      _tronCore,
     ];
     for (var i = 0; i < SbtChain.values.length; i++) {
       if (coreList[i] != null) {

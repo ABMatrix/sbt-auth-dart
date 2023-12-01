@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:aptos/utils/sha.dart';
+import 'package:crypto/crypto.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter_bitcoin/flutter_bitcoin.dart';
 import 'package:flutter_bitcoin/src/crypto.dart' as bcrypto;
@@ -227,6 +228,28 @@ String aptosAddressFromPubKey(String pubKey) {
 /// Get near address
 String nearAddressFromPubKey(String pubKey) {
   return pubKey.substring(2);
+}
+
+/// 将公钥转换为Tron地址
+String tronPublicKeyToAddress(String pubKey) {
+  // 1. 使用keccak256函数哈希公钥，并提取结果的最后20个字节。
+  // 2. 将41添加到字节数组的开头。 初始地址的长度应为21个字节。
+  var publicKeyBytes = decompressPublicKey(hexToBytes(pubKey.substring(2)));
+  if (publicKeyBytes.length == 65) publicKeyBytes = publicKeyBytes.sublist(1);
+  final hashedPublicKey = keccak256(Uint8List.fromList(publicKeyBytes));
+  final addressBytes = [
+    0x41,
+    ...hashedPublicKey.sublist(hashedPublicKey.length - 20),
+  ];
+  // 3. 使用sha256函数对地址进行两次哈希，并将前4个字节作为验证码。
+  final doubleHashedAddress =
+      sha256.convert(sha256.convert(addressBytes).bytes).bytes;
+  final checksum = doubleHashedAddress.sublist(0, 4);
+  // 4. 将验证码添加到初始地址的末尾，并通过base58编码获取base58check格式的地址。
+  // 5. 编码的主网地址以T开头，长度为34个字节。
+  addressBytes.addAll(checksum);
+  final base58checkAddress = base58encode(addressBytes);
+  return base58checkAddress;
 }
 
 /// Save friend share

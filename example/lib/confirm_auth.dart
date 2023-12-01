@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
 class ConfirmAuthPage extends StatefulWidget {
-  SbtAuth auth;
+  final SbtAuth auth;
   final String deviceName;
   final String keyType;
 
-  ConfirmAuthPage({
+  const ConfirmAuthPage({
     super.key,
     required this.deviceName,
     required this.auth,
