@@ -315,7 +315,7 @@ class SbtAuthApi {
         include0x: true,
       ),
       'publicKeyAddress': address,
-      'keyType': keyType
+      'keyType': keyType,
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/private-key-fragment-info'),
