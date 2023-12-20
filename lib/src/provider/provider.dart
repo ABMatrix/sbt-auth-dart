@@ -41,7 +41,7 @@ const _ethRpc = {
       'https://rpc-product.safematrix.io/json-rpc/http/filecoin_calibration_evm',
   // Avalanche
   '0xa86a': 'https://rpc-product.safematrix.io/json-rpc/http/avalanche',
-  // Avalance Fuji
+  // Avalanche Fuji
   '0xa869': 'https://rpc-product.safematrix.io/json-rpc/http/avalanche_fuji',
   // Optimism
   '0xa': 'https://rpc-product.safematrix.io/json-rpc/http/optimism',
@@ -90,11 +90,13 @@ class SbtAuthProvider {
     required this.signer,
     required this.clientId,
     required this.isTestnet,
+    Map<String, String>? rpcUrls,
     String? url,
   }) {
     accounts = signer.getAccounts();
     _setupJsonRpcClient();
     _url = url;
+    rpcUrls = {..._ethRpc, ...rpcUrls ?? {}};
   }
 
   String? _url;
@@ -110,6 +112,9 @@ class SbtAuthProvider {
 
   /// namespace
   final namespace = 'eip155';
+
+  /// rpc urls
+  Map<String, String> rpcUrls = {};
 
   /// Chain id for the provider, default 0x1
   String chainId = '0x5';
