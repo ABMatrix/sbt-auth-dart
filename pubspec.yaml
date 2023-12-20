@@ -28,7 +28,7 @@ dependencies:
   mpc_dart: ^1.4.4
   near_api_flutter:
     git: https://github.com/PGG-X/near-api-flutter
-  package_info_plus: ^4.1.0
+  package_info_plus: ^5.0.1
   path_provider: ^2.0.11
   pointycastle: ^3.7.3
   sbt_encrypt: ^0.2.0

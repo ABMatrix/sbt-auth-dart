@@ -270,8 +270,8 @@ class TokenListInfo {
       hasNext: (map['hasNext'] ?? false) as bool,
       totalCount: (map['totalCount'] ?? '0') as String,
       items: [
-        for (var t in (map['items'] ?? []) as List)
-          TokenInfo.fromMap(t as Map<String, dynamic>)
+        for (final t in map['items'] as List? ?? [])
+          TokenInfo.fromMap(t as Map<String, dynamic>),
       ],
     );
   }
@@ -410,8 +410,8 @@ class UserTokenList {
       hasNext: (map['hasNext'] ?? false) as bool,
       totalCount: (map['totalCount'] ?? '0') as String,
       items: [
-        for (var t in (map['items'] ?? []) as List)
-          UserToken.fromMap(t as Map<String, dynamic>)
+        for (final t in map['items'] as List? ?? [])
+          UserToken.fromMap(t as Map<String, dynamic>),
       ],
     );
   }

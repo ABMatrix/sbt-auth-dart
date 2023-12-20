@@ -211,7 +211,7 @@ class Api {
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
     );
     final data = _checkResponse(response) as List;
-    return [for (var i in data) Utxo.fromMap(i as Map<String, dynamic>)];
+    return [for (final i in data) Utxo.fromMap(i as Map<String, dynamic>)];
   }
 
   /// send transaction
@@ -299,7 +299,7 @@ class TransactionBuilder {
   late int maximumFeeRate;
   late List<Input> _inputs;
   late Transaction _tx;
-  final Map _prevTxSet = {};
+  final Map<dynamic, dynamic> _prevTxSet = {};
 
   /// inputs
   List<Input> get inputs => _inputs;
@@ -507,84 +507,84 @@ class TransactionBuilder {
     var hashPrevouts = ZERO;
     var hashSequence = ZERO;
 
-    writeSlice(slice) {
+    writeSlice(Iterable<int> slice) {
       tbuffer.setRange(
-          toffset, (toffset + (slice.length as int)), slice as Iterable<int>);
-      toffset += (slice.length as int);
+          toffset, (toffset + (slice.length)), slice);
+      toffset += slice.length;
     }
 
-    writeUInt8(i) {
-      bytes.setUint8(toffset, i as int);
-      toffset++;
-    }
+    // writeUInt8(int i) {
+    //   bytes.setUint8(toffset, i);
+    //   toffset++;
+    // }
 
-    writeUInt32(i) {
-      bytes.setUint32(toffset, i as int, Endian.little);
+    writeUInt32(int i) {
+      bytes.setUint32(toffset, i, Endian.little);
       toffset += 4;
     }
 
-    writeInt32(i) {
-      bytes.setInt32(toffset, i as int, Endian.little);
-      toffset += 4;
-    }
+    // writeInt32(i) {
+    //   bytes.setInt32(toffset, i as int, Endian.little);
+    //   toffset += 4;
+    // }
 
-    writeUInt64(i) {
-      bytes.setUint64(toffset, i as int, Endian.little);
+    void writeUInt64(int i) {
+      bytes.setUint64(toffset, i, Endian.little);
       toffset += 8;
     }
 
-    writeVarInt(i) {
-      varuint.encode(i as int, tbuffer, toffset);
-      toffset += varuint.encodingLength(i as int);
+    void writeVarInt(int i) {
+      varuint.encode(i, tbuffer, toffset);
+      toffset += varuint.encodingLength(i);
     }
 
-    writeVarSlice(slice) {
+    void writeVarSlice(Iterable<int> slice) {
       writeVarInt(slice.length);
       writeSlice(slice);
     }
 
-    writeVector(vector) {
-      writeVarInt(vector.length);
-      vector.forEach((buf) {
-        writeVarSlice(buf);
-      });
-    }
+    // writeVector(vector) {
+    //   writeVarInt(vector.length);
+    //   vector.forEach((buf) {
+    //     writeVarSlice(buf);
+    //   });
+    // }
 
     if ((hashType & SIGHASH_ANYONECANPAY) == 0) {
       tbuffer = Uint8List(36 * tx.ins.length);
       bytes = tbuffer.buffer.asByteData();
       toffset = 0;
 
-      tx.ins.forEach((txIn) {
-        writeSlice(txIn?.hash);
-        writeUInt32(txIn?.index);
-      });
+      for (final txIn in tx.ins) {
+        writeSlice(txIn!.hash!);
+        writeUInt32(txIn.index!);
+      }
       hashPrevouts = bcrypto.hash256(tbuffer);
     }
 
     if ((hashType & SIGHASH_ANYONECANPAY) == 0 &&
         (hashType & 0x1f) != SIGHASH_SINGLE &&
         (hashType & 0x1f) != SIGHASH_NONE) {
-      tbuffer = Uint8List(4 * tx.ins.length as int);
+      tbuffer = Uint8List(4 * tx.ins.length);
       bytes = tbuffer.buffer.asByteData();
       toffset = 0;
-      tx.ins.forEach((txIn) {
-        writeUInt32(txIn?.sequence);
-      });
+      for (final txIn in tx.ins) {
+        writeUInt32(txIn!.sequence!);
+      }
       hashSequence = bcrypto.hash256(tbuffer);
     }
 
     if ((hashType & 0x1f) != SIGHASH_SINGLE &&
         (hashType & 0x1f) != SIGHASH_NONE) {
       final txOutsSize = tx.outs.fold(
-          0, (sum, output) => (sum as int) + 8 + varSliceSize(output.script!));
+          0, (sum, output) => (sum) + 8 + varSliceSize(output.script!));
       tbuffer = Uint8List(txOutsSize);
       bytes = tbuffer.buffer.asByteData();
       toffset = 0;
-      tx.outs.forEach((txOut) {
-        writeUInt64(txOut.value);
-        writeVarSlice(txOut.script);
-      });
+      for (final txOut in tx.outs) {
+        writeUInt64(txOut.value!);
+        writeVarSlice(txOut.script!);
+      }
       hashOutputs = bcrypto.hash256(tbuffer);
     } else if ((hashType & 0x1f) == SIGHASH_SINGLE &&
         inIndex < tx.outs.length) {
@@ -593,8 +593,8 @@ class TransactionBuilder {
       tbuffer = Uint8List(8 + varSliceSize(output.script!));
       bytes = tbuffer.buffer.asByteData();
       toffset = 0;
-      writeUInt64(output.value);
-      writeVarSlice(output.script);
+      writeUInt64(output.value!);
+      writeVarSlice(output.script!);
       hashOutputs = bcrypto.hash256(tbuffer);
     }
 
@@ -605,11 +605,11 @@ class TransactionBuilder {
     writeUInt32(tx.version);
     writeSlice(hashPrevouts);
     writeSlice(hashSequence);
-    writeSlice(input?.hash);
-    writeUInt32(input?.index);
+    writeSlice(input!.hash!);
+    writeUInt32(input.index!);
     writeVarSlice(prevOutScript);
     writeUInt64(value);
-    writeUInt32(input?.sequence);
+    writeUInt32(input.sequence!);
     writeSlice(hashOutputs);
     writeUInt32(tx.locktime);
     writeUInt32(hashType);
@@ -663,9 +663,9 @@ class TransactionBuilder {
       // SIGHASH_ALL: only ignore input scripts
     } else {
       // 'blank' others input scripts
-      txTmp.ins.forEach((input) {
+      for (final input in txTmp.ins) {
         input?.script = EMPTY_SCRIPT;
-      });
+      }
       txTmp.ins[inIndex]?.script = ourScript;
     }
     // serialize and hash
@@ -857,5 +857,5 @@ class TransactionBuilder {
   Transaction get tx => _tx;
 
   /// prevTxSet
-  Map get prevTxSet => _prevTxSet;
+  Map<dynamic, dynamic> get prevTxSet => _prevTxSet;
 }
