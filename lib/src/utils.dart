@@ -233,10 +233,10 @@ String nearAddressFromPubKey(String pubKey) {
 /// 将公钥转换为Tron地址
 String tronPublicKeyToAddress(String pubKey) {
   // 1. 使用keccak256函数哈希公钥，并提取结果的最后20个字节。
-  // 2. 将41添加到字节数组的开头。 初始地址的长度应为21个字节。
-  var publicKeyBytes = decompressPublicKey(hexToBytes(pubKey.substring(2)));
+   var publicKeyBytes = decompressPublicKey(hexToBytes(pubKey.substring(2)));
   if (publicKeyBytes.length == 65) publicKeyBytes = publicKeyBytes.sublist(1);
   final hashedPublicKey = keccak256(Uint8List.fromList(publicKeyBytes));
+  // 2. 将41添加到字节数组的开头。 初始地址的长度应为21个字节。
   final addressBytes = [
     0x41,
     ...hashedPublicKey.sublist(hashedPublicKey.length - 20),
@@ -244,11 +244,15 @@ String tronPublicKeyToAddress(String pubKey) {
   // 3. 使用sha256函数对地址进行两次哈希，并将前4个字节作为验证码。
   final doubleHashedAddress =
       sha256.convert(sha256.convert(addressBytes).bytes).bytes;
-  final checksum = doubleHashedAddress.sublist(0, 4);
+  final checksum = doubleHashedAddress.take(4);
   // 4. 将验证码添加到初始地址的末尾，并通过base58编码获取base58check格式的地址。
-  // 5. 编码的主网地址以T开头，长度为34个字节。
   addressBytes.addAll(checksum);
   final base58checkAddress = base58encode(addressBytes);
+  // 5. 编码的主网地址以T开头，长度为34个字节。
+  assert(
+    base58checkAddress.startsWith('T') && base58checkAddress.length == 34,
+    '编码的主网地址应以T开头，长度为34个字节',
+  );
   return base58checkAddress;
 }
 

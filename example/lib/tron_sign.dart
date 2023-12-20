@@ -13,7 +13,7 @@ class TronSignPage extends StatefulWidget {
 }
 
 class _TronSignPageState extends State<TronSignPage> {
-  String hash = '';
+  String hash = '',hash2 = '';
   String tokenHash = '';
   String registerHash = '';
   String tronAddress = '';
@@ -45,6 +45,13 @@ class _TronSignPageState extends State<TronSignPage> {
             ),
             const SizedBox(height: 10),
             Text(hash),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: _sendToken,
+              child: const Text('Send USDT'),
+            ),
+            const SizedBox(height: 10),
+            Text(hash2),
             const SizedBox(height: 10),
             Text(registerHash),
           ],
@@ -83,9 +90,18 @@ class _TronSignPageState extends State<TronSignPage> {
 
   _send() async {
     final singer = widget.sbtAuth.tronSigner;
-    final res = await singer!.sendTokenTest(10);
+    // 发送1 TRX
+    final res = await singer!.sendTrxTest(1000000);
     setState(() {
       hash = res.toString();
+    });
+  }
+
+  _sendToken() async {
+    final singer = widget.sbtAuth.tronSigner;
+    final res = await singer!.sendUSDTTokenTest(1000000);
+    setState(() {
+      hash2 = res.toString();
     });
   }
 }
