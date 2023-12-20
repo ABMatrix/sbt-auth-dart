@@ -83,7 +83,8 @@ class SbtAuth {
   late String _scheme;
 
   String? _url;
-  LocaleType _locale = LocaleType.en_US;
+  /// Locale
+  LocaleType locale = LocaleType.en_US;
   Map<String, String>? _rpcUrls;
 
   /// Loading stream
@@ -209,7 +210,7 @@ class SbtAuth {
     return SbtAuthApi(
       baseUrl: _baseUrl,
       token: token,
-      local: _getLocale(_locale),
+      local: _getLocale(locale),
     );
   }
 
@@ -400,7 +401,7 @@ class SbtAuth {
       password,
       _baseUrl,
       _clientId,
-      localLan: _getLocale(_locale),
+      localLan: _getLocale(locale),
       areaCode: areaCode,
       phoneNumber: phoneNumber,
       loginType: loginType,
@@ -448,7 +449,7 @@ class SbtAuth {
         password: password,
         clientId: _clientId,
         baseUrl: _baseUrl,
-        localLan: _getLocale(_locale),
+        localLan: _getLocale(locale),
         captchaToken: captchaToken,
         loginType: loginType,
       );
@@ -1028,11 +1029,6 @@ class SbtAuth {
     }
   }
 
-  /// Set local
-  set setLocale(LocaleType localeType) {
-    _locale = localeType;
-  }
-
   /// Batch recover
   Future<void> batchRecover(
     String password,
@@ -1264,7 +1260,7 @@ class SbtAuth {
     if (_aptosCore == null) {
       await init(isLogin: true, chain: SbtChain.APTOS);
     }
-    if(_tronCore == null){
+    if (_tronCore == null) {
       await init(isLogin: true, chain: SbtChain.TRON);
     }
     final coreList = <AuthCore?>[
