@@ -35,8 +35,7 @@ class TronSigner {
       transportSecure: false,
     ),
     interceptors: [
-      // TODO(RA1NO3O): replace this apiKey
-      tron.ApiKeyInterceptor('2fecc24a-d0ce-438d-b623-96fe7c8b1215'),
+      tron.ApiKeyInterceptor('7fb2a814-c3e4-4fdd-b425-319151924063'),
     ],
   );
 
@@ -45,6 +44,43 @@ class TronSigner {
 
   /// Test account2
   static const testAddress2 = 'TYHYDzYGGEu4kiCiDfpjkVEcihJLVAs75o';
+
+  /// 发送TRX交易(在本地签署交易)：
+  ///
+  /// * [privateKey] 私钥
+  /// * [ownerAddress] 发送者地址
+  /// * [toAddress] 接收者地址
+  /// * [amount] 交易金额
+  Future<Map<String, dynamic>> sendTrxLocal({
+    required Uint8List privateKey,
+    List<int>? ownerAddress,
+    required Uint8List toAddress,
+    Int64? amount,
+  }) async {
+    // 1.通过系统合约API创建交易
+    final tx = await walletClient.createTransaction2(
+      tron.TransferContract(
+        ownerAddress: ownerAddress,
+        toAddress: toAddress,
+        amount: amount,
+      ),
+    );
+
+    if (!tx.result.result) {
+      throw Exception(String.fromCharCodes(tx.result.message));
+    }
+
+    // 2.签署交易
+    final signedTx = await walletClient.getTransactionSign2(
+      tron.TransactionSign(transaction: tx.transaction, privateKey: privateKey),
+    );
+
+    // 3.通过[broadcastTransaction]广播交易
+    final result =
+        await walletClient.broadcastTransaction(signedTx.transaction);
+    if (!result.result) throw Exception(String.fromCharCodes(result.message));
+    return result.writeToJsonMap();
+  }
 
   /// 发送TRX交易：
   ///
@@ -93,11 +129,12 @@ class TronSigner {
   /// * [toAddress] 接收者地址
   /// * [amount] 交易金额
   /// * [contractAddress] 代币所属合约地址
+  /// * [data] 合约调用数据
   Future<Map<String, dynamic>> sendToken({
     List<int>? ownerAddress,
-    required List<int> toAddress,
+    required Uint8List toAddress,
     Int64? amount,
-    required List<int> contractAddress,
+    required Uint8List contractAddress,
     Uint8List? data,
   }) async {
     // 通过合约地址触发合约
@@ -109,14 +146,6 @@ class TronSigner {
         data: data,
       ),
     );
-    // final tx = await walletClient.transferAsset2(
-    //   tron.TransferAssetContract(
-    //     ownerAddress: ownerAddress,
-    //     toAddress: toAddress,
-    //     amount: amount,
-    //     assetName: tokenName,
-    //   ),
-    // );
 
     if (!tx.result.result) {
       throw Exception(String.fromCharCodes(tx.result.message));
@@ -178,9 +207,9 @@ class TronSigner {
 
     return sendToken(
       ownerAddress: addressBytes,
-      toAddress: base58decode(testAddress1).sublist(0, 21),
-      contractAddress: contract.contractAddress,
-      data: assembleData(
+      toAddress: Uint8List.fromList(base58decode(testAddress1).sublist(0, 21)),
+      contractAddress: Uint8List.fromList(contract.contractAddress),
+      data: assembleContractData(
         abiFunction: contract.abi.entrys
             .firstWhere((element) => element.name == 'transfer'),
         // functionInfo: 'transfer(address,uint256)',
@@ -196,7 +225,7 @@ class TronSigner {
   ///
   /// * [abiFunction] 合约方法签名
   /// * [parameters] 参数列表
-  Uint8List assembleData({
+  Uint8List assembleContractData({
     String? functionInfo,
     tron.SmartContract_ABI_Entry? abiFunction,
     required List<dynamic> parameters,
