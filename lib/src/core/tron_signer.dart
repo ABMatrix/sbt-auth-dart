@@ -53,7 +53,7 @@ class TronSigner {
   /// * [amount] 交易金额
   Future<Map<String, dynamic>> sendTrxLocal({
     required Uint8List privateKey,
-    List<int>? ownerAddress,
+    Uint8List? ownerAddress,
     required Uint8List toAddress,
     Int64? amount,
   }) async {
@@ -88,8 +88,8 @@ class TronSigner {
   /// * [toAddress] 接收者地址
   /// * [amount] 交易金额
   Future<Map<String, dynamic>> sendTrx({
-    List<int>? ownerAddress,
-    required List<int> toAddress,
+    Uint8List? ownerAddress,
+    required Uint8List toAddress,
     Int64? amount,
   }) async {
     // 1.通过系统合约API创建交易
@@ -177,8 +177,8 @@ class TronSigner {
       ...hashedPublicKey.sublist(hashedPublicKey.length - 20),
     ];
     return sendTrx(
-      ownerAddress: addressBytes,
-      toAddress: base58decode(testAddress1).sublist(0, 21),
+      ownerAddress: Uint8List.fromList(addressBytes),
+      toAddress: Uint8List.fromList(base58decode(testAddress1).sublist(0, 21)),
       amount: Int64(amount),
     );
   }
