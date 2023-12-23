@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
+import 'package:fixnum/fixnum.dart';
 
 import 'grant_authorization.dart';
 
@@ -13,7 +15,7 @@ class TronSignPage extends StatefulWidget {
 }
 
 class _TronSignPageState extends State<TronSignPage> {
-  String hash = '',hash2 = '';
+  String hash = '', hash2 = '';
   String tokenHash = '';
   String registerHash = '';
   String tronAddress = '';
@@ -41,17 +43,17 @@ class _TronSignPageState extends State<TronSignPage> {
             SelectableText(tronAddress),
             TextButton(
               onPressed: _send,
-              child: const Text('Send trx'),
+              child: const Text('Send 1 TRX'),
             ),
             const SizedBox(height: 10),
-            Text(hash),
+            SelectableText(hash),
             const SizedBox(height: 10),
             TextButton(
               onPressed: _sendToken,
-              child: const Text('Send USDT'),
+              child: const Text('Send 1 USDT'),
             ),
             const SizedBox(height: 10),
-            Text(hash2),
+            SelectableText(hash2),
             const SizedBox(height: 10),
             Text(registerHash),
           ],
@@ -88,10 +90,16 @@ class _TronSignPageState extends State<TronSignPage> {
                 )));
   }
 
+  static const testAddress1 = 'TTW2v4AVnxyL4MJpXXBXViK8UAfHZE5Qgp';
+
   _send() async {
     final singer = widget.sbtAuth.tronSigner;
-    // 发送1 TRX
-    final res = await singer!.sendTrxTest(1000000);
+    // 发送 1 TRX
+    final res = await singer!.sendTrx(
+      ownerAddress: tronAddress,
+      toAddress: testAddress1,
+      amount: Int64(1000000),
+    );
     setState(() {
       hash = res.toString();
     });
@@ -99,7 +107,13 @@ class _TronSignPageState extends State<TronSignPage> {
 
   _sendToken() async {
     final singer = widget.sbtAuth.tronSigner;
-    final res = await singer!.sendUSDTTokenTest(1000000);
+    // 发送 1 USDT
+    final res = await singer!.sendToken(
+      amount: BigInt.from(1000000),
+      ownerAddress: tronAddress,
+      toAddress: testAddress1,
+      contractAddress: 'TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs',
+    );
     setState(() {
       hash2 = res.toString();
     });
