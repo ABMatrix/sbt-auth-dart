@@ -25,7 +25,7 @@ dependencies:
   grpc: ^3.2.4
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  http: ^0.13.6
+  http: ^1.1.0
   mpc_dart: ^1.4.4
   near_api_flutter:
     git: https://github.com/PGG-X/near-api-flutter
