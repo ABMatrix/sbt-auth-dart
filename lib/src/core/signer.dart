@@ -7,7 +7,7 @@ import 'package:sbt_auth_dart/src/core/core.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
 import 'package:sbt_auth_dart/src/utils.dart';
 import 'package:web3dart/crypto.dart';
-import 'package:web3dart/src/utils/length_tracking_byte_sink.dart';
+import 'package:web3dart/web3dart.dart';
 import 'package:web3dart/src/utils/rlp.dart' as rlp;
 
 /// Signer
