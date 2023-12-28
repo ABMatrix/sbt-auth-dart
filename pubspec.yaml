@@ -37,7 +37,7 @@ dependencies:
   solana: ^0.30.0+1
   tron: ^0.0.2
   url_launcher: ^6.1.6
-  web3dart: ^2.5.1
+  web3dart: ^2.7.1
 
 
 
