@@ -83,6 +83,7 @@ class SbtAuth {
   late String _scheme;
 
   String? _url;
+
   /// Locale
   LocaleType locale = LocaleType.en_US;
   Map<String, String>? _rpcUrls;
@@ -181,6 +182,8 @@ class SbtAuth {
       : TronSigner(
           core: tronCore!,
           testNet: developMode,
+          jRPCUrl: _rpcUrls?['tron_jrpc'] ?? 'https://api.shasta.trongrid.io',
+          gRPCUrl: _rpcUrls?['tron_grpc'] ?? 'https://grpc.shasta.trongrid.io',
         );
 
   /// tron core

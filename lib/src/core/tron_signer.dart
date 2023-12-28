@@ -11,10 +11,15 @@ import 'package:web3dart/crypto.dart';
 
 ///
 class TronSigner {
-  ///
+  /// Tron 签名器
+  /// * [testNet] 仅用作透传参数为`getAddress`所用, 无其他效果
+  /// * [jRPCUrl] jRPC URL
+  /// * [gRPCUrl] gRPC URL
   TronSigner({
     required this.core,
     this.testNet = true,
+    required this.jRPCUrl,
+    required this.gRPCUrl,
   });
 
   /// account id
@@ -26,9 +31,16 @@ class TronSigner {
   /// 是否测试网
   final bool testNet;
 
-  /// tron HTTP客户端
-  final httpClient = Dio(
+  /// jRPC URL
+  final String jRPCUrl;
+
+  /// gRPC URL
+  final String gRPCUrl;
+
+  /// HTTP(jRPC) 客户端
+  late final httpClient = Dio(
     BaseOptions(
+      baseUrl: jRPCUrl,
       headers: {
         'accept': 'aplication/json',
         'content-type': 'application/json',
@@ -36,10 +48,10 @@ class TronSigner {
     ),
   );
 
-  /// tron钱包客户端
+  /// gRPC 客户端
   late final walletClient = tron.WalletClient(
     GrpcOrGrpcWebClientChannel.toSingleEndpoint(
-      host: 'grpc${testNet ? '.shasta' : ''}.trongrid.io',
+      host: Uri.parse(gRPCUrl).host,
       port: 50051,
       transportSecure: false,
     ),
@@ -76,7 +88,6 @@ class TronSigner {
 
     // 2.签署交易
     // 改写签名 交由core.signDigest进行
-
     await core
         .signDigest(
           Uint8List.fromList(tx.txid),
@@ -98,18 +109,19 @@ class TronSigner {
   /// * [toAddress] 接收者地址
   /// * [amount] 交易金额
   /// * [contractAddress] 代币所属合约地址
-  Future<Map<String, dynamic>> sendToken({
+  Future<Map<String, dynamic>?> sendToken({
     String? ownerAddress,
     required String toAddress,
     required BigInt amount,
     required String contractAddress,
   }) async {
+    //解码合约地址
     final dca = base58decode(contractAddress);
+
     // 获取合约信息
     final contract = await walletClient.getContract(
       tron.BytesMessage(value: dca.take(dca.length - 4).toList()),
     );
-
     if (!contract.hasAbi()) {
       throw Exception('Contract ${contract.name} has no abi!');
     }
@@ -133,23 +145,16 @@ class TronSigner {
       },
     );
 
-    // 通过合约地址触发合约
-    // https://developers.tron.network/reference/triggersmartcontract
-    final tscResp = await httpClient.postUri<Map<String, dynamic>>(
-      Uri.https('api.shasta.trongrid.io', '/wallet/triggersmartcontract'),
-      data: {
-        'owner_address': ownerAddress ?? core.getAddress(isTestnet: testNet),
-        'contract_address': contractAddress,
-        'function_selector': '${transferAbiFunc.name}'
-                '${transferAbiFunc.inputs.map((e) => e.type)}'
-            .replaceAll(' ', ''),
-        'parameter': params.join(),
-        'fee_limit': 1000000000,
-        'visible': true,
-      },
+    // 触发智能合约
+    final tscResp = await triggerSmartContract(
+      ownerAddress: ownerAddress,
+      contractAddress: contractAddress,
+      abiFunc: transferAbiFunc,
+      params: params,
     );
 
-    final jsonTx = tscResp.data?['transaction'] as Map<String, dynamic>;
+    // 取出交易json
+    final jsonTx = tscResp?['transaction'] as Map<String, dynamic>;
 
     // 调用mpc远端签名
     final signStr = await core.signDigest(
@@ -160,19 +165,55 @@ class TronSigner {
       contractAddress: contractAddress,
     );
 
-    // 广播交易
-    // https://developers.tron.network/reference/broadcasttransaction
-    final result = await httpClient.postUri<Map<String, dynamic>>(
-      Uri.https('api.shasta.trongrid.io', '/wallet/broadcasttransaction'),
-      data: {
-        'txID': jsonTx['txID'],
-        'visible': true,
-        'raw_data': jsonTx['raw_data'],
-        'raw_data_hex': jsonTx['raw_data_hex'],
-        'signature': [signStr]
-      },
-    );
-
-    return Future.value(result.data);
+    return broadcastTransaction(signStr: signStr, jsonTx: jsonTx);
   }
+
+  /// 触发智能合约
+  ///
+  /// * [ownerAddress] 发送者地址, 为空时使用`core.getAddress(isTestnet: testNet)`
+  /// * [contractAddress] 合约地址
+  /// * [abiFunc] 合约方法
+  /// * [params] 参数
+  ///
+  /// [API 文档](https://developers.tron.network/reference/triggersmartcontract)
+  Future<Map<String, dynamic>?> triggerSmartContract({
+    String? ownerAddress,
+    required String contractAddress,
+    required tron.SmartContract_ABI_Entry abiFunc,
+    Iterable<String> params = const [],
+  }) =>
+      httpClient.post<Map<String, dynamic>>(
+        '/wallet/triggersmartcontract',
+        data: {
+          'owner_address': ownerAddress ?? core.getAddress(isTestnet: testNet),
+          'contract_address': contractAddress,
+          'function_selector': '${abiFunc.name}'
+                  '${abiFunc.inputs.map((e) => e.type)}'
+              .replaceAll(' ', ''),
+          'parameter': params.join(),
+          'fee_limit': 1000000000,
+          'visible': true,
+        },
+      ).then((resp) => resp.data);
+
+  /// 广播交易
+  ///
+  /// * [signStr] 签名字符串
+  /// * [jsonTx] 交易JSON
+  ///
+  /// [API 文档](https://developers.tron.network/reference/broadcasttransaction)
+  Future<Map<String, dynamic>?> broadcastTransaction({
+    required String signStr,
+    required Map<String, dynamic> jsonTx,
+  }) =>
+      httpClient.post<Map<String, dynamic>>(
+        '/wallet/broadcasttransaction',
+        data: {
+          'txID': jsonTx['txID'],
+          'visible': true,
+          'raw_data': jsonTx['raw_data'],
+          'raw_data_hex': jsonTx['raw_data_hex'],
+          'signature': [signStr],
+        },
+      ).then((resp) => resp.data);
 }
