@@ -1272,7 +1272,8 @@ class SbtAuth {
       _bitcoinCore,
       _dogecoinCore,
       _aptosCore,
-      _nearCore,
+      null,
+      // _nearCore,
       _tronCore,
     ];
     for (var i = 0; i < SbtChain.values.length; i++) {
