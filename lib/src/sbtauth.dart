@@ -1373,6 +1373,13 @@ class SbtAuth {
           );
           await api.verifyIdentity(aptosCore!.localShare!, keyType: 'APTOS');
         }
+        if (localShares['tron'] != null) {
+          await _initCoreWithLocalPrivateKey(
+            localShares['tron']!.toString(),
+            SbtChain.TRON,
+          );
+          await api.verifyIdentity(tronCore!.localShare!, keyType: 'TRON');
+        }
         await _authRequestListener();
         loginStreamController.add(true);
       }

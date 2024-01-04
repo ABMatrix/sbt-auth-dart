@@ -60,6 +60,19 @@ class TronSigner {
     ],
   );
 
+  /// 获取带宽消耗
+  Future<num> getBandwidth({String? ownerAddress}) async {
+    final accountActivated = await httpClient.post<Map<String, dynamic>>(
+      '/walletsolidity/getaccount',
+      data: {
+        'owner_address': ownerAddress ?? core.getAddress(isTestnet: testNet),
+        'visible': true,
+      },
+    ).then((resp) => resp.data?.isNotEmpty ?? false);
+    if (accountActivated) return 0.002;
+    return 0.1;
+  }
+
   /// 发送TRX交易：
   ///
   /// * [ownerAddress] 发送者地址, 为空时使用`core.getAddress(isTestnet: testNet)`
