@@ -450,7 +450,7 @@ class SbtAuthApi {
         include0x: true,
       ),
       'type': 'PRIVATE_KEY1',
-      'keyType': keyType
+      'keyType': keyType,
     };
     final response = await http.post(
       Uri.parse('$_baseUrl/user/verify:identity'),

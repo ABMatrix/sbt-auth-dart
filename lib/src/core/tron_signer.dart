@@ -63,7 +63,7 @@ class TronSigner {
   /// 获取带宽消耗
   Future<num> getBandwidth({String? ownerAddress}) async {
     final accountActivated = await httpClient.post<Map<String, dynamic>>(
-      '/walletsolidity/getaccount',
+      '/wallet/getaccount',
       data: {
         'owner_address': ownerAddress ?? core.getAddress(isTestnet: testNet),
         'visible': true,
