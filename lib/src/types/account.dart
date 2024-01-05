@@ -34,6 +34,7 @@ class Share {
     };
   }
 
+  ///
   Share copyWith({String? privateKey, String? publicKey, String? extraData}) {
     return Share(
       privateKey: privateKey ?? this.privateKey,

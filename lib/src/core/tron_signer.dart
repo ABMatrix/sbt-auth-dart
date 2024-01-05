@@ -65,7 +65,7 @@ class TronSigner {
     final accountActivated = await httpClient.post<Map<String, dynamic>>(
       '/wallet/getaccount',
       data: {
-        'owner_address': ownerAddress ?? core.getAddress(isTestnet: testNet),
+        'address': ownerAddress ?? core.getAddress(isTestnet: testNet),
         'visible': true,
       },
     ).then((resp) => resp.data?.isNotEmpty ?? false);
