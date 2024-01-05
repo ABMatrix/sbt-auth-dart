@@ -652,6 +652,9 @@ class SbtAuth {
     if (aptosCore != null) {
       local['aptos'] = aptosCore?.localShare?.privateKey;
     }
+    if (tronCore != null) {
+      local['tron'] = tronCore?.localShare?.privateKey;
+    }
     final encrypted = await encryptMsg(jsonEncode(local), password);
     await api.confirmLoginWithQrCode(qrCodeId, encrypted);
   }
