@@ -174,7 +174,7 @@ class TronSigner {
       hexToBytes(jsonTx['txID'] as String),
       [toAddress],
       amount.toString(),
-      network: 'tron',
+      network: testNet ? 'tron_testnet' : 'tron',
       contractAddress: contractAddress,
     );
 
