@@ -106,7 +106,7 @@ class TronSigner {
           Uint8List.fromList(tx.txid),
           [toAddress],
           amount.toString(),
-          network: 'tron',
+          network: testNet ? 'tron_testnet' : 'tron',
         )
         .then((signStr) => tx.transaction.signature.add(hexToBytes(signStr)));
 
