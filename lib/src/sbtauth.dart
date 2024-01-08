@@ -526,6 +526,7 @@ class SbtAuth {
     _bitcoinCore = null;
     _dogecoinCore = null;
     _aptosCore = null;
+    _tronCore = null;
     _eventSource?.client.close();
   }
 
