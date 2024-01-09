@@ -57,7 +57,7 @@ class TronSigner {
     ),
     interceptors: [
       // This key may will be outdated.
-      tron.ApiKeyInterceptor('9d5dc642-7ec8-4411-9dc7-add7c83227d3'),
+      tron.ApiKeyInterceptor('eb88c099-f892-4c7d-9fe9-66948a5ded60'),
     ],
   );
 
