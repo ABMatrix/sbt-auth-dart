@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
+// ignore: depend_on_referenced_packages
 import 'package:fixnum/fixnum.dart';
 
 import 'grant_authorization.dart';

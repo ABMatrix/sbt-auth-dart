@@ -5,7 +5,7 @@ import 'package:eth_sig_util/eth_sig_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sbt_auth_dart/src/core/core.dart';
 import 'package:sbt_auth_dart/src/types/signer.dart';
-import 'package:sbt_auth_dart/src/utils.dart';
+import 'package:sbt_auth_dart/src/utils.dart' as u;
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/src/utils/rlp.dart' as rlp;
 import 'package:web3dart/web3dart.dart';
@@ -28,7 +28,7 @@ class Signer {
     final data =
         message.startsWith('0x') ? hexToBytes(message) : ascii.encode(message);
     final res = await _core.signDigest(
-      uit8Message(data),
+      u.uit8Message(data),
       [],
       '',
       network: '',
@@ -64,7 +64,7 @@ class Signer {
         transaction.maxPriorityFeePerGas != null) {
       final encodedTx = LengthTrackingByteSink()
         ..addByte(0x02)
-        ..add(rlp.encode(encodeEIP1559ToRlp(transaction, chainId)))
+        ..add(rlp.encode(u.encodeEIP1559ToRlp(transaction, chainId)))
         ..close();
       final signature = await _core.signTransaction(
         encodedTx.asBytes(),
@@ -77,18 +77,18 @@ class Signer {
         nonce: nonce,
       );
       final result = [0x02] +
-          uint8ListFromList(
+          u.uint8ListFromList(
             rlp.encode(
-              encodeEIP1559ToRlp(transaction, chainId, signature),
+              u.encodeEIP1559ToRlp(transaction, chainId, signature),
             ),
           );
       return bytesToHex(result, include0x: true);
     } else {
       final innerSignature =
           Signature(Uint8List.fromList([0]), Uint8List.fromList([0]), chainId);
-      final encodedTx = uint8ListFromList(
+      final encodedTx = u.uint8ListFromList(
         rlp.encode(
-          encodeToRlp(
+          u.encodeToRlp(
             transaction,
             innerSignature,
           ),
@@ -103,9 +103,9 @@ class Signer {
         network: network,
         nonce: nonce,
       );
-      final result = uint8ListFromList(
+      final result = u.uint8ListFromList(
         rlp.encode(
-          encodeToRlp(transaction, signature),
+          u.encodeToRlp(transaction, signature),
         ),
       );
       return bytesToHex(result, include0x: true);

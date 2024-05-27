@@ -1,11 +1,13 @@
+// ignore_for_file: implementation_imports
+
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:eth_sig_util/util/utils.dart';
 import 'package:flutter_bitcoin/flutter_bitcoin.dart';
+import 'package:flutter_bitcoin/src/crypto.dart' as bcrypto;
 import 'package:flutter_bitcoin/src/utils/script.dart' as bscript;
 import 'package:flutter_bitcoin/src/utils/varuint.dart' as varuint;
-import 'package:flutter_bitcoin/src/crypto.dart' as bcrypto;
 import 'package:http/http.dart';
 import 'package:sbt_auth_dart/sbt_auth_dart.dart';
 
