@@ -134,7 +134,7 @@ class _SolanaSignPageState extends State<SolanaSignPage> {
       required Ed25519HDPublicKey mint,
       Commitment commitment = Commitment.finalized,
     }) async {
-      final rpcClient = RpcClient('https://test-rpc-solana.abmatrix.cn',
+      final rpcClient = RpcClient('https://test-rpc-solana.safematrix.io',
           timeout: const Duration(seconds: 30));
       final accounts = await rpcClient.getTokenAccountsByOwner(
         owner.toBase58(),

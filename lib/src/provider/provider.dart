@@ -367,7 +367,7 @@ class EvmApi {
   Future<String> sendTransaction(String singedData) async {
     final data = {'singedData': singedData, 'network': network};
     final response = await post(
-      Uri.parse('${url}wallet/transfer'),
+      Uri.parse('$url/wallet/transfer'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
