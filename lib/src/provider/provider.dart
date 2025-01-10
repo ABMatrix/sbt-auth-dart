@@ -66,7 +66,11 @@ const _ethRpc = {
   // ZkSync Testnet
   '0x118': 'https://rpc-product.safematrix.io/json-rpc/http/zksync_testnet',
   // Bool Testnet
-  '0x2f': 'https://rpc-product.safematrix.io/json-rpc/http/bool_testnet',
+  '0x1e1': 'https://betatest-rpc-node-http.bool.network',
+  // UltraLiquid Testnet
+  '0x1e3': 'https://ultra-test-node-rpc.bool.network',
+  // Bool Mainnet
+  '0x2b5c': 'https://beta-rpc-node-http.bool.network',
   // Base Goerli
   '0x14a33': 'https://rpc-product.safematrix.io/json-rpc/http/base_goerli',
   // Base
